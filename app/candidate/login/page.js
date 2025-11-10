@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function CandidateLogin() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [formData, setFormData] = useState({
@@ -36,7 +38,7 @@ export default function CandidateLogin() {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle login logic here
-    console.log('Login submitted:', formData);
+    router.push('/candidate/dashboard');
   };
 
   return (

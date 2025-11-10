@@ -5,7 +5,7 @@ import Topbar from "../../components/Topbar";
 export default function EmployerDashboard() {
   return (
     <div className="min-h-screen flex bg-gray-50">
-      <Sidebar active="Dashboard" />
+      <Sidebar active="Dashboard" type="employer" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
         <main className="p-6 md:p-10 flex-1">

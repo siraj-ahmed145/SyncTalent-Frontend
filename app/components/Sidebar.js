@@ -1,15 +1,27 @@
 "use client";
 import Link from "next/link";
-import { LayoutGrid, Search, Briefcase, BarChart } from "lucide-react";
+import { LayoutGrid, Search, Briefcase, BarChart, FileText, Users } from "lucide-react";
 
-const navLinks = [
-  { label: "Dashboard", icon: LayoutGrid, href: "/dashboard" },
-  { label: "Search Job", icon: Search, href: "/search-job" },
-  { label: "Applications", icon: Briefcase, href: "/applications" },
-  { label: "Statistics", icon: BarChart, href: "/statistics" },
+// Candidate navigation links
+const candidateNavLinks = [
+  { label: "Dashboard", icon: LayoutGrid, href: "/candidate/dashboard" },
+  { label: "Search Job", icon: Search, href: "/candidate/job-search" },
+  { label: "Applications", icon: Briefcase, href: "/candidate/applications" },
+  { label: "Statistics", icon: BarChart, href: "/candidate/statistics" },
 ];
 
-export default function Sidebar({ active = "Dashboard" }) {
+// Employer navigation links
+const employerNavLinks = [
+  { label: "Dashboard", icon: LayoutGrid, href: "/employer/dashboard" },
+  { label: "Post Job", icon: FileText, href: "/employer/post-job" },
+  { label: "Candidates", icon: Users, href: "/employer/candidates" },
+  { label: "Statistics", icon: BarChart, href: "/employer/statistics" },
+];
+
+export default function Sidebar({ active = "Dashboard", type = "candidate" }) {
+  // Select navigation links based on type
+  const navLinks = type === "employer" ? employerNavLinks : candidateNavLinks;
+
   return (
     <aside className="fixed md:relative left-0 top-0 h-full md:h-screen w-20 md:w-64 bg-linear-to-br from-blue-900 via-blue-800 to-purple-900 flex flex-col items-center md:items-stretch py-6 z-40 transition-all">
       <nav className="flex-1 flex flex-col gap-2 mt-8 md:mt-0">
