@@ -4,11 +4,14 @@ import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import api from '../lib/api';
 
 export default function CandidateLogin() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -16,7 +19,6 @@ export default function CandidateLogin() {
   });
 
   useEffect(() => {
-    // Check for saved theme preference or default to light mode
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       setDarkMode(true);
@@ -35,10 +37,28 @@ export default function CandidateLogin() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    router.push('/candidate/dashboard');
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await api.post('/candidiate/login', {
+        email: formData.email,
+        password: formData.password
+      });
+
+      // Store user data in localStorage
+      localStorage.setItem('candidiate_id', response.candidiate_id);
+      localStorage.setItem('fullName', response.fullName);
+      
+      // Redirect to dashboard
+      router.push('/candidate/dashboard');
+    } catch (err) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -72,6 +92,13 @@ export default function CandidateLogin() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
+                {error}
+              </div>
+            )}
+
             {/* Google Sign In Button */}
             <button
               type="button"
@@ -109,6 +136,7 @@ export default function CandidateLogin() {
                 placeholder="info@gmail.com"
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a2332] border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -126,6 +154,7 @@ export default function CandidateLogin() {
                   placeholder="Enter your password"
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a2332] border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors pr-12"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
@@ -149,6 +178,7 @@ export default function CandidateLogin() {
                   checked={formData.keepLoggedIn}
                   onChange={(e) => setFormData({...formData, keepLoggedIn: e.target.checked})}
                   className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-[#1a2332] text-blue-600 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
+                  disabled={loading}
                 />
                 <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Keep me logged in</span>
               </label>
@@ -160,9 +190,10 @@ export default function CandidateLogin() {
             {/* Sign In Button */}
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
             >
-              Sign in
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
 
             {/* Sign Up Link */}
@@ -200,4 +231,3 @@ export default function CandidateLogin() {
     </div>
   );
 }
-
