@@ -3,11 +3,16 @@
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import api from '../../lib/api';
 
 export default function EmployerSignup() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     companyName: '',
     email: '',
@@ -17,7 +22,6 @@ export default function EmployerSignup() {
   });
 
   useEffect(() => {
-    // Check for saved theme preference or default to light mode
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       setDarkMode(true);
@@ -36,10 +40,39 @@ export default function EmployerSignup() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle signup logic here
-    console.log('Signup submitted:', formData);
+    setError('');
+
+    // Validation: Check if passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    // Validation: Check if terms are agreed
+    if (!formData.agreeToTerms) {
+      setError('Please agree to the Terms and Conditions');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await api.post('/employer/signup', {
+        companyName: formData.companyName,
+        email: formData.email,
+        password: formData.password
+      });
+
+      // Show success message or redirect to login
+      alert('Signup successful! Please login to continue.');
+      router.push('/employer/login');
+    } catch (err) {
+      setError(err.message || 'Signup failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,6 +106,13 @@ export default function EmployerSignup() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
+                {error}
+              </div>
+            )}
+
             {/* Google Sign Up Button */}
             <button
               type="button"
@@ -110,6 +150,7 @@ export default function EmployerSignup() {
                 placeholder="Your Company"
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a2332] border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -126,6 +167,7 @@ export default function EmployerSignup() {
                 placeholder="info@gmail.com"
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a2332] border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
                 required
+                disabled={loading}
               />
             </div>
 
@@ -143,6 +185,7 @@ export default function EmployerSignup() {
                   placeholder="Enter your password"
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a2332] border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors pr-12"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
@@ -172,6 +215,7 @@ export default function EmployerSignup() {
                   placeholder="Confirm your password"
                   className="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a2332] border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors pr-12"
                   required
+                  disabled={loading}
                 />
                 <button
                   type="button"
@@ -196,6 +240,7 @@ export default function EmployerSignup() {
                 onChange={(e) => setFormData({...formData, agreeToTerms: e.target.checked})}
                 className="w-4 h-4 mt-1 rounded border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-[#1a2332] text-blue-600 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
                 required
+                disabled={loading}
               />
               <label htmlFor="agreeToTerms" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                 I agree to the{' '}
@@ -212,9 +257,10 @@ export default function EmployerSignup() {
             {/* Sign Up Button */}
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
             >
-              Sign up
+              {loading ? 'Creating account...' : 'Sign up'}
             </button>
 
             {/* Sign In Link */}
@@ -252,4 +298,3 @@ export default function EmployerSignup() {
     </div>
   );
 }
-
