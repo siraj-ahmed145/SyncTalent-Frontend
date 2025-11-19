@@ -23,18 +23,20 @@ export default function Sidebar({ active = "Dashboard", type = "candidate" }) {
   const navLinks = type === "employer" ? employerNavLinks : candidateNavLinks;
 
   return (
-    <aside className="fixed md:relative left-0 top-0 h-full md:h-screen w-20 md:w-64 bg-linear-to-br from-blue-900 via-blue-800 to-purple-900 flex flex-col items-center md:items-stretch py-6 z-40 transition-all">
+    <aside className="fixed left-0 top-0 h-screen w-20 md:w-64 bg-linear-to-br from-blue-900 via-blue-800 to-purple-900 flex flex-col items-center md:items-stretch py-6 z-40 transition-all overflow-y-auto">
       <nav className="flex-1 flex flex-col gap-2 mt-8 md:mt-0">
         {navLinks.map(({ label, icon: Icon, href }) => (
           <Link
             key={label}
             href={href}
-            className={`group flex items-center justify-center md:justify-start gap-4 px-4 py-3 rounded-lg text-white text-sm font-medium hover:bg-white/10 transition-colors ${
+            className={`group flex items-center justify-start gap-4 px-4 md:px-8 py-3 rounded-none md:rounded-2xl text-white text-base font-medium hover:bg-white/10 transition-colors ${
               active === label ? "bg-white/10" : ""
             }`}
           >
-            <Icon size={22} className="shrink-0" />
-            <span className="hidden md:inline">{label}</span>
+            <Icon size={24} className="shrink-0" strokeWidth={2} />
+            <span className="hidden md:inline-block align-middle leading-tight">
+              {label}
+            </span>
           </Link>
         ))}
       </nav>
