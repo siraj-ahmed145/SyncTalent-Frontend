@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import api from '../lib/api';
+import api from '../../lib/api';
 
 export default function CandidateLogin() {
   const router = useRouter();
