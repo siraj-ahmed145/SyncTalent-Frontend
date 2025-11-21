@@ -35,7 +35,7 @@ export default function Topbar() {
         <button className="p-2 flex items-center justify-center">
           <Menu size={24} className="text-gray-700" />
         </button>
-        <h1 className="text-xl font-bold text-gray-900 leading-none -mt-1">{currentPage}</h1>
+        <h1 className="text-xl font-bold text-gray-900">{currentPage}</h1>
       </div>
 
       {/* Center - Search bar */}
