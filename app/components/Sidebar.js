@@ -6,7 +6,7 @@ import { LayoutGrid, Search, Briefcase, BarChart, FileText, Users } from "lucide
 const candidateNavLinks = [
   { label: "Dashboard", icon: LayoutGrid, href: "/candidate/dashboard" },
   { label: "Search Job", icon: Search, href: "/candidate/job-search" },
-  { label: "Applications", icon: Briefcase, href: "/candidate/applications" },
+  { label: "Job Applications", icon: Briefcase, href: "/candidate/job-applications" },
   { label: "Statistics", icon: BarChart, href: "/candidate/statistics" },
 ];
 
