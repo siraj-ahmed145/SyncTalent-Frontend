@@ -1,13 +1,14 @@
 "use client";
 import Link from "next/link";
-import { LayoutGrid, Search, Briefcase, BarChart, FileText, Users } from "lucide-react";
+import { LayoutGrid, Search, Briefcase, BarChart, FileText, Users, Sparkles, Bookmark } from "lucide-react";
 
 // Candidate navigation links
 const candidateNavLinks = [
   { label: "Dashboard", icon: LayoutGrid, href: "/candidate/dashboard" },
   { label: "Search Job", icon: Search, href: "/candidate/job-search" },
   { label: "Job Applications", icon: Briefcase, href: "/candidate/job-applications" },
-  { label: "Statistics", icon: BarChart, href: "/candidate/statistics" },
+  { label: "Job Recommendations", icon: Sparkles, href: "/candidate/job-recommendations" },
+  { label: "Saved Jobs", icon: Bookmark, href: "/candidate/saved-jobs" },
 ];
 
 // Employer navigation links
@@ -34,7 +35,7 @@ export default function Sidebar({ active = "Dashboard", type = "candidate" }) {
             }`}
           >
             <Icon size={24} className="shrink-0" strokeWidth={2} />
-            <span className="hidden md:inline-block align-middle leading-tight">
+            <span className="hidden md:inline-block align-middle leading-tight whitespace-nowrap">
               {label}
             </span>
           </Link>
