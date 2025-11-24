@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MapPin, Briefcase, Clock, Search } from 'lucide-react';
+import { MapPin, Briefcase, Clock, Search, Bookmark, CheckCircle } from 'lucide-react';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 
@@ -111,8 +111,28 @@ export default function CandidateJobSearchPage() {
   const [applicationStep, setApplicationStep] = useState('choice'); // 'choice', 'upload', 'confirm'
   const [useCustomResume, setUseCustomResume] = useState(false);
   const [uploadedResume, setUploadedResume] = useState(null);
+  
+  // Saved jobs state
+  const [savedJobIds, setSavedJobIds] = useState([]);
+  const [showSaveNotification, setShowSaveNotification] = useState(false);
+  const [showUnsaveNotification, setShowUnsaveNotification] = useState(false);
+  const [showApplicationNotification, setShowApplicationNotification] = useState(false);
 
   // For UI, all jobs are shown - for real implementation add filtering logic
+  
+  const handleSaveJob = (jobId) => {
+    if (savedJobIds.includes(jobId)) {
+      setSavedJobIds(savedJobIds.filter(id => id !== jobId));
+      // Show unsave notification
+      setShowUnsaveNotification(true);
+      setTimeout(() => setShowUnsaveNotification(false), 2000);
+    } else {
+      setSavedJobIds([...savedJobIds, jobId]);
+      // Show save notification
+      setShowSaveNotification(true);
+      setTimeout(() => setShowSaveNotification(false), 2000);
+    }
+  };
   
   const handleApplyClick = (job) => {
     setSelectedJob(job);
@@ -154,8 +174,9 @@ export default function CandidateJobSearchPage() {
     setUseCustomResume(false);
     setUploadedResume(null);
     
-    // Show success message (you can add a toast notification here)
-    alert('Application submitted successfully!');
+    // Show success notification
+    setShowApplicationNotification(true);
+    setTimeout(() => setShowApplicationNotification(false), 2000);
   };
 
   const closeModal = () => {
@@ -169,8 +190,45 @@ export default function CandidateJobSearchPage() {
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Sidebar active="Search Job" type="candidate" />
-      <div className="flex-1 flex flex-col md:ml-64 ml-20">
+      <div className="flex-1 flex flex-col md:ml-64 ml-20 relative">
         <Topbar />
+        
+        {/* Save Notification Popup */}
+        {showSaveNotification && (
+          <div className="fixed top-0 left-0 right-0 md:ml-64 ml-20 flex justify-center pt-6 z-50 pointer-events-none">
+            <div className="bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce-in">
+              <div className="bg-white/20 p-1.5 rounded-full">
+                <CheckCircle className="w-5 h-5" />
+              </div>
+              <span className="font-semibold text-base">Job Saved for later</span>
+            </div>
+          </div>
+        )}
+        
+        {/* Unsave Notification Popup */}
+        {showUnsaveNotification && (
+          <div className="fixed top-0 left-0 right-0 md:ml-64 ml-20 flex justify-center pt-6 z-50 pointer-events-none">
+            <div className="bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce-in">
+              <div className="bg-white/20 p-1.5 rounded-full">
+                <CheckCircle className="w-5 h-5" />
+              </div>
+              <span className="font-semibold text-base">Job Removed from Saved Jobs</span>
+            </div>
+          </div>
+        )}
+        
+        {/* Application Submitted Notification Popup */}
+        {showApplicationNotification && (
+          <div className="fixed top-0 left-0 right-0 md:ml-64 ml-20 flex justify-center pt-6 z-50 pointer-events-none">
+            <div className="bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce-in">
+              <div className="bg-white/20 p-1.5 rounded-full">
+                <CheckCircle className="w-5 h-5" />
+              </div>
+              <span className="font-semibold text-base">Application Submitted Successfully</span>
+            </div>
+          </div>
+        )}
+        
         <main className="p-6 md:p-10 flex-1">
           <section className="w-full pb-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
@@ -250,8 +308,17 @@ export default function CandidateJobSearchPage() {
                         </span>
                       ))}
                     </div>
-                    <div className="mt-auto flex items-center justify-between">
-                      <span className="text-xs text-gray-400">{job.time}</span>
+                    <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-400 flex items-center">Job Posted: {job.time}</span>
+                        <button
+                          onClick={() => handleSaveJob(i)}
+                          className={`p-1.5 rounded-lg transition-all ${savedJobIds.includes(i) ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
+                          title={savedJobIds.includes(i) ? "Remove from saved" : "Save for later"}
+                        >
+                          <Bookmark className={`w-6 h-6 ${savedJobIds.includes(i) ? 'fill-blue-600' : ''}`} />
+                        </button>
+                      </div>
                       <button 
                         onClick={() => handleApplyClick(job)}
                         className="px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium shadow transition-colors"
