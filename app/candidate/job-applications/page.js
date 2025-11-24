@@ -301,7 +301,7 @@ export default function CandidateApplicationsPage() {
                           </div>
                           
                           {/* Match Score Badge */}
-                          <div className="ml-3 text-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl px-3 py-2 border border-gray-200 shadow-sm">
+                          <div className="ml-3 text-center bg-linear-to-br from-gray-50 to-gray-100 rounded-xl px-3 py-2 border border-gray-200 shadow-sm">
                             <div className="text-xs text-gray-500 font-medium mb-0.5">Match</div>
                             <div className={`text-2xl font-bold ${matchScoreColor}`}>
                               {app.matchScore}%
