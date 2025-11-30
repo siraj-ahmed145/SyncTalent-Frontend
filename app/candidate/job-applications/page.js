@@ -16,7 +16,7 @@ const APPLICATIONS = [
     salary: "$120k - $160k",
     level: "Senior",
     appliedDate: "Nov 20, 2025",
-    status: "Shortlisted for Interview",
+    status: "Shortlisted",
     matchScore: 92,
     tags: ["React", "Node.js", "AWS", "TypeScript", "Docker"],
     description: "We're seeking an experienced Senior Software Engineer to lead our engineering team. You'll work on cutting-edge projects using React, Node.js, and AWS...",
@@ -72,7 +72,7 @@ const APPLICATIONS = [
     salary: "$130k - $170k",
     level: "Senior",
     appliedDate: "Nov 10, 2025",
-    status: "Shortlisted for Interview",
+    status: "Shortlisted",
     matchScore: 95,
     tags: ["Kubernetes", "Docker", "AWS", "CI/CD", "Terraform"],
     description: "Manage and optimize our cloud infrastructure. Implement CI/CD pipelines, monitor system performance, ensure high availability...",
@@ -114,7 +114,7 @@ const APPLICATIONS = [
     salary: "$115k - $145k",
     level: "Senior",
     appliedDate: "Nov 3, 2025",
-    status: "Shortlisted for Interview",
+    status: "Shortlisted",
     matchScore: 90,
     tags: ["Java", "Spring Boot", "PostgreSQL", "Microservices"],
     description: "Design and implement scalable backend systems. Work with modern technologies and cloud-native architecture...",
@@ -126,7 +126,7 @@ export default function CandidateApplicationsPage() {
 
   // Calculate statistics
   const totalApplied = APPLICATIONS.length;
-  const shortlisted = APPLICATIONS.filter(app => app.status === "Shortlisted for Interview").length;
+  const shortlisted = APPLICATIONS.filter(app => app.status === "Shortlisted").length;
   const rejected = APPLICATIONS.filter(app => app.status === "Rejected").length;
   const inProgress = APPLICATIONS.filter(app => app.status === "In Progress").length;
 
@@ -138,7 +138,7 @@ export default function CandidateApplicationsPage() {
   // Get status badge styling
   const getStatusBadge = (status) => {
     switch(status) {
-      case "Shortlisted for Interview":
+      case "Shortlisted":
         return {
           bg: "bg-green-100",
           text: "text-green-700",
@@ -253,7 +253,7 @@ export default function CandidateApplicationsPage() {
               {/* Filter Tabs */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex flex-wrap gap-2">
-                  {["All", "Shortlisted for Interview", "In Progress", "Rejected"].map((filter) => (
+                  {["All", "Shortlisted", "In Progress", "Rejected"].map((filter) => (
                     <button
                       key={filter}
                       onClick={() => setStatusFilter(filter)}
