@@ -506,7 +506,7 @@ export default function ViewApplicationsPage() {
   const filteredCandidates = getFilteredCandidates();
 
   const handleBack = () => {
-    router.push("/employer/dashboard");
+    router.push(`/employer/view-job?jobId=${jobId}`);
   };
 
   const getScoreColor = (score) => {
@@ -538,17 +538,17 @@ export default function ViewApplicationsPage() {
         <main className="p-6 md:p-10 flex-1">
           {!selectedCandidate ? (
             <>
-              {/* Back Button */}
-              <button
-                onClick={handleBack}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium mb-6 transition-colors px-3 py-2 rounded-lg"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                <span>Back to Dashboard</span>
-              </button>
-
               {/* Page Header */}
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-8">
+                {/* Back Button */}
+                <button
+                  onClick={handleBack}
+                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium mb-6 transition-colors px-3 py-2 rounded-lg"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  <span>Back to View Job</span>
+                </button>
+
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
                   {jobTitle || "Job"} - Applications
                 </h1>
