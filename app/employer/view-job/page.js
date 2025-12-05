@@ -294,7 +294,7 @@ export default function ViewJobPage() {
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
                       <Calendar className="w-7 h-7 text-blue-600" />
                     </div>
                     <div>
@@ -305,7 +305,7 @@ export default function ViewJobPage() {
                 </div>
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center shrink-0">
                       <Users className="w-7 h-7 text-purple-600" />
                     </div>
                     <div>

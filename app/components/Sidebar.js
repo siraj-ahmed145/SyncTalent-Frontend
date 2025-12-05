@@ -14,7 +14,7 @@ const candidateNavLinks = [
 // Employer navigation links
 const employerNavLinks = [
   { label: "Dashboard", icon: LayoutGrid, href: "/employer/dashboard" },
-  { label: "Post Job", icon: FileText, href: "/employer/job-post" },
+  { label: "Create Job Post", icon: FileText, href: "/employer/create-job-post" },
   { label: "Candidates", icon: Users, href: "/employer/candidates" },
   { label: "Statistics", icon: BarChart, href: "/employer/statistics" },
 ];
