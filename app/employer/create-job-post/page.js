@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
-import { Briefcase, MapPin } from 'lucide-react';
+import { FileText, MapPin } from 'lucide-react';
 
-export default function JobPostPage() {
+export default function CreateJobPage() {
   const [formData, setFormData] = useState({
     jobTitle: '',
     jobDescription: '',
@@ -18,6 +18,7 @@ export default function JobPostPage() {
     responsibilities: [],
     requirements: [],
     benefits: [],
+    shortlistedCandidates: '',
   });
 
   const [skillInput, setSkillInput] = useState('');
@@ -137,7 +138,7 @@ export default function JobPostPage() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
-      <Sidebar active="Post Job" type="employer" />
+      <Sidebar active="Create Job Post" type="employer" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
         <main className="p-6 md:p-10 flex-1 flex justify-center">
@@ -146,12 +147,12 @@ export default function JobPostPage() {
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <Briefcase className="w-5 h-5 text-white" />
+                  <FileText className="w-5 h-5 text-white" />
                 </div>
-                <h1 className="text-3xl font-semibold text-gray-900 leading-none -mt-1">Post a New Job</h1>
+                <h1 className="text-3xl font-semibold text-gray-900 leading-none -mt-1">Create a New Job Post</h1>
               </div>
               <p className="text-base text-gray-500 ml-[52px] -mt-1">
-                Fill in the details below to create a new job posting and attract top talent
+                Fill in the details below to create a new job post and attract top talent
               </p>
             </div>
 
@@ -282,6 +283,53 @@ export default function JobPostPage() {
                             ×
                           </button>
                         </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Add Skills */}
+                <div className="mb-6">
+                  <label htmlFor="skillInput" className="block text-base font-medium text-gray-900 mb-2">
+                    Add Skills <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      id="skillInput"
+                      value={skillInput}
+                      onChange={(e) => setSkillInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="e.g. React, Node.js, Python"
+                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddSkill}
+                      className="px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <span className="text-lg leading-none">+</span>
+                      Add
+                    </button>
+                  </div>
+
+                  {/* Skills Tags */}
+                  {formData.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {formData.skills.map((skill, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 text-base font-medium rounded-lg border border-blue-200"
+                        >
+                          {skill}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSkill(index)}
+                            className="text-blue-500 hover:text-blue-700 transition-colors"
+                          >
+                            ×
+                          </button>
+                        </span>
                       ))}
                     </div>
                   )}
@@ -440,51 +488,24 @@ export default function JobPostPage() {
                   </div>
                 </div>
 
-                {/* Add Skills */}
-                <div className="mb-0">
-                  <label htmlFor="skillInput" className="block text-base font-medium text-gray-900 mb-2">
-                    Add Skills <span className="text-red-500">*</span>
+                {/* Shortlisted Candidates */}
+                <div className="mb-6">
+                  <label htmlFor="shortlistedCandidates" className="block text-base font-medium text-gray-900 mb-2">
+                    How many candidates to be shortlisted? <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex gap-3">
-                    <input
-                      type="text"
-                      id="skillInput"
-                      value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      placeholder="e.g. React, Node.js, Python"
-                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddSkill}
-                      className="px-6 py-2 bg-blue-600 text-white text-base font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <span className="text-lg leading-none">+</span>
-                      Add
-                    </button>
-                  </div>
-
-                  {/* Skills Tags */}
-                  {formData.skills.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {formData.skills.map((skill, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 text-base font-medium rounded-lg border border-blue-200"
-                        >
-                          {skill}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveSkill(index)}
-                            className="text-blue-500 hover:text-blue-700 transition-colors"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <input
+                    type="number"
+                    id="shortlistedCandidates"
+                    name="shortlistedCandidates"
+                    value={formData.shortlistedCandidates}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 10"
+                    min="1"
+                    className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                  <p className="text-sm text-gray-500 mt-2">
+                    Top N candidates based on match scores will be shortlisted.
+                  </p>
                 </div>
               </div>
 
@@ -493,9 +514,9 @@ export default function JobPostPage() {
                 <button
                   type="submit"
                   className="px-6 py-2 bg-blue-600 text-white text-base font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2"
-                  style={{ width: 'clamp(180px, 22%, 300px)' }}
+                  style={{ width: 'clamp(250px, 30%, 350px)' }}
                 >
-                  <Briefcase className="w-4 h-4" />
+                  <FileText className="w-4 h-4" />
                   Post Job
                 </button>
               </div>
@@ -506,3 +527,4 @@ export default function JobPostPage() {
     </div>
   );
 }
+
