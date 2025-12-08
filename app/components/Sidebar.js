@@ -1,12 +1,12 @@
 "use client";
 import Link from "next/link";
-import { LayoutGrid, Search, Briefcase, BarChart, FileText, Users, Sparkles, Bookmark } from "lucide-react";
+import { LayoutGrid, Search, Briefcase, BarChart, FileText, Users, Sparkles, Bookmark, FileCheck } from "lucide-react";
 
 // Candidate navigation links
 const candidateNavLinks = [
   { label: "Dashboard", icon: LayoutGrid, href: "/candidate/dashboard" },
   { label: "Search Job", icon: Search, href: "/candidate/job-search" },
-  { label: "Job Applications", icon: Briefcase, href: "/candidate/job-applications" },
+  { label: "Job Applications", icon: FileCheck, href: "/candidate/job-applications" },
   { label: "Job Recommendations", icon: Sparkles, href: "/candidate/job-recommendations" },
   { label: "Saved Jobs", icon: Bookmark, href: "/candidate/saved-jobs" },
 ];
@@ -15,8 +15,6 @@ const candidateNavLinks = [
 const employerNavLinks = [
   { label: "Dashboard", icon: LayoutGrid, href: "/employer/dashboard" },
   { label: "Create Job Post", icon: FileText, href: "/employer/create-job-post" },
-  { label: "Candidates", icon: Users, href: "/employer/candidates" },
-  { label: "Statistics", icon: BarChart, href: "/employer/statistics" },
 ];
 
 export default function Sidebar({ active = "Dashboard", type = "candidate" }) {
