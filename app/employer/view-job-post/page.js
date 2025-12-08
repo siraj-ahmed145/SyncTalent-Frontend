@@ -2,7 +2,8 @@
 import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Users, MapPin, Briefcase, Calendar, DollarSign, Clock } from "lucide-react";
+import { ArrowLeft, Users, MapPin, Briefcase, Calendar, DollarSign, Clock, Building2, CheckCircle, X } from "lucide-react";
+import { useState } from "react";
 
 // Dummy data for jobs
 const JOBS = [
@@ -14,7 +15,7 @@ const JOBS = [
     jobType: "Full-time",
     level: "Senior",
     skills: ["React", "Javascript", "Tailwind CSS"],
-    applications: 14,
+    applications: 8,
     time: "2 days ago",
     status: "Active",
     salary: "$80k - $120k",
@@ -50,7 +51,7 @@ const JOBS = [
     jobType: "Part-time",
     level: "Junior",
     skills: ["Node.js", "Express", "MongoDB"],
-    applications: 8,
+    applications: 5,
     time: "4 days ago",
     status: "Active",
     salary: "$50k - $70k",
@@ -86,7 +87,7 @@ const JOBS = [
     jobType: "Contract",
     level: "Junior",
     skills: ["React", "Node.js", "AWS"],
-    applications: 21,
+    applications: 5,
     time: "1 week ago",
     status: "Closed",
     salary: "$60k - $90k",
@@ -122,7 +123,7 @@ const JOBS = [
     jobType: "Full-time",
     level: "Mid-Level",
     skills: ["Figma", "Adobe XD", "Prototyping"],
-    applications: 12,
+    applications: 5,
     time: "3 days ago",
     status: "Active",
     salary: "$55k - $85k",
@@ -158,7 +159,7 @@ const JOBS = [
     jobType: "Full-time",
     level: "Senior",
     skills: ["Docker", "Kubernetes", "AWS", "CI/CD"],
-    applications: 18,
+    applications: 5,
     time: "5 days ago",
     status: "Active",
     salary: "$90k - $130k",
@@ -194,7 +195,7 @@ const JOBS = [
     jobType: "Full-time",
     level: "Junior",
     skills: ["Python", "SQL", "Excel", "Power BI"],
-    applications: 16,
+    applications: 5,
     time: "1 week ago",
     status: "Closed",
     salary: "$45k - $65k",
@@ -221,15 +222,222 @@ const JOBS = [
       "Modern office facilities",
       "Friendly team culture"
     ]
+  },
+  {
+    id: 7,
+    title: "Mobile App Developer",
+    location: "Lahore, Pakistan",
+    workMode: "On-site",
+    jobType: "Full-time",
+    level: "Senior",
+    skills: ["React Native", "Flutter", "Swift"],
+    applications: 5,
+    time: "3 days ago",
+    status: "Active",
+    salary: "$70k - $110k",
+    postedDate: "Nov 26, 2025",
+    description: "Develop high-performance mobile applications for iOS and Android. Create seamless user experiences and maintain code quality standards.",
+    responsibilities: [
+      "Develop cross-platform mobile applications using React Native or Flutter",
+      "Optimize mobile app performance and user experience",
+      "Integrate backend APIs and third-party services",
+      "Participate in code reviews and best practices",
+      "Release and manage app store submissions"
+    ],
+    requirements: [
+      "4+ years of mobile development experience",
+      "Proficiency in React Native or Flutter",
+      "Understanding of iOS and Android platforms",
+      "Experience with mobile testing frameworks",
+      "Strong problem-solving skills"
+    ],
+    benefits: [
+      "Competitive salary and bonus",
+      "Health and wellness program",
+      "Latest development devices",
+      "Learning and conference budget",
+      "Flexible work arrangements"
+    ]
+  },
+  {
+    id: 8,
+    title: "Cloud Architect",
+    location: "Remote",
+    workMode: "Remote",
+    jobType: "Full-time",
+    level: "Senior",
+    skills: ["AWS", "Azure", "Terraform"],
+    applications: 5,
+    time: "6 days ago",
+    status: "Active",
+    salary: "$120k - $160k",
+    postedDate: "Nov 23, 2025",
+    description: "Design and implement scalable cloud infrastructure solutions. Lead cloud migration initiatives and optimize cloud costs.",
+    responsibilities: [
+      "Design cloud architecture for scalability and reliability",
+      "Lead cloud migration projects",
+      "Implement security best practices in cloud infrastructure",
+      "Optimize cloud costs and resource utilization",
+      "Provide technical guidance to development teams"
+    ],
+    requirements: [
+      "7+ years of cloud architecture experience",
+      "Expert knowledge of AWS or Azure",
+      "Experience with Infrastructure as Code (Terraform)",
+      "Strong understanding of cloud security",
+      "Leadership and communication skills"
+    ],
+    benefits: [
+      "Highest tier compensation",
+      "Stock options and equity",
+      "Unlimited learning budget",
+      "Fully remote with flexible hours",
+      "Executive perks and benefits"
+    ]
+  },
+  {
+    id: 9,
+    title: "QA Engineer",
+    location: "Karachi, Pakistan",
+    workMode: "Hybrid",
+    jobType: "Full-time",
+    level: "Mid-Level",
+    skills: ["Selenium", "TestNG", "JIRA"],
+    applications: 5,
+    time: "4 days ago",
+    status: "Active",
+    salary: "$40k - $60k",
+    postedDate: "Nov 25, 2025",
+    description: "Ensure product quality through comprehensive testing. Develop automated test scripts and report quality metrics.",
+    responsibilities: [
+      "Design and execute automated test suites",
+      "Perform manual and exploratory testing",
+      "Report and track software defects",
+      "Collaborate with development teams",
+      "Maintain test documentation"
+    ],
+    requirements: [
+      "2+ years of QA testing experience",
+      "Proficiency in test automation frameworks",
+      "Knowledge of SQL and databases",
+      "Experience with testing tools like JIRA",
+      "Strong attention to detail"
+    ],
+    benefits: [
+      "Health insurance",
+      "Flexible work hours",
+      "Professional training",
+      "Modern testing tools",
+      "Career growth opportunities"
+    ]
+  },
+  {
+    id: 10,
+    title: "Product Manager",
+    location: "Lahore, Pakistan",
+    workMode: "Hybrid",
+    jobType: "Full-time",
+    level: "Senior",
+    skills: ["Product Strategy", "Analytics", "Leadership"],
+    applications: 5,
+    time: "2 days ago",
+    status: "Active",
+    salary: "$80k - $120k",
+    postedDate: "Nov 27, 2025",
+    description: "Lead product vision and strategy. Manage product roadmap and oversee product launches.",
+    responsibilities: [
+      "Define product vision and strategy",
+      "Manage product roadmap and prioritization",
+      "Conduct market research and competitive analysis",
+      "Lead cross-functional product teams",
+      "Monitor product metrics and KPIs"
+    ],
+    requirements: [
+      "5+ years of product management experience",
+      "Strong analytical and strategic thinking skills",
+      "Experience with product management tools",
+      "Excellent communication skills",
+      "Track record of successful product launches"
+    ],
+    benefits: [
+      "Competitive salary and bonus",
+      "Stock options",
+      "Leadership development program",
+      "Hybrid work flexibility",
+      "Executive coaching"
+    ]
   }
 ];
 
-export default function ViewJobPage() {
+export default function ViewJobPostPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const jobId = parseInt(searchParams.get("jobId"));
   
+  // State for modals and notifications
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null); // 'close', 'reopen', 'delete'
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  
+  // Helper function to convert level to experience years
+  const getLevelInYears = (level) => {
+    const levelMap = {
+      'Junior': '0-1 years',
+      'Mid-Level': '2-4 years',
+      'Senior': '5+ years'
+    };
+    return levelMap[level] || level;
+  };
+  
   const selectedJob = JOBS.find(job => job.id === jobId);
+  
+  // Handler functions
+  const handleActionClick = (action) => {
+    setConfirmAction(action);
+    setShowConfirmModal(true);
+  };
+  
+  const handleConfirmAction = () => {
+    let message = '';
+    switch (confirmAction) {
+      case 'close':
+        message = 'Job Post closed successfully';
+        // Here you would update the job status in your backend
+        break;
+      case 'reopen':
+        message = 'Job Post reopened successfully';
+        // Here you would update the job status in your backend
+        break;
+      case 'delete':
+        message = 'Job Post deleted successfully';
+        // Here you would delete the job from your backend
+        setTimeout(() => router.push('/employer/dashboard'), 1500);
+        break;
+    }
+    
+    setShowConfirmModal(false);
+    setSuccessMessage(message);
+    setShowSuccessMessage(true);
+    
+    // Hide success message after 3 seconds
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 3000);
+  };
+  
+  const getConfirmMessage = () => {
+    switch (confirmAction) {
+      case 'close':
+        return 'Are you sure you want to close this job post?';
+      case 'reopen':
+        return 'Are you sure you want to reopen this job post?';
+      case 'delete':
+        return 'Are you sure you want to delete this job post?';
+      default:
+        return '';
+    }
+  };
 
   if (!selectedJob) {
     return (
@@ -250,6 +458,51 @@ export default function ViewJobPage() {
       <Sidebar active="Dashboard" type="employer" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
+        
+        {/* Success Notification */}
+        {showSuccessMessage && (
+          <div className="fixed top-0 left-0 right-0 md:ml-64 ml-20 flex justify-center pt-6 z-50 pointer-events-none">
+            <div className="bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce-in">
+              <div className="bg-white/20 p-1.5 rounded-full">
+                <CheckCircle className="w-5 h-5" />
+              </div>
+              <span className="font-semibold text-base">{successMessage}</span>
+            </div>
+          </div>
+        )}
+        
+        {/* Confirmation Modal */}
+        {showConfirmModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-xl font-bold text-gray-900">Confirm Action</h3>
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <p className="text-gray-700 mb-6">{getConfirmMessage()}</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleConfirmAction}
+                  className="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors"
+                >
+                  No
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <main className="p-6 md:p-10 flex-1">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
             {/* Back Button */}
@@ -265,22 +518,22 @@ export default function ViewJobPage() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
               {/* Header */}
               <div className="mb-6 pb-6 border-b border-gray-200">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3 flex-1">
                     <h1 className="text-3xl font-bold text-gray-900">{selectedJob.title}</h1>
-                    <span className={`px-3 py-1 text-sm rounded-full font-medium ${selectedJob.level.includes('Senior') ? 'bg-blue-100 text-blue-600' : 'bg-blue-50 text-blue-500'} border border-blue-200`}>
-                      {selectedJob.level}
+                    <span className="px-3 py-1 text-sm rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap">
+                      {getLevelInYears(selectedJob.level)}
                     </span>
                   </div>
-                  <span className={`px-3 py-1 text-sm rounded-full font-medium ${selectedJob.status === 'Active' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'} border`}>
+                  <span className={`px-3 py-1 text-sm rounded-full font-medium ${selectedJob.status === 'Active' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'} border ml-2 shrink-0`}>
                     {selectedJob.status}
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-4 text-base text-gray-600">
-                  <span className="flex items-center gap-1"><MapPin className="w-5 h-5" />{selectedJob.location}</span>
-                  <span className="flex items-center gap-1"><Briefcase className="w-5 h-5" />{selectedJob.workMode}</span>
-                  <span className="flex items-center gap-1"><Clock className="w-5 h-5" />{selectedJob.jobType}</span>
-                  <span className="flex items-center gap-1"><DollarSign className="w-5 h-5" />{selectedJob.salary}</span>
+                <div className="flex flex-wrap gap-3 text-base text-gray-600">
+                  {selectedJob.workMode !== 'Remote' && <span className="flex items-center gap-1"><MapPin className="w-5 h-5" />{selectedJob.location}</span>}
+                  <span className="flex items-center gap-1"><Building2 className="w-5 h-5" />{selectedJob.workMode}</span>
+                  <span className="flex items-center gap-1"><Briefcase className="w-5 h-5" />{selectedJob.jobType}</span>
+                  {selectedJob.salary && <span className="flex items-center gap-1"><DollarSign className="w-5 h-5" />{selectedJob.salary}</span>}
                 </div>
               </div>
 
@@ -378,21 +631,43 @@ export default function ViewJobPage() {
                 <div className="flex justify-end mb-10">
                   <button 
                     onClick={() => router.push(`/employer/applications?jobId=${selectedJob.id}&jobTitle=${encodeURIComponent(selectedJob.title)}`)}
-                    className="py-3 px-5 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 font-semibold rounded-xl transition-colors">
+                    className="py-3 px-5 text-blue-700 bg-blue-100 hover:bg-blue-200 hover:text-blue-800 active:bg-blue-200 active:text-blue-800 font-semibold rounded-xl transition-all">
                     View Applications
                   </button>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <button className="py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 font-semibold rounded-xl transition-colors border border-gray-300">
-                    Edit Job Post
-                  </button>
-                  <button className={`py-3 font-semibold rounded-xl transition-colors border ${selectedJob.status === 'Active' ? 'bg-red-50 hover:bg-red-100 text-red-700 border-red-200' : 'bg-green-50 hover:bg-green-100 text-green-700 border-green-300'}`}>
-                    {selectedJob.status === 'Active' ? 'Close Job Post' : 'Reopen Job Post'}
-                  </button>
-                  <button className="py-3 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-xl transition-colors border border-red-400">
-                    Delete Job Post
-                  </button>
-                </div>
+                
+                {selectedJob.status === 'Active' ? (
+                  <div className="grid grid-cols-3 gap-3">
+                    <button 
+                      onClick={() => handleActionClick('close')}
+                      className="py-3 bg-red-50 hover:bg-red-100 text-red-700 border-red-200 font-semibold rounded-xl transition-colors border">
+                      Close Job Post
+                    </button>
+                    <button 
+                      onClick={() => router.push(`/employer/edit-job-post?jobId=${selectedJob.id}`)}
+                      className="py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">
+                      Edit Job Post
+                    </button>
+                    <button 
+                      onClick={() => handleActionClick('delete')}
+                      className="py-3 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-xl transition-colors border border-red-400">
+                      Delete Job Post
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3">
+                    <button 
+                      onClick={() => handleActionClick('reopen')}
+                      className="py-3 bg-green-50 hover:bg-green-100 text-green-700 border-green-300 font-semibold rounded-xl transition-colors border">
+                      Reopen Job Post
+                    </button>
+                    <button 
+                      onClick={() => handleActionClick('delete')}
+                      className="py-3 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-xl transition-colors border border-red-400">
+                      Delete Job Post
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -401,3 +676,4 @@ export default function ViewJobPage() {
     </div>
   );
 }
+

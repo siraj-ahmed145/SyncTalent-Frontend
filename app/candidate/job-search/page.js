@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { MapPin, Briefcase, Clock, Search, Bookmark, CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { MapPin, Briefcase, Clock, Search, Bookmark, CheckCircle, Building2, DollarSign } from 'lucide-react';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 
@@ -25,72 +26,90 @@ const SORTS = ["Most Relevant", "Newest", "Oldest", "Highest Salary"];
 // Dummy job data for UI only
 const JOBS = [
   {
+    id: 1,
     title: "Senior Software Engineer",
     company: "TechCorp Solutions",
     location: "San Francisco, CA",
-    workMode: "Full-time",
+    jobType: "Full-time",
+    workMode: "On-site",
     salary: "$120k - $160k",
     level: "Senior",
+    experience: "5+ years",
     tags: ["React", "Node.js", "AWS", "TypeScript", "Docker"],
     time: "2 days ago",
     description:
       "We're seeking an experienced Senior Software Engineer to lead our engineering team. You'll work on cutting-edge projects using React, Node.js, and AWS...",
   },
   {
+    id: 2,
     title: "Machine Learning Engineer",
     company: "AI Innovations Inc",
     location: "Remote",
-    workMode: "Full-time",
+    jobType: "Full-time",
+    workMode: "Remote",
     salary: "$140k - $180k",
     level: "Senior",
+    experience: "5+ years",
     tags: ["Python", "TensorFlow", "PyTorch", "Machine Learning", "NLP"],
     time: "1 day ago",
     description:
       "Join our ML team to build state-of-the-art machine learning models. Work on NLP, computer vision, recommendation systems. Experience with TensorFlow, PyTorch...",
   },
   {
+    id: 3,
     title: "Product Manager",
     company: "StartupXYZ",
     location: "New York, NY",
-    workMode: "Full-time",
+    jobType: "Full-time",
+    workMode: "Hybrid",
     salary: "$130k - $170k",
-    level: "Mid Senior",
+    level: "Mid-Level",
+    experience: "2-4 years",
     tags: ["Product Strategy", "Agile", "User Research", "Analytics"],
     time: "3 days ago",
     description:
       "Lead product development for our SaaS platform. Define product roadmap, work with cross-functional teams, drive product strategy. 5+ years of product management experience...",
   },
   {
+    id: 4,
     title: "Full Stack Developer",
     company: "WebDev Agency",
     location: "Austin, TX",
-    workMode: "Full-time",
+    jobType: "Full-time",
+    workMode: "On-site",
     salary: "$100k - $140k",
     level: "Mid-Level",
+    experience: "2-4 years",
     tags: ["React", "Node.js", "MongoDB", "JavaScript", "REST API"],
     time: "5 days ago",
     description:
       "Build modern web applications using React, Node.js, and MongoDB. Work in a collaborative environment with designers and other developers...",
   },
   {
+    id: 5,
     title: "DevOps Engineer",
     company: "CloudScale Systems",
     location: "Remote",
-    workMode: "Full-time",
+    jobType: "Full-time",
+    workMode: "Remote",
     salary: "$130k - $170k",
     level: "Senior",
+    experience: "5+ years",
     tags: ["Kubernetes", "Docker", "AWS", "CI/CD", "Terraform"],
     time: "4 days ago",
     description:
       "Manage and optimize our cloud infrastructure. Implement CI/CD pipelines, monitor system performance, ensure high availability...",
   },
   {
+    id: 6,
     title: "UX/UI Designer",
     company: "Design Studio Pro",
     location: "Los Angeles, CA",
-    workMode: "Full-time",
+    jobType: "Full-time",
+    workMode: "On-site",
     salary: "$90k - $130k",
     level: "Mid-Level",
+    experience: "2-4 years",
     tags: ["Figma", "UI Design", "UX Research", "Prototyping", "User Testing"],
     time: "1 week ago",
     description:
@@ -99,6 +118,7 @@ const JOBS = [
 ];
 
 export default function CandidateJobSearchPage() {
+  const router = useRouter();
   const [region, setRegion] = useState(REGIONS[0]);
   const [mode, setMode] = useState(MODES[0]);
   const [type, setType] = useState(TYPES[0]);
@@ -232,11 +252,15 @@ export default function CandidateJobSearchPage() {
         <main className="p-6 md:p-10 flex-1">
           <section className="w-full pb-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+              {/* Page Header */}
               <div className="pt-4 pb-6">
-                <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 leading-tight">
-                  Find Your Next Opportunity
-                </h2>
-                <p className="text-zinc-500 text-sm mt-2">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <Search className="w-5 h-5 text-white" />
+                  </div>
+                  <h1 className="text-3xl font-semibold text-gray-900 leading-none -mt-1">Find Your Next Opportunity</h1>
+                </div>
+                <p className="text-base text-gray-500 ml-[52px] -mt-1">
                   Search through thousands of job opportunities
                 </p>
               </div>
@@ -282,49 +306,56 @@ export default function CandidateJobSearchPage() {
                 {JOBS.map((job, i) => (
                   <div
                     key={i}
-                    className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex flex-col h-full transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
+                    className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-lg hover:border-blue-200"
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg md:text-xl font-semibold text-gray-900">
                         {job.title}
                       </h3>
-                      <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${job.level.includes('Senior') ? 'bg-blue-100 text-blue-600' : 'bg-blue-50 text-blue-500'} border border-blue-200 whitespace-nowrap`}>
-                        {job.level}
+                      <span className="px-3 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap">
+                        {job.experience}
                       </span>
                     </div>
 
-                    <p className="text-sm text-gray-500 font-medium mb-1">{job.company}</p>
-                    <div className="flex flex-wrap gap-4 text-xs text-gray-400 mb-3">
-                      <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {job.location}</span>
-                      <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" /> {job.workMode}</span>
-                      <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {job.salary}</span>
+                    <p className="text-sm font-medium mb-2 text-blue-600">{job.company}</p>
+                    <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-3">
+                      {job.workMode !== 'Remote' && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {job.location}</span>}
+                      <span className="flex items-center gap-1"><Building2 className="w-4 h-4" /> {job.workMode}</span>
+                      <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" /> {job.jobType}</span>
+                      <span className="flex items-center gap-1"><DollarSign className="w-4 h-4" /> {job.salary}</span>
                     </div>
-                    <p className="text-xs md:text-sm text-gray-700 mb-3 line-clamp-2">{job.description}</p>
+                    
+                    <div className="border-t border-gray-200 pt-3 mb-3">
+                      <p className="text-xs md:text-sm text-gray-700 line-clamp-2">{job.description}</p>
+                    </div>
 
-                    <div className="flex flex-wrap gap-2 mb-3">
+                    <div className="flex flex-wrap gap-2 pb-3 mb-2 border-b border-gray-200">
                       {job.tags.map(tag => (
                         <span key={tag} className="px-2 py-0.5 bg-zinc-100 text-xs font-medium rounded border border-zinc-200 text-zinc-600">
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-gray-400 flex items-center">Job Posted: {job.time}</span>
+                    
+                    <div className="mt-auto">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-xs text-gray-400">Job Posted: {job.time}</span>
                         <button
                           onClick={() => handleSaveJob(i)}
-                          className={`p-1.5 rounded-lg transition-all ${savedJobIds.includes(i) ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
+                          className={`p-2 rounded-lg transition-all ${savedJobIds.includes(i) ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
                           title={savedJobIds.includes(i) ? "Remove from saved" : "Save for later"}
                         >
                           <Bookmark className={`w-6 h-6 ${savedJobIds.includes(i) ? 'fill-blue-600' : ''}`} />
                         </button>
                       </div>
-                      <button 
-                        onClick={() => handleApplyClick(job)}
-                        className="px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium shadow transition-colors"
-                      >
-                        Apply Now
-                      </button>
+                      <div className="w-full flex justify-center -mt-1.5">
+                        <button 
+                          onClick={() => router.push(`/candidate/view-job-post?jobId=${job.id}`)}
+                          className="px-5 py-2 rounded-full text-blue-700 bg-blue-100 hover:bg-blue-200 hover:text-blue-800 active:bg-blue-200 active:text-blue-800 text-sm font-semibold transition-all"
+                        >
+                          View Job Post
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

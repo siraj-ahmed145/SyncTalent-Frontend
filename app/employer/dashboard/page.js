@@ -3,7 +3,7 @@ import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Briefcase, Users, Search, MapPin, Calendar, DollarSign, Clock } from "lucide-react";
+import { Briefcase, Users, Search, MapPin, Calendar, DollarSign, Clock, LayoutGrid, FileText, Building2 } from "lucide-react";
 import api from "../../lib/api";
 
 // Dummy data for jobs
@@ -16,7 +16,7 @@ const JOBS = [
     jobType: "Full-time",
     level: "Senior",
     skills: ["React", "Javascript", "Tailwind CSS"],
-    applications: 14,
+    applications: 8,
     time: "2 days ago",
     status: "Active",
     salary: "$80k - $120k",
@@ -52,7 +52,7 @@ const JOBS = [
     jobType: "Part-time",
     level: "Junior",
     skills: ["Node.js", "Express", "MongoDB"],
-    applications: 8,
+    applications: 5,
     time: "4 days ago",
     status: "Active",
     salary: "$50k - $70k",
@@ -88,7 +88,7 @@ const JOBS = [
     jobType: "Contract",
     level: "Junior",
     skills: ["React", "Node.js", "AWS"],
-    applications: 21,
+    applications: 5,
     time: "1 week ago",
     status: "Closed",
     salary: "$60k - $90k",
@@ -124,7 +124,7 @@ const JOBS = [
     jobType: "Full-time",
     level: "Mid-Level",
     skills: ["Figma", "Adobe XD", "Prototyping"],
-    applications: 12,
+    applications: 5,
     time: "3 days ago",
     status: "Active",
     salary: "$55k - $85k",
@@ -160,7 +160,7 @@ const JOBS = [
     jobType: "Full-time",
     level: "Senior",
     skills: ["Docker", "Kubernetes", "AWS", "CI/CD"],
-    applications: 18,
+    applications: 5,
     time: "5 days ago",
     status: "Active",
     salary: "$90k - $130k",
@@ -196,7 +196,7 @@ const JOBS = [
     jobType: "Full-time",
     level: "Junior",
     skills: ["Python", "SQL", "Excel", "Power BI"],
-    applications: 16,
+    applications: 5,
     time: "1 week ago",
     status: "Closed",
     salary: "$45k - $65k",
@@ -223,6 +223,150 @@ const JOBS = [
       "Modern office facilities",
       "Friendly team culture"
     ]
+  },
+  {
+    id: 7,
+    title: "Mobile App Developer",
+    location: "Lahore, Pakistan",
+    workMode: "On-site",
+    jobType: "Full-time",
+    level: "Senior",
+    skills: ["React Native", "Flutter", "Swift"],
+    applications: 5,
+    time: "3 days ago",
+    status: "Active",
+    salary: "$70k - $110k",
+    postedDate: "Nov 26, 2025",
+    description: "Develop high-performance mobile applications for iOS and Android. Create seamless user experiences and maintain code quality standards.",
+    responsibilities: [
+      "Develop cross-platform mobile applications using React Native or Flutter",
+      "Optimize mobile app performance and user experience",
+      "Integrate backend APIs and third-party services",
+      "Participate in code reviews and best practices",
+      "Release and manage app store submissions"
+    ],
+    requirements: [
+      "4+ years of mobile development experience",
+      "Proficiency in React Native or Flutter",
+      "Understanding of iOS and Android platforms",
+      "Experience with mobile testing frameworks",
+      "Strong problem-solving skills"
+    ],
+    benefits: [
+      "Competitive salary and bonus",
+      "Health and wellness program",
+      "Latest development devices",
+      "Learning and conference budget",
+      "Flexible work arrangements"
+    ]
+  },
+  {
+    id: 8,
+    title: "Cloud Architect",
+    location: "Remote",
+    workMode: "Remote",
+    jobType: "Full-time",
+    level: "Senior",
+    skills: ["AWS", "Azure", "Terraform"],
+    applications: 5,
+    time: "6 days ago",
+    status: "Active",
+    salary: "$120k - $160k",
+    postedDate: "Nov 23, 2025",
+    description: "Design and implement scalable cloud infrastructure solutions. Lead cloud migration initiatives and optimize cloud costs.",
+    responsibilities: [
+      "Design cloud architecture for scalability and reliability",
+      "Lead cloud migration projects",
+      "Implement security best practices in cloud infrastructure",
+      "Optimize cloud costs and resource utilization",
+      "Provide technical guidance to development teams"
+    ],
+    requirements: [
+      "7+ years of cloud architecture experience",
+      "Expert knowledge of AWS or Azure",
+      "Experience with Infrastructure as Code (Terraform)",
+      "Strong understanding of cloud security",
+      "Leadership and communication skills"
+    ],
+    benefits: [
+      "Highest tier compensation",
+      "Stock options and equity",
+      "Unlimited learning budget",
+      "Fully remote with flexible hours",
+      "Executive perks and benefits"
+    ]
+  },
+  {
+    id: 9,
+    title: "QA Engineer",
+    location: "Karachi, Pakistan",
+    workMode: "Hybrid",
+    jobType: "Full-time",
+    level: "Mid-Level",
+    skills: ["Selenium", "TestNG", "JIRA"],
+    applications: 5,
+    time: "4 days ago",
+    status: "Active",
+    salary: "$40k - $60k",
+    postedDate: "Nov 25, 2025",
+    description: "Ensure product quality through comprehensive testing. Develop automated test scripts and report quality metrics.",
+    responsibilities: [
+      "Design and execute automated test suites",
+      "Perform manual and exploratory testing",
+      "Report and track software defects",
+      "Collaborate with development teams",
+      "Maintain test documentation"
+    ],
+    requirements: [
+      "2+ years of QA testing experience",
+      "Proficiency in test automation frameworks",
+      "Knowledge of SQL and databases",
+      "Experience with testing tools like JIRA",
+      "Strong attention to detail"
+    ],
+    benefits: [
+      "Health insurance",
+      "Flexible work hours",
+      "Professional training",
+      "Modern testing tools",
+      "Career growth opportunities"
+    ]
+  },
+  {
+    id: 10,
+    title: "Product Manager",
+    location: "Lahore, Pakistan",
+    workMode: "Hybrid",
+    jobType: "Full-time",
+    level: "Senior",
+    skills: ["Product Strategy", "Analytics", "Leadership"],
+    applications: 5,
+    time: "2 days ago",
+    status: "Active",
+    salary: "$80k - $120k",
+    postedDate: "Nov 27, 2025",
+    description: "Lead product vision and strategy. Manage product roadmap and oversee product launches.",
+    responsibilities: [
+      "Define product vision and strategy",
+      "Manage product roadmap and prioritization",
+      "Conduct market research and competitive analysis",
+      "Lead cross-functional product teams",
+      "Monitor product metrics and KPIs"
+    ],
+    requirements: [
+      "5+ years of product management experience",
+      "Strong analytical and strategic thinking skills",
+      "Experience with product management tools",
+      "Excellent communication skills",
+      "Track record of successful product launches"
+    ],
+    benefits: [
+      "Competitive salary and bonus",
+      "Stock options",
+      "Leadership development program",
+      "Hybrid work flexibility",
+      "Executive coaching"
+    ]
   }
 ];
 
@@ -239,6 +383,17 @@ const SORTS = ["Most Relevant", "Newest", "Oldest", "Most Applications"];
 
 export default function EmployerDashboard() {
   const router = useRouter();
+  
+  // Helper function to convert level to experience years
+  const getLevelInYears = (level) => {
+    const levelMap = {
+      'Junior': '0-1 years',
+      'Mid-Level': '2-4 years',
+      'Senior': '5+ years'
+    };
+    return levelMap[level] || level;
+  };
+
   const [region, setRegion] = useState("All Regions");
   const [mode, setMode] = useState("All Work Modes");
   const [type, setType] = useState("All Types");
@@ -265,6 +420,19 @@ export default function EmployerDashboard() {
         <Topbar />
         <main className="p-6 md:p-10 flex-1">
           <>
+            {/* Header */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-10">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <LayoutGrid className="w-5 h-5 text-white" />
+                </div>
+                <h1 className="text-3xl font-semibold text-gray-900 leading-none -mt-1">Employer Dashboard</h1>
+              </div>
+              <p className="text-base text-gray-500 ml-[52px] -mt-1">
+                Monitor your job postings, applications, and manage your hiring process
+              </p>
+            </div>
+
             {/* Top stats */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -275,7 +443,7 @@ export default function EmployerDashboard() {
                       <p className="text-3xl font-bold text-gray-900">{JOBS.length}</p>
                     </div>
                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                      <Briefcase className="w-6 h-6 text-blue-600" />
+                      <FileText className="w-6 h-6 text-blue-600" />
                     </div>
                   </div>
                 </div>
@@ -350,23 +518,26 @@ export default function EmployerDashboard() {
                           key={job.id}
                           className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col h-full transition-all duration-500 hover:shadow-2xl"
                         >
-                          <div className="flex items-start justify-between mb-1">
-                            <h3 className="text-lg md:text-xl font-semibold text-gray-900">{job.title}</h3>
-                            <div className="flex items-center gap-2 ml-2">
-                              {/* Level badge */}
-                              <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${job.level.includes('Senior') ? 'bg-blue-100 text-blue-600' : 'bg-blue-50 text-blue-500'} border border-blue-200 whitespace-nowrap`}>
-                                {job.level}
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2 flex-1">
+                              <h3 className="text-lg md:text-xl font-semibold text-gray-900">{job.title}</h3>
+                              {/* Experience badge */}
+                              <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap">
+                                {getLevelInYears(job.level)}
                               </span>
+                            </div>
+                            <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                               {/* Status badge */}
                               <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${job.status === 'Active' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'} border whitespace-nowrap`}>
                                 {job.status}
                               </span>
                             </div>
                           </div>
-                          <div className="flex flex-wrap gap-4 items-center text-sm text-gray-500 mb-2">
-                            <span className="flex items-center gap-1"><MapPin className="w-4 h-4 mr-0.5" />{job.location}</span>
+                          <div className="flex flex-wrap gap-3 items-center text-sm text-gray-500 mb-4 pb-4 border-b border-gray-100">
+                            {job.workMode !== 'Remote' && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{job.location}</span>}
+                            <span className="flex items-center gap-1"><Building2 className="w-4 h-4" />{job.workMode}</span>
                             <span className="flex items-center gap-1"><Briefcase className="w-4 h-4 mr-0.5" />{job.jobType}</span>
-                            <span className="flex items-center gap-1"><Briefcase className="w-4 h-4 mr-0.5" />{job.workMode}</span>
+                            {job.salary && <span className="flex items-center gap-1"><DollarSign className="w-4 h-4" />{job.salary}</span>}
                           </div>
                           {/* Job description (clamped) */}
                           {job.description && (
@@ -386,9 +557,9 @@ export default function EmployerDashboard() {
                             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-purple-100 text-purple-700 border border-purple-200"><Users className="w-4 h-4" />{job.applications} Applications</span>
                           </div>
                           <div className="w-full mt-auto flex justify-center mb">
-                            <button 
-                              onClick={() => router.push(`/employer/view-job?jobId=${job.id}`)}
-                              className="font-bold text-sm text-blue-600 px-5 py-2 rounded-full bg-transparent hover:bg-blue-50 hover:text-blue-700 transition-all focus:outline-none"
+                            <button
+                              onClick={() => router.push(`/employer/view-job-post?jobId=${job.id}`)}
+                              className="font-semibold text-sm text-blue-700 px-4 py-2 rounded-full bg-blue-100 hover:bg-blue-200 hover:text-blue-800 active:bg-blue-200 active:text-blue-800 transition-all focus:outline-none"
                             >
                               View Job Post
                             </button>

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { MapPin, Briefcase, Clock, Star, TrendingUp, Sparkles, Bookmark, CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { MapPin, Briefcase, Clock, Star, TrendingUp, Sparkles, Bookmark, CheckCircle, Building2, DollarSign } from 'lucide-react';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 
@@ -12,9 +13,11 @@ const RECOMMENDED_JOBS = [
     title: "Senior Full Stack Developer",
     company: "Tech Innovations Ltd",
     location: "San Francisco, CA",
+    jobType: "Full-time",
     workMode: "Remote",
     salary: "$130k - $170k",
     level: "Senior",
+    experience: "5+ years",
     matchScore: 95,
     tags: ["React", "Node.js", "TypeScript", "AWS", "MongoDB"],
     description: "We're looking for a Senior Full Stack Developer with strong React and Node.js experience. You'll work on cutting-edge cloud-native applications using modern tech stack...",
@@ -26,9 +29,11 @@ const RECOMMENDED_JOBS = [
     title: "React Developer",
     company: "Digital Solutions Inc",
     location: "New York, NY",
+    jobType: "Full-time",
     workMode: "Hybrid",
     salary: "$110k - $150k",
-    level: "Mid Senior",
+    level: "Mid-Level",
+    experience: "2-4 years",
     matchScore: 92,
     tags: ["React", "JavaScript", "Redux", "REST API", "Git"],
     description: "Join our frontend team to build modern web applications. Strong React skills required with experience in state management and API integration...",
@@ -40,9 +45,11 @@ const RECOMMENDED_JOBS = [
     title: "Node.js Backend Engineer",
     company: "CloudTech Systems",
     location: "Remote",
-    workMode: "Full-time",
+    jobType: "Full-time",
+    workMode: "Remote",
     salary: "$125k - $165k",
     level: "Senior",
+    experience: "5+ years",
     matchScore: 90,
     tags: ["Node.js", "Express", "PostgreSQL", "Docker", "Microservices"],
     description: "Build scalable backend services and APIs. Experience with microservices architecture and containerization is a plus...",
@@ -54,9 +61,11 @@ const RECOMMENDED_JOBS = [
     title: "Full Stack JavaScript Developer",
     company: "StartupHub",
     location: "Austin, TX",
-    workMode: "Full-time",
+    jobType: "Full-time",
+    workMode: "Hybrid",
     salary: "$105k - $140k",
     level: "Mid-Level",
+    experience: "2-4 years",
     matchScore: 88,
     tags: ["JavaScript", "React", "Node.js", "MongoDB", "GraphQL"],
     description: "Be part of our dynamic team building innovative web solutions. Work with modern JavaScript ecosystem including React, Node.js, and GraphQL...",
@@ -68,9 +77,11 @@ const RECOMMENDED_JOBS = [
     title: "Frontend Developer (React)",
     company: "WebDev Pro",
     location: "Seattle, WA",
+    jobType: "Full-time",
     workMode: "On-site",
     salary: "$100k - $135k",
     level: "Mid-Level",
+    experience: "2-4 years",
     matchScore: 85,
     tags: ["React", "TypeScript", "CSS3", "Webpack", "Jest"],
     description: "Create beautiful and responsive user interfaces. Strong understanding of React, TypeScript, and modern CSS required...",
@@ -82,9 +93,11 @@ const RECOMMENDED_JOBS = [
     title: "Software Engineer - MERN Stack",
     company: "Innovation Labs",
     location: "Remote",
-    workMode: "Full-time",
+    jobType: "Full-time",
+    workMode: "Remote",
     salary: "$115k - $150k",
-    level: "Mid Senior",
+    level: "Mid-Level",
+    experience: "3-5 years",
     matchScore: 87,
     tags: ["MongoDB", "Express", "React", "Node.js", "AWS"],
     description: "Work with MERN stack to build enterprise-level applications. Experience with cloud deployment and CI/CD pipelines preferred...",
@@ -94,6 +107,8 @@ const RECOMMENDED_JOBS = [
 ];
 
 export default function JobRecommendationsPage() {
+  const router = useRouter();
+  
   // Saved jobs state
   const [savedJobIds, setSavedJobIds] = useState([]);
   const [showSaveNotification, setShowSaveNotification] = useState(false);
@@ -235,32 +250,17 @@ export default function JobRecommendationsPage() {
         <main className="p-6 md:p-10 flex-1">
           <section className="w-full pb-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
-              {/* Header */}
+              {/* Page Header */}
               <div className="pt-4 pb-6">
                 <div className="flex items-center gap-3 mb-2">
-                  <Sparkles className="w-8 h-8 text-blue-600" />
-                  <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 leading-tight">
-                    Job Recommendations
-                  </h2>
+                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white" />
+                  </div>
+                  <h1 className="text-3xl font-semibold text-gray-900 leading-none -mt-1">Job Recommendations</h1>
                 </div>
-                <p className="text-zinc-500 text-sm mt-2">
+                <p className="text-base text-gray-500 ml-[52px] -mt-1">
                   Personalized job matches based on your profile and preferences
                 </p>
-              </div>
-
-              {/* Info Banner */}
-              <div className="bg-linear-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl p-4 mb-6 flex items-start gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <TrendingUp className="w-5 h-5 text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-base font-semibold text-gray-900 mb-1">
-                    Smart Recommendations
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    These jobs are carefully selected based on your skills, experience, and career goals. Jobs with higher match scores align better with your profile.
-                  </p>
-                </div>
               </div>
 
               {/* Info Section */}
@@ -280,23 +280,24 @@ export default function JobRecommendationsPage() {
                   return (
                     <div
                       key={job.id}
-                      className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex flex-col h-full transition-all duration-500 hover:shadow-2xl hover:-translate-y-2"
+                      className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex flex-col h-full transition-all hover:shadow-lg hover:border-blue-200"
                     >
-                      {/* Header with Title and Match Score */}
+                      {/* Header with Title, Experience Tag and Match Score */}
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-1">
-                            {job.title}
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${job.level.includes('Senior') ? 'bg-blue-100 text-blue-600' : 'bg-blue-50 text-blue-500'} border border-blue-200 whitespace-nowrap`}>
-                              {job.level}
+                          <div className="flex items-center gap-3 mb-1">
+                            <h3 className="text-lg md:text-xl font-semibold text-gray-900">
+                              {job.title}
+                            </h3>
+                            <span className="px-3 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap">
+                              {job.experience}
                             </span>
                           </div>
+                          <p className="text-sm font-medium text-blue-600">{job.company}</p>
                         </div>
                         
                         {/* Match Score Badge */}
-                        <div className="ml-3 text-center bg-linear-to-br from-gray-50 to-gray-100 rounded-xl px-3 py-2 border border-gray-200 shadow-sm">
+                        <div className="ml-3 text-center bg-linear-to-br from-gray-50 to-gray-100 rounded-xl px-3 py-2 border border-gray-200 shadow-sm shrink-0">
                           <div className="text-xs text-gray-500 font-medium mb-0.5">Match</div>
                           <div className={`text-2xl font-bold ${matchScoreColor}`}>
                             {job.matchScore}%
@@ -304,28 +305,31 @@ export default function JobRecommendationsPage() {
                         </div>
                       </div>
 
-                      <p className="text-sm text-gray-500 font-medium mb-1">{job.company}</p>
-
-                      {/* Job Details */}
-                      <div className="flex flex-wrap gap-4 text-xs text-gray-400 mb-3">
+                      {/* Details */}
+                      <div className="flex flex-wrap gap-3 text-sm text-gray-600 -mt-3 mb-3">
+                        {job.workMode !== 'Remote' && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-4 h-4" /> {job.location}
+                          </span>
+                        )}
                         <span className="flex items-center gap-1">
-                          <MapPin className="w-4 h-4" /> {job.location}
+                          <Building2 className="w-4 h-4" /> {job.workMode}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Briefcase className="w-4 h-4" /> {job.workMode}
+                          <Briefcase className="w-4 h-4" /> {job.jobType}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" /> {job.salary}
+                          <DollarSign className="w-4 h-4" /> {job.salary}
                         </span>
                       </div>
 
                       {/* Description */}
-                      <p className="text-xs md:text-sm text-gray-700 mb-3 line-clamp-2">
-                        {job.description}
-                      </p>
+                      <div className="border-t border-gray-200 pt-3 mb-3">
+                        <p className="text-xs md:text-sm text-gray-700 line-clamp-2">{job.description}</p>
+                      </div>
 
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2 mb-3">
+                      {/* Skills */}
+                      <div className="flex flex-wrap gap-2 pb-3 mb-2 border-b border-gray-200">
                         {job.tags.map((tag) => (
                           <span
                             key={tag}
@@ -336,24 +340,26 @@ export default function JobRecommendationsPage() {
                         ))}
                       </div>
 
-                      {/* Footer with Posted Date, Save Button and Apply Button */}
-                      <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-gray-400 flex items-center">Job Posted: {job.postedDate}</span>
+                      {/* Footer with Posted Date, Save Button and View Job Post Button */}
+                      <div className="mt-auto">
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-xs text-gray-400">Job Posted: {job.postedDate}</span>
                           <button
                             onClick={() => handleSaveJob(job.id)}
-                            className={`p-1.5 rounded-lg transition-all ${savedJobIds.includes(job.id) ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
+                            className={`p-2 rounded-lg transition-all ${savedJobIds.includes(job.id) ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
                             title={savedJobIds.includes(job.id) ? "Remove from saved" : "Save for later"}
                           >
                             <Bookmark className={`w-6 h-6 ${savedJobIds.includes(job.id) ? 'fill-blue-600' : ''}`} />
                           </button>
                         </div>
-                        <button 
-                          onClick={() => handleApplyClick(job)}
-                          className="px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium shadow transition-colors"
-                        >
-                          Apply Now
-                        </button>
+                        <div className="w-full flex justify-center -mt-1.5">
+                          <button 
+                            onClick={() => router.push(`/candidate/view-job-post?jobId=${job.id}&from=recommendations&matchScore=${job.matchScore}`)}
+                            className="px-5 py-2 rounded-full text-blue-700 bg-blue-100 hover:bg-blue-200 hover:text-blue-800 active:bg-blue-200 active:text-blue-800 text-sm font-semibold transition-all"
+                          >
+                            View Job Post
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );

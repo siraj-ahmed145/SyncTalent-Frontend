@@ -393,6 +393,113 @@ const CANDIDATES_DATA = {
         { name: "English", proficiency: "Professional" },
         { name: "Urdu", proficiency: "Native" }
       ]
+    },
+    {
+      id: 103,
+      name: "Bilal Shah",
+      title: "Node.js Developer",
+      email: "bilal@example.com",
+      phone: "+92 312 4444444",
+      location: "Lahore, Pakistan",
+      matchingScore: 78,
+      status: "shortlisted",
+      skills: ["Node.js", "Express", "MongoDB", "REST APIs"],
+      experience: "3 years",
+      about: "Experienced Node.js developer with strong backend skills.",
+      resume: "bilal_resume.pdf",
+      profilePicture: "B",
+      workExperience: [
+        {
+          title: "Backend Developer",
+          company: "Tech Corp",
+          duration: "2021 - Present",
+          description: "Developed scalable REST APIs and microservices."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Science",
+          institution: "UET Lahore",
+          year: "2021"
+        }
+      ],
+      certifications: [
+        { name: "Node.js Certification", issuer: "Node.js Foundation", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 104,
+      name: "Sana Malik",
+      title: "Backend Engineer",
+      email: "sana@example.com",
+      phone: "+92 313 8888888",
+      location: "Karachi, Pakistan",
+      matchingScore: 72,
+      status: "shortlisted",
+      skills: ["Node.js", "Express", "PostgreSQL", "MongoDB"],
+      experience: "2.5 years",
+      about: "Backend engineer with experience in both SQL and NoSQL databases.",
+      resume: "sana_resume.pdf",
+      profilePicture: "S",
+      workExperience: [
+        {
+          title: "Backend Engineer",
+          company: "Data Systems",
+          duration: "2022 - Present",
+          description: "Building robust backend systems and APIs."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Software Engineering",
+          institution: "NED University",
+          year: "2022"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 105,
+      name: "Omar Khan",
+      title: "Junior Backend Developer",
+      email: "omar@example.com",
+      phone: "+92 314 2222222",
+      location: "Islamabad, Pakistan",
+      matchingScore: 58,
+      status: "rejected",
+      skills: ["Node.js", "Express", "JavaScript"],
+      experience: "1.5 years",
+      about: "Junior developer with basic Node.js skills, needs more experience.",
+      resume: "omar_resume.pdf",
+      profilePicture: "O",
+      workExperience: [
+        {
+          title: "Junior Backend Developer",
+          company: "Startup Inc",
+          duration: "2023 - Present",
+          description: "Learning backend development and building small projects."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Information Technology",
+          institution: "COMSATS Islamabad",
+          year: "2023"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
     }
   ],
   3: [
@@ -467,6 +574,1405 @@ const CANDIDATES_DATA = {
         { name: "English", proficiency: "Professional" },
         { name: "Urdu", proficiency: "Native" }
       ]
+    },
+    {
+      id: 203,
+      name: "Fahad Ali",
+      title: "Full Stack Developer",
+      email: "fahad@example.com",
+      phone: "+92 315 7777777",
+      location: "Lahore, Pakistan",
+      matchingScore: 84,
+      status: "shortlisted",
+      skills: ["React", "Node.js", "AWS", "Docker"],
+      experience: "4 years",
+      about: "Skilled full-stack developer with cloud deployment experience.",
+      resume: "fahad_resume.pdf",
+      profilePicture: "F",
+      workExperience: [
+        {
+          title: "Full Stack Developer",
+          company: "Cloud Tech",
+          duration: "2021 - Present",
+          description: "Developed and deployed full-stack applications on AWS."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Science",
+          institution: "UET Lahore",
+          year: "2021"
+        }
+      ],
+      certifications: [
+        { name: "AWS Developer Associate", issuer: "Amazon", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 204,
+      name: "Ayesha Tariq",
+      title: "Cloud Developer",
+      email: "ayesha@example.com",
+      phone: "+92 316 3333333",
+      location: "Islamabad, Pakistan",
+      matchingScore: 79,
+      status: "shortlisted",
+      skills: ["React", "Node.js", "AWS", "Lambda"],
+      experience: "3.5 years",
+      about: "Cloud-focused developer with strong AWS and serverless expertise.",
+      resume: "ayesha_resume.pdf",
+      profilePicture: "A",
+      workExperience: [
+        {
+          title: "Cloud Developer",
+          company: "Enterprise Cloud",
+          duration: "2021 - Present",
+          description: "Building serverless applications and managing cloud infrastructure."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Software Engineering",
+          institution: "FAST-NUCES Islamabad",
+          year: "2021"
+        }
+      ],
+      certifications: [
+        { name: "AWS Solutions Architect", issuer: "Amazon", year: "2023" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 205,
+      name: "Usman Ahmed",
+      title: "Software Engineer",
+      email: "usman@example.com",
+      phone: "+92 317 5555555",
+      location: "Karachi, Pakistan",
+      matchingScore: 67,
+      status: "rejected",
+      skills: ["React", "Node.js", "MongoDB"],
+      experience: "2 years",
+      about: "Software engineer with MERN stack experience but limited AWS knowledge.",
+      resume: "usman_resume.pdf",
+      profilePicture: "U",
+      workExperience: [
+        {
+          title: "Software Engineer",
+          company: "Web Solutions",
+          duration: "2022 - Present",
+          description: "Developing web applications using MERN stack."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Science",
+          institution: "NED University",
+          year: "2022"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    }
+  ],
+  4: [
+    {
+      id: 301,
+      name: "Faisal Mahmood",
+      title: "UI/UX Designer",
+      email: "faisal@example.com",
+      phone: "+92 318 1234567",
+      location: "Islamabad, Pakistan",
+      matchingScore: 88,
+      status: "shortlisted",
+      skills: ["Figma", "Adobe XD", "Prototyping", "User Research"],
+      experience: "4 years",
+      about: "Experienced UI/UX designer with a passion for creating intuitive designs.",
+      resume: "faisal_resume.pdf",
+      profilePicture: "F",
+      workExperience: [
+        {
+          title: "Senior UI/UX Designer",
+          company: "Design Studio Pro",
+          duration: "2021 - Present",
+          description: "Leading design projects and mentoring junior designers."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Fine Arts",
+          institution: "National College of Arts",
+          year: "2020"
+        }
+      ],
+      certifications: [
+        { name: "UX Design Professional", issuer: "Google", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 302,
+      name: "Mariam Khan",
+      title: "Product Designer",
+      email: "mariam@example.com",
+      phone: "+92 319 8888888",
+      location: "Islamabad, Pakistan",
+      matchingScore: 82,
+      status: "shortlisted",
+      skills: ["Figma", "Adobe XD", "Sketch", "Wireframing"],
+      experience: "3.5 years",
+      about: "Product designer focused on user-centered design principles.",
+      resume: "mariam_resume.pdf",
+      profilePicture: "M",
+      workExperience: [
+        {
+          title: "Product Designer",
+          company: "Tech Products Inc",
+          duration: "2021 - Present",
+          description: "Designing product interfaces and conducting user research."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Design",
+          institution: "NUST Islamabad",
+          year: "2021"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 303,
+      name: "Ahmed Raza",
+      title: "UX Designer",
+      email: "ahmed.r@example.com",
+      phone: "+92 320 5555555",
+      location: "Rawalpindi, Pakistan",
+      matchingScore: 75,
+      status: "shortlisted",
+      skills: ["Figma", "Prototyping", "User Testing"],
+      experience: "3 years",
+      about: "UX designer specializing in mobile app design and user research.",
+      resume: "ahmed_r_resume.pdf",
+      profilePicture: "A",
+      workExperience: [
+        {
+          title: "UX Designer",
+          company: "Mobile Apps Co",
+          duration: "2022 - Present",
+          description: "Designing mobile app experiences and conducting usability tests."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Science",
+          institution: "COMSATS Islamabad",
+          year: "2022"
+        }
+      ],
+      certifications: [
+        { name: "UX Research Fundamentals", issuer: "Nielsen Norman Group", year: "2023" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 304,
+      name: "Hina Ali",
+      title: "Visual Designer",
+      email: "hina@example.com",
+      phone: "+92 321 7777777",
+      location: "Islamabad, Pakistan",
+      matchingScore: 70,
+      status: "rejected",
+      skills: ["Adobe XD", "Illustrator", "Photoshop"],
+      experience: "2.5 years",
+      about: "Visual designer with strong graphic design skills but limited UX experience.",
+      resume: "hina_resume.pdf",
+      profilePicture: "H",
+      workExperience: [
+        {
+          title: "Visual Designer",
+          company: "Creative Agency",
+          duration: "2022 - Present",
+          description: "Creating visual assets and brand materials."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Fine Arts",
+          institution: "Punjab University",
+          year: "2022"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 305,
+      name: "Bilal Hassan",
+      title: "Interaction Designer",
+      email: "bilal.h@example.com",
+      phone: "+92 322 3333333",
+      location: "Islamabad, Pakistan",
+      matchingScore: 78,
+      status: "shortlisted",
+      skills: ["Figma", "Adobe XD", "Animation", "Prototyping"],
+      experience: "3 years",
+      about: "Interaction designer skilled in creating engaging micro-interactions.",
+      resume: "bilal_h_resume.pdf",
+      profilePicture: "B",
+      workExperience: [
+        {
+          title: "Interaction Designer",
+          company: "Digital Studio",
+          duration: "2022 - Present",
+          description: "Designing interactive experiences and animations."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Multimedia Arts",
+          institution: "NUST Islamabad",
+          year: "2022"
+        }
+      ],
+      certifications: [
+        { name: "Advanced Prototyping", issuer: "Interaction Design Foundation", year: "2023" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    }
+  ],
+  5: [
+    {
+      id: 401,
+      name: "Tariq Mehmood",
+      title: "Senior DevOps Engineer",
+      email: "tariq@example.com",
+      phone: "+92 323 1234567",
+      location: "Remote",
+      matchingScore: 92,
+      status: "shortlisted",
+      skills: ["Docker", "Kubernetes", "AWS", "CI/CD", "Terraform"],
+      experience: "6 years",
+      about: "Expert DevOps engineer with extensive cloud and containerization experience.",
+      resume: "tariq_resume.pdf",
+      profilePicture: "T",
+      workExperience: [
+        {
+          title: "Senior DevOps Engineer",
+          company: "Cloud Services Ltd",
+          duration: "2020 - Present",
+          description: "Managing cloud infrastructure and implementing DevOps best practices."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Engineering",
+          institution: "NUST Islamabad",
+          year: "2018"
+        }
+      ],
+      certifications: [
+        { name: "AWS Solutions Architect Professional", issuer: "Amazon", year: "2022" },
+        { name: "Certified Kubernetes Administrator", issuer: "CNCF", year: "2023" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 402,
+      name: "Sadia Malik",
+      title: "DevOps Specialist",
+      email: "sadia@example.com",
+      phone: "+92 324 8888888",
+      location: "Lahore, Pakistan",
+      matchingScore: 85,
+      status: "shortlisted",
+      skills: ["Docker", "Kubernetes", "AWS", "Jenkins", "Python"],
+      experience: "5 years",
+      about: "DevOps specialist with strong automation and scripting skills.",
+      resume: "sadia_resume.pdf",
+      profilePicture: "S",
+      workExperience: [
+        {
+          title: "DevOps Specialist",
+          company: "Tech Infrastructure Co",
+          duration: "2020 - Present",
+          description: "Automating infrastructure and managing CI/CD pipelines."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Software Engineering",
+          institution: "UET Lahore",
+          year: "2020"
+        }
+      ],
+      certifications: [
+        { name: "AWS DevOps Engineer Professional", issuer: "Amazon", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 403,
+      name: "Rizwan Ahmed",
+      title: "Cloud Engineer",
+      email: "rizwan@example.com",
+      phone: "+92 325 5555555",
+      location: "Remote",
+      matchingScore: 78,
+      status: "shortlisted",
+      skills: ["AWS", "Docker", "Terraform", "Linux"],
+      experience: "4 years",
+      about: "Cloud engineer experienced in AWS infrastructure and automation.",
+      resume: "rizwan_resume.pdf",
+      profilePicture: "R",
+      workExperience: [
+        {
+          title: "Cloud Engineer",
+          company: "Enterprise Cloud",
+          duration: "2021 - Present",
+          description: "Managing AWS infrastructure and implementing IaC."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Science",
+          institution: "FAST-NUCES Islamabad",
+          year: "2021"
+        }
+      ],
+      certifications: [
+        { name: "AWS Solutions Architect Associate", issuer: "Amazon", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 404,
+      name: "Zara Khan",
+      title: "DevOps Engineer",
+      email: "zara@example.com",
+      phone: "+92 326 7777777",
+      location: "Karachi, Pakistan",
+      matchingScore: 72,
+      status: "rejected",
+      skills: ["Docker", "Kubernetes", "Git", "Jenkins"],
+      experience: "3 years",
+      about: "DevOps engineer with good containerization skills but limited AWS experience.",
+      resume: "zara_resume.pdf",
+      profilePicture: "Z",
+      workExperience: [
+        {
+          title: "DevOps Engineer",
+          company: "Software Solutions",
+          duration: "2022 - Present",
+          description: "Managing containerized applications and CI/CD pipelines."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Information Technology",
+          institution: "NED University",
+          year: "2022"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 405,
+      name: "Hamza Yousaf",
+      title: "Infrastructure Engineer",
+      email: "hamza@example.com",
+      phone: "+92 327 3333333",
+      location: "Remote",
+      matchingScore: 80,
+      status: "shortlisted",
+      skills: ["AWS", "Docker", "Kubernetes", "Terraform", "Python"],
+      experience: "4.5 years",
+      about: "Infrastructure engineer with comprehensive DevOps and cloud skills.",
+      resume: "hamza_resume.pdf",
+      profilePicture: "H",
+      workExperience: [
+        {
+          title: "Infrastructure Engineer",
+          company: "Digital Infrastructure",
+          duration: "2021 - Present",
+          description: "Building and maintaining cloud infrastructure and automation tools."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Engineering",
+          institution: "GIKI",
+          year: "2020"
+        }
+      ],
+      certifications: [
+        { name: "HashiCorp Certified Terraform Associate", issuer: "HashiCorp", year: "2023" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    }
+  ],
+  6: [
+    {
+      id: 501,
+      name: "Nasir Ali",
+      title: "Data Analyst",
+      email: "nasir@example.com",
+      phone: "+92 328 1234567",
+      location: "Karachi, Pakistan",
+      matchingScore: 79,
+      status: "shortlisted",
+      skills: ["Python", "SQL", "Excel", "Power BI", "Tableau"],
+      experience: "3 years",
+      about: "Data analyst with strong analytical skills and visualization expertise.",
+      resume: "nasir_resume.pdf",
+      profilePicture: "N",
+      workExperience: [
+        {
+          title: "Data Analyst",
+          company: "Analytics Corp",
+          duration: "2022 - Present",
+          description: "Analyzing data and creating dashboards for business insights."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Business Administration",
+          institution: "IBA Karachi",
+          year: "2022"
+        }
+      ],
+      certifications: [
+        { name: "Data Analysis with Python", issuer: "IBM", year: "2023" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 502,
+      name: "Rabia Ahmed",
+      title: "Business Analyst",
+      email: "rabia@example.com",
+      phone: "+92 329 8888888",
+      location: "Karachi, Pakistan",
+      matchingScore: 74,
+      status: "shortlisted",
+      skills: ["SQL", "Excel", "Power BI", "Analytics"],
+      experience: "2.5 years",
+      about: "Business analyst with data analysis and reporting experience.",
+      resume: "rabia_resume.pdf",
+      profilePicture: "R",
+      workExperience: [
+        {
+          title: "Business Analyst",
+          company: "Business Solutions",
+          duration: "2022 - Present",
+          description: "Creating reports and analyzing business metrics."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Commerce",
+          institution: "Karachi University",
+          year: "2022"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 503,
+      name: "Kamran Malik",
+      title: "Data Scientist",
+      email: "kamran@example.com",
+      phone: "+92 330 5555555",
+      location: "Lahore, Pakistan",
+      matchingScore: 85,
+      status: "shortlisted",
+      skills: ["Python", "SQL", "Machine Learning", "Power BI"],
+      experience: "3.5 years",
+      about: "Data scientist with strong Python and analytics background.",
+      resume: "kamran_resume.pdf",
+      profilePicture: "K",
+      workExperience: [
+        {
+          title: "Data Scientist",
+          company: "Data Tech",
+          duration: "2021 - Present",
+          description: "Building ML models and analyzing large datasets."
+        }
+      ],
+      education: [
+        {
+          degree: "Master of Data Science",
+          institution: "LUMS",
+          year: "2021"
+        }
+      ],
+      certifications: [
+        { name: "Machine Learning Specialization", issuer: "Stanford Online", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 504,
+      name: "Samina Hassan",
+      title: "Junior Data Analyst",
+      email: "samina@example.com",
+      phone: "+92 331 7777777",
+      location: "Karachi, Pakistan",
+      matchingScore: 62,
+      status: "rejected",
+      skills: ["Excel", "SQL", "Power BI"],
+      experience: "1.5 years",
+      about: "Junior analyst with basic skills but limited Python experience.",
+      resume: "samina_resume.pdf",
+      profilePicture: "S",
+      workExperience: [
+        {
+          title: "Junior Data Analyst",
+          company: "Consulting Firm",
+          duration: "2023 - Present",
+          description: "Creating reports and basic data analysis."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Statistics",
+          institution: "Karachi University",
+          year: "2023"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 505,
+      name: "Waqar Hussain",
+      title: "Analytics Specialist",
+      email: "waqar@example.com",
+      phone: "+92 332 3333333",
+      location: "Karachi, Pakistan",
+      matchingScore: 76,
+      status: "shortlisted",
+      skills: ["Python", "SQL", "Excel", "Power BI", "Statistics"],
+      experience: "3 years",
+      about: "Analytics specialist with comprehensive data analysis toolkit.",
+      resume: "waqar_resume.pdf",
+      profilePicture: "W",
+      workExperience: [
+        {
+          title: "Analytics Specialist",
+          company: "Finance Corp",
+          duration: "2022 - Present",
+          description: "Performing financial data analysis and reporting."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Economics",
+          institution: "IBA Karachi",
+          year: "2022"
+        }
+      ],
+      certifications: [
+        { name: "Power BI Data Analyst", issuer: "Microsoft", year: "2023" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    }
+  ],
+  7: [
+    {
+      id: 601,
+      name: "Asad Malik",
+      title: "Senior Mobile Developer",
+      email: "asad@example.com",
+      phone: "+92 333 1234567",
+      location: "Lahore, Pakistan",
+      matchingScore: 90,
+      status: "shortlisted",
+      skills: ["React Native", "Flutter", "Swift", "Kotlin"],
+      experience: "5 years",
+      about: "Expert mobile developer with cross-platform and native development experience.",
+      resume: "asad_resume.pdf",
+      profilePicture: "A",
+      workExperience: [
+        {
+          title: "Senior Mobile Developer",
+          company: "Mobile Solutions Ltd",
+          duration: "2020 - Present",
+          description: "Leading mobile app development for iOS and Android."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Science",
+          institution: "LUMS",
+          year: "2019"
+        }
+      ],
+      certifications: [
+        { name: "iOS Development Professional", issuer: "Apple", year: "2021" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 602,
+      name: "Maryam Fatima",
+      title: "Flutter Developer",
+      email: "maryam@example.com",
+      phone: "+92 334 8888888",
+      location: "Lahore, Pakistan",
+      matchingScore: 83,
+      status: "shortlisted",
+      skills: ["Flutter", "Dart", "Firebase", "REST APIs"],
+      experience: "4 years",
+      about: "Flutter specialist with experience in building cross-platform apps.",
+      resume: "maryam_resume.pdf",
+      profilePicture: "M",
+      workExperience: [
+        {
+          title: "Flutter Developer",
+          company: "App Development Co",
+          duration: "2021 - Present",
+          description: "Developing cross-platform mobile applications with Flutter."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Software Engineering",
+          institution: "UET Lahore",
+          year: "2021"
+        }
+      ],
+      certifications: [
+        { name: "Flutter Development", issuer: "Google", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 603,
+      name: "Naveed Hassan",
+      title: "React Native Developer",
+      email: "naveed@example.com",
+      phone: "+92 335 5555555",
+      location: "Islamabad, Pakistan",
+      matchingScore: 78,
+      status: "shortlisted",
+      skills: ["React Native", "JavaScript", "Redux", "TypeScript"],
+      experience: "3.5 years",
+      about: "React Native developer with strong JavaScript fundamentals.",
+      resume: "naveed_resume.pdf",
+      profilePicture: "N",
+      workExperience: [
+        {
+          title: "React Native Developer",
+          company: "Tech Startup",
+          duration: "2021 - Present",
+          description: "Building mobile apps using React Native."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Science",
+          institution: "FAST-NUCES Islamabad",
+          year: "2021"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 604,
+      name: "Shazia Khan",
+      title: "iOS Developer",
+      email: "shazia@example.com",
+      phone: "+92 336 7777777",
+      location: "Lahore, Pakistan",
+      matchingScore: 72,
+      status: "rejected",
+      skills: ["Swift", "iOS", "Xcode"],
+      experience: "3 years",
+      about: "iOS specialist but limited experience with cross-platform frameworks.",
+      resume: "shazia_resume.pdf",
+      profilePicture: "S",
+      workExperience: [
+        {
+          title: "iOS Developer",
+          company: "Apple Dev Shop",
+          duration: "2022 - Present",
+          description: "Developing native iOS applications."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Software Engineering",
+          institution: "COMSATS Lahore",
+          year: "2022"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 605,
+      name: "Talha Ahmed",
+      title: "Mobile App Developer",
+      email: "talha@example.com",
+      phone: "+92 337 3333333",
+      location: "Lahore, Pakistan",
+      matchingScore: 81,
+      status: "shortlisted",
+      skills: ["React Native", "Flutter", "JavaScript", "Dart"],
+      experience: "4 years",
+      about: "Versatile mobile developer proficient in multiple frameworks.",
+      resume: "talha_resume.pdf",
+      profilePicture: "T",
+      workExperience: [
+        {
+          title: "Mobile App Developer",
+          company: "Digital Apps",
+          duration: "2021 - Present",
+          description: "Developing mobile apps for various clients using React Native and Flutter."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Science",
+          institution: "Punjab University",
+          year: "2021"
+        }
+      ],
+      certifications: [
+        { name: "React Native Certification", issuer: "Meta", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    }
+  ],
+  8: [
+    {
+      id: 701,
+      name: "Yasir Mehmood",
+      title: "Cloud Solutions Architect",
+      email: "yasir@example.com",
+      phone: "+92 338 1234567",
+      location: "Remote",
+      matchingScore: 94,
+      status: "shortlisted",
+      skills: ["AWS", "Azure", "Terraform", "Cloud Security"],
+      experience: "8 years",
+      about: "Expert cloud architect with extensive multi-cloud experience.",
+      resume: "yasir_resume.pdf",
+      profilePicture: "Y",
+      workExperience: [
+        {
+          title: "Cloud Solutions Architect",
+          company: "Enterprise Cloud Services",
+          duration: "2019 - Present",
+          description: "Designing and implementing cloud architectures for enterprise clients."
+        }
+      ],
+      education: [
+        {
+          degree: "Master of Computer Science",
+          institution: "NUST Islamabad",
+          year: "2017"
+        }
+      ],
+      certifications: [
+        { name: "AWS Solutions Architect Professional", issuer: "Amazon", year: "2021" },
+        { name: "Azure Solutions Architect Expert", issuer: "Microsoft", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 702,
+      name: "Nadia Akhtar",
+      title: "Senior Cloud Engineer",
+      email: "nadia@example.com",
+      phone: "+92 339 8888888",
+      location: "Karachi, Pakistan",
+      matchingScore: 88,
+      status: "shortlisted",
+      skills: ["AWS", "Terraform", "CloudFormation", "Python"],
+      experience: "7 years",
+      about: "Senior cloud engineer specializing in AWS infrastructure automation.",
+      resume: "nadia_resume.pdf",
+      profilePicture: "N",
+      workExperience: [
+        {
+          title: "Senior Cloud Engineer",
+          company: "Cloud Infrastructure Co",
+          duration: "2019 - Present",
+          description: "Managing large-scale AWS deployments and automation."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Engineering",
+          institution: "NED University",
+          year: "2018"
+        }
+      ],
+      certifications: [
+        { name: "AWS DevOps Engineer Professional", issuer: "Amazon", year: "2021" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 703,
+      name: "Kashif Ali",
+      title: "Cloud Architect",
+      email: "kashif@example.com",
+      phone: "+92 340 5555555",
+      location: "Remote",
+      matchingScore: 85,
+      status: "shortlisted",
+      skills: ["Azure", "AWS", "Terraform", "DevOps"],
+      experience: "6.5 years",
+      about: "Cloud architect with strong multi-cloud and DevOps background.",
+      resume: "kashif_resume.pdf",
+      profilePicture: "K",
+      workExperience: [
+        {
+          title: "Cloud Architect",
+          company: "Digital Cloud Solutions",
+          duration: "2020 - Present",
+          description: "Architecting cloud solutions and leading migration projects."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Software Engineering",
+          institution: "FAST-NUCES Karachi",
+          year: "2018"
+        }
+      ],
+      certifications: [
+        { name: "Azure Solutions Architect", issuer: "Microsoft", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 704,
+      name: "Lubna Hassan",
+      title: "Infrastructure Architect",
+      email: "lubna@example.com",
+      phone: "+92 341 7777777",
+      location: "Lahore, Pakistan",
+      matchingScore: 79,
+      status: "rejected",
+      skills: ["AWS", "Terraform", "Kubernetes"],
+      experience: "5 years",
+      about: "Infrastructure architect with good AWS skills but limited Azure experience.",
+      resume: "lubna_resume.pdf",
+      profilePicture: "L",
+      workExperience: [
+        {
+          title: "Infrastructure Architect",
+          company: "Tech Infrastructure",
+          duration: "2020 - Present",
+          description: "Designing infrastructure solutions on AWS."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Science",
+          institution: "UET Lahore",
+          year: "2020"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 705,
+      name: "Qasim Raza",
+      title: "Principal Cloud Architect",
+      email: "qasim@example.com",
+      phone: "+92 342 3333333",
+      location: "Remote",
+      matchingScore: 91,
+      status: "shortlisted",
+      skills: ["AWS", "Azure", "Terraform", "Security", "Cost Optimization"],
+      experience: "9 years",
+      about: "Principal architect with comprehensive cloud expertise and leadership skills.",
+      resume: "qasim_resume.pdf",
+      profilePicture: "Q",
+      workExperience: [
+        {
+          title: "Principal Cloud Architect",
+          company: "Global Cloud Services",
+          duration: "2018 - Present",
+          description: "Leading cloud architecture initiatives and mentoring teams."
+        }
+      ],
+      education: [
+        {
+          degree: "Master of Software Engineering",
+          institution: "LUMS",
+          year: "2016"
+        }
+      ],
+      certifications: [
+        { name: "AWS Solutions Architect Professional", issuer: "Amazon", year: "2020" },
+        { name: "Azure Solutions Architect Expert", issuer: "Microsoft", year: "2021" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    }
+  ],
+  9: [
+    {
+      id: 801,
+      name: "Adnan Khan",
+      title: "Senior QA Engineer",
+      email: "adnan@example.com",
+      phone: "+92 343 1234567",
+      location: "Karachi, Pakistan",
+      matchingScore: 82,
+      status: "shortlisted",
+      skills: ["Selenium", "TestNG", "JIRA", "Automation", "API Testing"],
+      experience: "4 years",
+      about: "Senior QA engineer with comprehensive testing and automation expertise.",
+      resume: "adnan_resume.pdf",
+      profilePicture: "A",
+      workExperience: [
+        {
+          title: "Senior QA Engineer",
+          company: "Quality Assurance Corp",
+          duration: "2021 - Present",
+          description: "Leading QA automation and testing initiatives."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Science",
+          institution: "IBA Karachi",
+          year: "2021"
+        }
+      ],
+      certifications: [
+        { name: "ISTQB Advanced Test Automation", issuer: "ISTQB", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 802,
+      name: "Farah Ahmed",
+      title: "Test Automation Engineer",
+      email: "farah@example.com",
+      phone: "+92 344 8888888",
+      location: "Karachi, Pakistan",
+      matchingScore: 76,
+      status: "shortlisted",
+      skills: ["Selenium", "Java", "TestNG", "JIRA"],
+      experience: "3 years",
+      about: "Automation engineer focused on building robust test frameworks.",
+      resume: "farah_resume.pdf",
+      profilePicture: "F",
+      workExperience: [
+        {
+          title: "Test Automation Engineer",
+          company: "Software Testing Solutions",
+          duration: "2022 - Present",
+          description: "Developing automated test suites and frameworks."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Software Engineering",
+          institution: "NED University",
+          year: "2022"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 803,
+      name: "Irfan Malik",
+      title: "QA Analyst",
+      email: "irfan@example.com",
+      phone: "+92 345 5555555",
+      location: "Lahore, Pakistan",
+      matchingScore: 71,
+      status: "shortlisted",
+      skills: ["Manual Testing", "Selenium", "JIRA", "SQL"],
+      experience: "2.5 years",
+      about: "QA analyst with both manual and automation testing experience.",
+      resume: "irfan_resume.pdf",
+      profilePicture: "I",
+      workExperience: [
+        {
+          title: "QA Analyst",
+          company: "Tech QA Services",
+          duration: "2022 - Present",
+          description: "Performing manual and automated testing."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Information Technology",
+          institution: "Punjab University",
+          year: "2022"
+        }
+      ],
+      certifications: [
+        { name: "ISTQB Foundation Level", issuer: "ISTQB", year: "2023" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 804,
+      name: "Saima Hassan",
+      title: "Manual QA Tester",
+      email: "saima@example.com",
+      phone: "+92 346 7777777",
+      location: "Karachi, Pakistan",
+      matchingScore: 58,
+      status: "rejected",
+      skills: ["Manual Testing", "JIRA", "Test Cases"],
+      experience: "2 years",
+      about: "Manual tester with limited automation experience.",
+      resume: "saima_resume.pdf",
+      profilePicture: "S",
+      workExperience: [
+        {
+          title: "Manual QA Tester",
+          company: "Testing Solutions",
+          duration: "2023 - Present",
+          description: "Performing manual testing and writing test cases."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Science",
+          institution: "Karachi University",
+          year: "2023"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 805,
+      name: "Waseem Ahmed",
+      title: "QA Engineer",
+      email: "waseem@example.com",
+      phone: "+92 347 3333333",
+      location: "Karachi, Pakistan",
+      matchingScore: 79,
+      status: "shortlisted",
+      skills: ["Selenium", "TestNG", "JIRA", "Python", "API Testing"],
+      experience: "3.5 years",
+      about: "QA engineer with strong automation and API testing skills.",
+      resume: "waseem_resume.pdf",
+      profilePicture: "W",
+      workExperience: [
+        {
+          title: "QA Engineer",
+          company: "Quality Tech",
+          duration: "2021 - Present",
+          description: "Automating tests and ensuring software quality."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Software Engineering",
+          institution: "FAST-NUCES Karachi",
+          year: "2021"
+        }
+      ],
+      certifications: [
+        { name: "Selenium WebDriver Certification", issuer: "Udemy", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    }
+  ],
+  10: [
+    {
+      id: 901,
+      name: "Imtiaz Hassan",
+      title: "Senior Product Manager",
+      email: "imtiaz@example.com",
+      phone: "+92 348 1234567",
+      location: "Lahore, Pakistan",
+      matchingScore: 89,
+      status: "shortlisted",
+      skills: ["Product Strategy", "Analytics", "Leadership", "Roadmapping"],
+      experience: "6 years",
+      about: "Experienced product manager with proven track record of successful launches.",
+      resume: "imtiaz_resume.pdf",
+      profilePicture: "I",
+      workExperience: [
+        {
+          title: "Senior Product Manager",
+          company: "Tech Products Inc",
+          duration: "2020 - Present",
+          description: "Leading product strategy and managing cross-functional teams."
+        }
+      ],
+      education: [
+        {
+          degree: "MBA",
+          institution: "LUMS",
+          year: "2019"
+        }
+      ],
+      certifications: [
+        { name: "Product Management Professional", issuer: "Product School", year: "2021" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 902,
+      name: "Kiran Malik",
+      title: "Product Manager",
+      email: "kiran@example.com",
+      phone: "+92 349 8888888",
+      location: "Lahore, Pakistan",
+      matchingScore: 83,
+      status: "shortlisted",
+      skills: ["Product Strategy", "Analytics", "Agile", "User Research"],
+      experience: "4.5 years",
+      about: "Product manager with strong analytical and stakeholder management skills.",
+      resume: "kiran_resume.pdf",
+      profilePicture: "K",
+      workExperience: [
+        {
+          title: "Product Manager",
+          company: "Digital Products Co",
+          duration: "2021 - Present",
+          description: "Managing product lifecycle and coordinating with teams."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Business Administration",
+          institution: "IBA Lahore",
+          year: "2020"
+        }
+      ],
+      certifications: [
+        { name: "Certified Scrum Product Owner", issuer: "Scrum Alliance", year: "2022" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 903,
+      name: "Owais Ahmed",
+      title: "Technical Product Manager",
+      email: "owais@example.com",
+      phone: "+92 350 5555555",
+      location: "Islamabad, Pakistan",
+      matchingScore: 86,
+      status: "shortlisted",
+      skills: ["Product Strategy", "Technical Analysis", "Leadership", "SQL"],
+      experience: "5 years",
+      about: "Technical PM with engineering background and strong leadership skills.",
+      resume: "owais_resume.pdf",
+      profilePicture: "O",
+      workExperience: [
+        {
+          title: "Technical Product Manager",
+          company: "Software Solutions Ltd",
+          duration: "2020 - Present",
+          description: "Bridging technical and business requirements for product success."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Computer Science",
+          institution: "FAST-NUCES Islamabad",
+          year: "2019"
+        }
+      ],
+      certifications: [
+        { name: "Technical Product Management", issuer: "Pragmatic Institute", year: "2021" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 904,
+      name: "Rida Khan",
+      title: "Associate Product Manager",
+      email: "rida@example.com",
+      phone: "+92 351 7777777",
+      location: "Lahore, Pakistan",
+      matchingScore: 68,
+      status: "rejected",
+      skills: ["Product Strategy", "Analytics", "Communication"],
+      experience: "2 years",
+      about: "Junior PM with good potential but limited senior-level experience.",
+      resume: "rida_resume.pdf",
+      profilePicture: "R",
+      workExperience: [
+        {
+          title: "Associate Product Manager",
+          company: "Startup Products",
+          duration: "2023 - Present",
+          description: "Supporting product initiatives and learning product management."
+        }
+      ],
+      education: [
+        {
+          degree: "Bachelor of Business Administration",
+          institution: "LUMS",
+          year: "2023"
+        }
+      ],
+      certifications: [],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
+    },
+    {
+      id: 905,
+      name: "Tanveer Hassan",
+      title: "Product Manager",
+      email: "tanveer@example.com",
+      phone: "+92 352 3333333",
+      location: "Lahore, Pakistan",
+      matchingScore: 80,
+      status: "shortlisted",
+      skills: ["Product Strategy", "Analytics", "Leadership", "Market Research"],
+      experience: "5 years",
+      about: "Product manager with comprehensive experience in B2B and B2C products.",
+      resume: "tanveer_resume.pdf",
+      profilePicture: "T",
+      workExperience: [
+        {
+          title: "Product Manager",
+          company: "Enterprise Software",
+          duration: "2020 - Present",
+          description: "Managing enterprise product portfolio and driving growth."
+        }
+      ],
+      education: [
+        {
+          degree: "MBA",
+          institution: "IBA Karachi",
+          year: "2020"
+        }
+      ],
+      certifications: [
+        { name: "Product Management Certification", issuer: "General Assembly", year: "2021" }
+      ],
+      languages: [
+        { name: "English", proficiency: "Professional" },
+        { name: "Urdu", proficiency: "Native" }
+      ]
     }
   ]
 };
@@ -474,7 +1980,7 @@ const CANDIDATES_DATA = {
 export default function ViewApplicationsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const jobId = searchParams.get("jobId");
+  const jobId = parseInt(searchParams.get("jobId"));
   const jobTitle = searchParams.get("jobTitle");
   
   const [candidates, setCandidates] = useState([]);
@@ -506,7 +2012,7 @@ export default function ViewApplicationsPage() {
   const filteredCandidates = getFilteredCandidates();
 
   const handleBack = () => {
-    router.push(`/employer/view-job?jobId=${jobId}`);
+    router.push(`/employer/view-job-post?jobId=${jobId}`);
   };
 
   const getScoreColor = (score) => {
@@ -546,7 +2052,7 @@ export default function ViewApplicationsPage() {
                   className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium mb-6 transition-colors px-3 py-2 rounded-lg"
                 >
                   <ArrowLeft className="w-5 h-5" />
-                  <span>Back to View Job</span>
+                  <span>Back to View Job Post</span>
                 </button>
 
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -667,7 +2173,7 @@ export default function ViewApplicationsPage() {
                               className={`rounded-2xl border p-5 shadow-sm hover:shadow-lg transition-all duration-300 flex items-center justify-between ${
                                 isShortlisted
                                   ? "bg-green-50 border-green-100"
-                                  : "bg-red-50 border-red-100 opacity-80 hover:opacity-100"
+                                  : "bg-red-50 border-red-100"
                               }`}
                             >
                               <div className="flex items-center gap-4 flex-1">
@@ -691,7 +2197,7 @@ export default function ViewApplicationsPage() {
 
                                 <button 
                                   onClick={() => setSelectedCandidate(candidate)}
-                                  className="font-semibold text-sm text-blue-600 px-4 py-2 rounded-full bg-transparent hover:bg-blue-50 hover:text-blue-700 transition-all focus:outline-none whitespace-nowrap"
+                                  className="font-semibold text-sm text-blue-700 px-4 py-2 rounded-full bg-blue-100 hover:bg-blue-200 hover:text-blue-800 active:bg-blue-200 active:text-blue-800 transition-all focus:outline-none whitespace-nowrap"
                                 >
                                   View Profile
                                 </button>
