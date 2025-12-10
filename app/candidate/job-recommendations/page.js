@@ -422,9 +422,6 @@ export default function JobRecommendationsPage() {
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Choose Resume Option</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Would you like to use your default resume or upload a custom one for this application?
-                    </p>
                   </div>
 
                   <div className="space-y-3">
@@ -514,13 +511,6 @@ export default function JobRecommendationsPage() {
               {/* Step 3: Confirmation */}
               {applicationStep === 'confirm' && (
                 <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirm Application</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Review your application details before submitting
-                    </p>
-                  </div>
-
                   <div className="bg-gray-50 rounded-xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Resume:</span>

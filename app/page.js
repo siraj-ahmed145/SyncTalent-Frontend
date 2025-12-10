@@ -1,72 +1,49 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   Briefcase, 
   Users, 
   Target, 
   TrendingUp, 
-  Shield, 
-  Moon, 
-  Sun 
+  Shield
 } from 'lucide-react';
 
 export default function Home() {
-  const [darkMode, setDarkMode] = useState(false);
-
-  useEffect(() => {
-    // Check for saved theme preference or default to light mode
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    if (!darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
-
   return (
     <div className="min-h-screen bg-white dark:bg-[#0f1729] transition-colors duration-300">
-      {/* Dark Mode Toggle */}
-      <div className="fixed top-6 right-6 z-50">
-        <button
-          onClick={toggleDarkMode}
-          className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-lg"
-          aria-label="Toggle dark mode"
-        >
-          {darkMode ? (
-            <Sun className="w-5 h-5 text-yellow-500" />
-          ) : (
-            <Moon className="w-5 h-5 text-gray-700" />
-          )}
-        </button>
-      </div>
+      {/* Hero Section with Background Image */}
+      <section className="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] h-[70vh] flex items-center justify-center overflow-hidden bg-gray-200">
+        {/* Background Image with Blur Effect */}
+        <div className="absolute inset-0 w-full h-full">
+          <Image
+            src="/FrontImage.png"
+            alt="AI Recruitment Platform"
+            fill
+            className="object-cover"
+            priority
+          />
+          {/* Dark Overlay */}
+          <div className="absolute inset-0 bg-black/40"></div>
+        </div>
 
-      {/* Hero Section */}
-      <section className="px-4 py-12 md:py-20">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12 md:mb-16">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 md:mb-6 leading-tight">
-              Smart Resume Screening & Job Matching
+        {/* Content Overlay */}
+        <div className="relative z-10 text-center px-4 md:px-8 max-w-4xl">
+          <div className="rounded-2xl md:rounded-3xl p-3 md:p-4 lg:p-5">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-blue-400 via-blue-500 to-purple-500 bg-clip-text text-transparent drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] mb-6 md:mb-8 leading-tight">
+              SyncTalent
             </h1>
-            <p className="text-base md:text-lg text-gray-600 dark:text-gray-300 max-w-4xl mx-auto px-4 leading-relaxed">
-              Streamline your hiring process with AI-driven candidate ranking and personalized job
-              recommendations. Connecting the right talent with the right opportunities.
+            <p className="text-lg md:text-2xl text-white max-w-3xl mx-auto leading-relaxed drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
+              Sync Your Skills with Opportunities
             </p>
           </div>
+        </div>
+      </section>
 
-          {/* Cards Section */}
+      {/* Main Content Section */}
+      <section className="px-4 py-12 md:py-20">
           <div className="grid grid-cols-2 gap-4 md:gap-6 lg:gap-8 max-w-6xl mx-auto mb-20 md:mb-32">
             {/* Employer Card */}
             <div className="bg-white dark:bg-gray-800 rounded-xl md:rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 p-4 md:p-6 lg:p-8 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full">
@@ -143,8 +120,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Why Choose Our Platform Section */}
-          <div className="text-center">
+        {/* Why Choose Our Platform Section */}
+        <div className="text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-12 md:mb-16">
               Why Choose Our Platform?
             </h2>
@@ -159,7 +136,7 @@ export default function Home() {
                   Accurate Matching
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base max-w-xs leading-relaxed">
-                  Advanced NLP algorithms ensure precise candidate-job alignment
+                  Ensure precise candidate-job alignment
                 </p>
               </div>
 
@@ -190,7 +167,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
       </section>
     </div>
   );

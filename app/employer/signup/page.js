@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Moon, Sun } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import api from '../../lib/api';
 
@@ -56,17 +57,22 @@ export default function EmployerSignup() {
       return;
     }
 
+    // Validation: Check if all fields are filled
+    if (!formData.companyName || !formData.email || !formData.password) {
+      setError('Please fill in all fields');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const response = await api.post('/employer/signup', {
-        companyName: formData.companyName,
-        email: formData.email,
-        password: formData.password
-      });
-
-      // Show success message or redirect to login
-      alert('Signup successful! Please login to continue.');
+      // Store user data in localStorage
+      localStorage.setItem('employer_id', Math.random().toString());
+      localStorage.setItem('companyName', formData.companyName);
+      localStorage.setItem('email', formData.email);
+      localStorage.setItem('userType', 'employer');
+      
+      // Redirect to login page
       router.push('/employer/login');
     } catch (err) {
       setError(err.message || 'Signup failed. Please try again.');
@@ -77,21 +83,6 @@ export default function EmployerSignup() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Dark Mode Toggle */}
-      <div className="fixed top-6 right-6 z-50">
-        <button
-          onClick={toggleDarkMode}
-          className="p-3 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shadow-lg"
-          aria-label="Toggle dark mode"
-        >
-          {darkMode ? (
-            <Sun className="w-5 h-5 text-yellow-500" />
-          ) : (
-            <Moon className="w-5 h-5 text-gray-700" />
-          )}
-        </button>
-      </div>
-
       {/* Left Side - Signup Form */}
       <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12 transition-colors duration-300">
         <div className="w-full max-w-md">
@@ -275,23 +266,25 @@ export default function EmployerSignup() {
       </div>
 
       {/* Right Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-linear-to-br from-blue-900 via-blue-800 to-purple-900 items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 items-center justify-center p-12">
         <div className="text-center text-white max-w-md">
           {/* Logo */}
-          <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <div className="flex gap-1.5">
-              <div className="w-1 h-12 bg-white rounded-full"></div>
-              <div className="w-1 h-12 bg-white rounded-full"></div>
-              <div className="w-1 h-12 bg-white rounded-full"></div>
-            </div>
+          <div className="w-20 h-20 mx-auto mb-6">
+            <Image
+              src="/Icon.png"
+              alt="SyncTalent Logo"
+              width={80}
+              height={80}
+              className="w-full h-full object-contain"
+            />
           </div>
 
           {/* Text Content */}
           <h2 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-            AI Recruitment
+            SyncTalent
           </h2>
           <p className="text-base md:text-lg text-white/90 leading-relaxed">
-            Free and Open-Source AI-Powered<br />Resume Screening & Job Matching
+            Sync Your Skills with Opportunities
           </p>
         </div>
       </div>

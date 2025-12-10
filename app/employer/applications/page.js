@@ -4,7 +4,14 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
-import { ArrowLeft, Users, CheckCircle, XCircle, Star, Mail, Phone, MapPin, Clock, Download } from "lucide-react";
+import { ArrowLeft, Users, CheckCircle, XCircle, Star, Mail, Phone, MapPin, Clock, Download, Github, FileText } from "lucide-react";
+
+// Custom LinkedIn Icon
+const LinkedinIcon = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" fill="currentColor"/>
+  </svg>
+);
 
 // Dummy candidates data with matching scores
 const CANDIDATES_DATA = {
@@ -16,6 +23,8 @@ const CANDIDATES_DATA = {
       email: "ahmed@example.com",
       phone: "+92 300 1234567",
       location: "Lahore, Pakistan",
+      linkedin: "linkedin.com/in/ahmed-hassan",
+      github: "github.com/ahmedhasan",
       matchingScore: 92,
       status: "shortlisted",
       skills: ["React", "JavaScript", "Tailwind CSS", "Next.js"],
@@ -61,6 +70,8 @@ const CANDIDATES_DATA = {
       email: "fatima@example.com",
       phone: "+92 301 9876543",
       location: "Karachi, Pakistan",
+      linkedin: "linkedin.com/in/fatima-khan",
+      github: "github.com/fatimakhan",
       matchingScore: 88,
       status: "shortlisted",
       skills: ["React", "Node.js", "JavaScript", "MongoDB"],
@@ -105,6 +116,8 @@ const CANDIDATES_DATA = {
       email: "ali@example.com",
       phone: "+92 302 5555555",
       location: "Islamabad, Pakistan",
+      linkedin: "linkedin.com/in/ali-raza",
+      github: "github.com/aliraza",
       matchingScore: 45,
       status: "rejected",
       skills: ["React", "CSS", "JavaScript"],
@@ -141,6 +154,8 @@ const CANDIDATES_DATA = {
       email: "sara@example.com",
       phone: "+92 303 7777777",
       location: "Remote",
+      linkedin: "linkedin.com/in/sara-ahmed",
+      github: "github.com/saraahmed",
       matchingScore: 85,
       status: "shortlisted",
       skills: ["React", "JavaScript", "Tailwind CSS", "TypeScript"],
@@ -179,6 +194,8 @@ const CANDIDATES_DATA = {
       email: "hassan@example.com",
       phone: "+92 304 3333333",
       location: "Lahore, Pakistan",
+      linkedin: "linkedin.com/in/hassan-malik",
+      github: "github.com/hassanmalik",
       matchingScore: 52,
       status: "rejected",
       skills: ["Python", "Django", "PostgreSQL"],
@@ -215,6 +232,8 @@ const CANDIDATES_DATA = {
       email: "zainab@example.com",
       phone: "+92 305 1111111",
       location: "Karachi, Pakistan",
+      linkedin: "linkedin.com/in/zainab-ali",
+      github: "github.com/zainabali",
       matchingScore: 90,
       status: "shortlisted",
       skills: ["React", "JavaScript", "Tailwind CSS", "Redux", "Next.js"],
@@ -253,6 +272,8 @@ const CANDIDATES_DATA = {
       email: "hasan@example.com",
       phone: "+92 306 9999999",
       location: "Remote",
+      linkedin: "linkedin.com/in/muhammad-hasan",
+      github: "github.com/muhammdhasan",
       matchingScore: 40,
       status: "rejected",
       skills: ["HTML", "CSS", "JavaScript"],
@@ -289,6 +310,8 @@ const CANDIDATES_DATA = {
       email: "amina@example.com",
       phone: "+92 307 6666666",
       location: "Islamabad, Pakistan",
+      linkedin: "linkedin.com/in/amina-fatima",
+      github: "github.com/aminafatima",
       matchingScore: 87,
       status: "shortlisted",
       skills: ["React", "Node.js", "JavaScript", "Tailwind CSS", "MongoDB"],
@@ -329,6 +352,8 @@ const CANDIDATES_DATA = {
       email: "khalid@example.com",
       phone: "+92 308 1234567",
       location: "Lahore, Pakistan",
+      linkedin: "linkedin.com/in/khalid-ahmed",
+      github: "github.com/khalidahmed",
       matchingScore: 94,
       status: "shortlisted",
       skills: ["Node.js", "Express", "MongoDB"],
@@ -366,6 +391,8 @@ const CANDIDATES_DATA = {
       email: "nida@example.com",
       phone: "+92 309 9876543",
       location: "Remote",
+      linkedin: "linkedin.com/in/nida-khan",
+      github: "github.com/nidakhan",
       matchingScore: 55,
       status: "rejected",
       skills: ["Docker", "Kubernetes", "AWS"],
@@ -401,6 +428,8 @@ const CANDIDATES_DATA = {
       email: "bilal@example.com",
       phone: "+92 312 4444444",
       location: "Lahore, Pakistan",
+      linkedin: "linkedin.com/in/bilal-shah",
+      github: "github.com/bilalshah",
       matchingScore: 78,
       status: "shortlisted",
       skills: ["Node.js", "Express", "MongoDB", "REST APIs"],
@@ -438,6 +467,8 @@ const CANDIDATES_DATA = {
       email: "sana@example.com",
       phone: "+92 313 8888888",
       location: "Karachi, Pakistan",
+      linkedin: "linkedin.com/in/sana-malik",
+      github: "github.com/sanamalik",
       matchingScore: 72,
       status: "shortlisted",
       skills: ["Node.js", "Express", "PostgreSQL", "MongoDB"],
@@ -473,6 +504,8 @@ const CANDIDATES_DATA = {
       email: "omar@example.com",
       phone: "+92 314 2222222",
       location: "Islamabad, Pakistan",
+      linkedin: "linkedin.com/in/omar-khan",
+      github: "github.com/omarkhan",
       matchingScore: 58,
       status: "rejected",
       skills: ["Node.js", "Express", "JavaScript"],
@@ -510,6 +543,8 @@ const CANDIDATES_DATA = {
       email: "imran@example.com",
       phone: "+92 310 1234567",
       location: "Karachi, Pakistan",
+      linkedin: "linkedin.com/in/imran-hassan",
+      github: "github.com/imranhassan",
       matchingScore: 91,
       status: "shortlisted",
       skills: ["React", "Node.js", "AWS"],
@@ -547,6 +582,8 @@ const CANDIDATES_DATA = {
       email: "leila@example.com",
       phone: "+92 311 5555555",
       location: "Remote",
+      linkedin: "linkedin.com/in/leila-ahmed",
+      github: "github.com/leilaahmed",
       matchingScore: 48,
       status: "rejected",
       skills: ["React", "Node.js"],
@@ -582,6 +619,8 @@ const CANDIDATES_DATA = {
       email: "fahad@example.com",
       phone: "+92 315 7777777",
       location: "Lahore, Pakistan",
+      linkedin: "linkedin.com/in/fahad-ali",
+      github: "github.com/fahadali",
       matchingScore: 84,
       status: "shortlisted",
       skills: ["React", "Node.js", "AWS", "Docker"],
@@ -619,6 +658,8 @@ const CANDIDATES_DATA = {
       email: "ayesha@example.com",
       phone: "+92 316 3333333",
       location: "Islamabad, Pakistan",
+      linkedin: "linkedin.com/in/ayesha-tariq",
+      github: "github.com/ayeshatar iq",
       matchingScore: 79,
       status: "shortlisted",
       skills: ["React", "Node.js", "AWS", "Lambda"],
@@ -656,6 +697,8 @@ const CANDIDATES_DATA = {
       email: "usman@example.com",
       phone: "+92 317 5555555",
       location: "Karachi, Pakistan",
+      linkedin: "linkedin.com/in/usman-ahmed",
+      github: "github.com/usmanah med",
       matchingScore: 67,
       status: "rejected",
       skills: ["React", "Node.js", "MongoDB"],
@@ -693,6 +736,8 @@ const CANDIDATES_DATA = {
       email: "faisal@example.com",
       phone: "+92 318 1234567",
       location: "Islamabad, Pakistan",
+      linkedin: "linkedin.com/in/faisal-mahmood",
+      github: "github.com/faisalmahmood",
       matchingScore: 88,
       status: "shortlisted",
       skills: ["Figma", "Adobe XD", "Prototyping", "User Research"],
@@ -730,6 +775,8 @@ const CANDIDATES_DATA = {
       email: "mariam@example.com",
       phone: "+92 319 8888888",
       location: "Islamabad, Pakistan",
+      linkedin: "linkedin.com/in/mariam-khan",
+      github: "github.com/mariamkhan",
       matchingScore: 82,
       status: "shortlisted",
       skills: ["Figma", "Adobe XD", "Sketch", "Wireframing"],
@@ -765,6 +812,8 @@ const CANDIDATES_DATA = {
       email: "ahmed.r@example.com",
       phone: "+92 320 5555555",
       location: "Rawalpindi, Pakistan",
+      linkedin: "linkedin.com/in/ahmed-raza",
+      github: "github.com/ahmedraza",
       matchingScore: 75,
       status: "shortlisted",
       skills: ["Figma", "Prototyping", "User Testing"],
@@ -802,6 +851,8 @@ const CANDIDATES_DATA = {
       email: "hina@example.com",
       phone: "+92 321 7777777",
       location: "Islamabad, Pakistan",
+      linkedin: "linkedin.com/in/hina-ali",
+      github: "github.com/hinali",
       matchingScore: 70,
       status: "rejected",
       skills: ["Adobe XD", "Illustrator", "Photoshop"],
@@ -837,6 +888,8 @@ const CANDIDATES_DATA = {
       email: "bilal.h@example.com",
       phone: "+92 322 3333333",
       location: "Islamabad, Pakistan",
+      linkedin: "linkedin.com/in/bilal-hassan",
+      github: "github.com/bilalhassan",
       matchingScore: 78,
       status: "shortlisted",
       skills: ["Figma", "Adobe XD", "Animation", "Prototyping"],
@@ -876,6 +929,8 @@ const CANDIDATES_DATA = {
       email: "tariq@example.com",
       phone: "+92 323 1234567",
       location: "Remote",
+      linkedin: "linkedin.com/in/tariq-mehmood",
+      github: "github.com/tariqmehmood",
       matchingScore: 92,
       status: "shortlisted",
       skills: ["Docker", "Kubernetes", "AWS", "CI/CD", "Terraform"],
@@ -914,6 +969,8 @@ const CANDIDATES_DATA = {
       email: "sadia@example.com",
       phone: "+92 324 8888888",
       location: "Lahore, Pakistan",
+      linkedin: "linkedin.com/in/sadia-malik",
+      github: "github.com/sadiamalik",
       matchingScore: 85,
       status: "shortlisted",
       skills: ["Docker", "Kubernetes", "AWS", "Jenkins", "Python"],
@@ -951,6 +1008,8 @@ const CANDIDATES_DATA = {
       email: "rizwan@example.com",
       phone: "+92 325 5555555",
       location: "Remote",
+      linkedin: "linkedin.com/in/rizwan-ahmed",
+      github: "github.com/rizwahmed",
       matchingScore: 78,
       status: "shortlisted",
       skills: ["AWS", "Docker", "Terraform", "Linux"],
@@ -988,6 +1047,8 @@ const CANDIDATES_DATA = {
       email: "zara@example.com",
       phone: "+92 326 7777777",
       location: "Karachi, Pakistan",
+      linkedin: "linkedin.com/in/zara-khan",
+      github: "github.com/zarakhan",
       matchingScore: 72,
       status: "rejected",
       skills: ["Docker", "Kubernetes", "Git", "Jenkins"],
@@ -1023,6 +1084,8 @@ const CANDIDATES_DATA = {
       email: "hamza@example.com",
       phone: "+92 327 3333333",
       location: "Remote",
+      linkedin: "linkedin.com/in/hamza-yousaf",
+      github: "github.com/hamzayousaf",
       matchingScore: 80,
       status: "shortlisted",
       skills: ["AWS", "Docker", "Kubernetes", "Terraform", "Python"],
@@ -1062,6 +1125,8 @@ const CANDIDATES_DATA = {
       email: "nasir@example.com",
       phone: "+92 328 1234567",
       location: "Karachi, Pakistan",
+      linkedin: "linkedin.com/in/nasir-ali",
+      github: "github.com/nasirali",
       matchingScore: 79,
       status: "shortlisted",
       skills: ["Python", "SQL", "Excel", "Power BI", "Tableau"],
@@ -1099,6 +1164,8 @@ const CANDIDATES_DATA = {
       email: "rabia@example.com",
       phone: "+92 329 8888888",
       location: "Karachi, Pakistan",
+      linkedin: "linkedin.com/in/rabia-ahmed",
+      github: "github.com/rabiaahmed",
       matchingScore: 74,
       status: "shortlisted",
       skills: ["SQL", "Excel", "Power BI", "Analytics"],
@@ -1134,6 +1201,8 @@ const CANDIDATES_DATA = {
       email: "kamran@example.com",
       phone: "+92 330 5555555",
       location: "Lahore, Pakistan",
+      linkedin: "linkedin.com/in/kamran-malik",
+      github: "github.com/kamranmalik",
       matchingScore: 85,
       status: "shortlisted",
       skills: ["Python", "SQL", "Machine Learning", "Power BI"],
@@ -1171,6 +1240,8 @@ const CANDIDATES_DATA = {
       email: "samina@example.com",
       phone: "+92 331 7777777",
       location: "Karachi, Pakistan",
+      linkedin: "linkedin.com/in/samina-hassan",
+      github: "github.com/saminahassan",
       matchingScore: 62,
       status: "rejected",
       skills: ["Excel", "SQL", "Power BI"],
@@ -1206,6 +1277,8 @@ const CANDIDATES_DATA = {
       email: "waqar@example.com",
       phone: "+92 332 3333333",
       location: "Karachi, Pakistan",
+      linkedin: "linkedin.com/in/waqar-hussain",
+      github: "github.com/waqarhussain",
       matchingScore: 76,
       status: "shortlisted",
       skills: ["Python", "SQL", "Excel", "Power BI", "Statistics"],
@@ -1245,6 +1318,8 @@ const CANDIDATES_DATA = {
       email: "asad@example.com",
       phone: "+92 333 1234567",
       location: "Lahore, Pakistan",
+      linkedin: "linkedin.com/in/asad-malik",
+      github: "github.com/asadmalik",
       matchingScore: 90,
       status: "shortlisted",
       skills: ["React Native", "Flutter", "Swift", "Kotlin"],
@@ -1282,6 +1357,8 @@ const CANDIDATES_DATA = {
       email: "maryam@example.com",
       phone: "+92 334 8888888",
       location: "Lahore, Pakistan",
+      linkedin: "linkedin.com/in/maryam-fatima",
+      github: "github.com/maryamfatima",
       matchingScore: 83,
       status: "shortlisted",
       skills: ["Flutter", "Dart", "Firebase", "REST APIs"],
@@ -1319,6 +1396,8 @@ const CANDIDATES_DATA = {
       email: "naveed@example.com",
       phone: "+92 335 5555555",
       location: "Islamabad, Pakistan",
+      linkedin: "linkedin.com/in/naveed-hassan",
+      github: "github.com/naveedhassan",
       matchingScore: 78,
       status: "shortlisted",
       skills: ["React Native", "JavaScript", "Redux", "TypeScript"],
@@ -1354,6 +1433,8 @@ const CANDIDATES_DATA = {
       email: "shazia@example.com",
       phone: "+92 336 7777777",
       location: "Lahore, Pakistan",
+      linkedin: "linkedin.com/in/shazia-khan",
+      github: "github.com/shaziakhan",
       matchingScore: 72,
       status: "rejected",
       skills: ["Swift", "iOS", "Xcode"],
@@ -1389,6 +1470,8 @@ const CANDIDATES_DATA = {
       email: "talha@example.com",
       phone: "+92 337 3333333",
       location: "Lahore, Pakistan",
+      linkedin: "linkedin.com/in/talha-ahmed",
+      github: "github.com/talhaahmed",
       matchingScore: 81,
       status: "shortlisted",
       skills: ["React Native", "Flutter", "JavaScript", "Dart"],
@@ -2187,7 +2270,7 @@ export default function ViewApplicationsPage() {
                                 </div>
                               </div>
 
-                              <div className={`flex items-center gap-4 flex-shrink-0 ml-4`}>
+                              <div className={`flex items-center gap-4 shrink-0 ml-4`}>
                                 <div className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 ${getScoreBgColor(candidate.matchingScore)} ${getScoreBorderColor(candidate.matchingScore)}`}>
                                   <p className="text-xs text-gray-600 font-medium">Match</p>
                                   <p className={`text-2xl font-bold ${getScoreColor(candidate.matchingScore)}`}>
@@ -2233,11 +2316,9 @@ export default function ViewApplicationsPage() {
                       </div>
                       <div>
                         <h1 className="text-3xl font-bold text-gray-900">{selectedCandidate.name}</h1>
-                        <p className="text-lg text-gray-600 mt-1">{selectedCandidate.title}</p>
                       </div>
                     </div>
                     <div className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 ${getScoreBgColor(selectedCandidate.matchingScore)} ${getScoreBorderColor(selectedCandidate.matchingScore)}`}>
-                      <Star className={`w-6 h-6 mb-2 ${getScoreColor(selectedCandidate.matchingScore)}`} />
                       <p className={`text-3xl font-bold ${getScoreColor(selectedCandidate.matchingScore)}`}>
                         {selectedCandidate.matchingScore}%
                       </p>
@@ -2270,33 +2351,51 @@ export default function ViewApplicationsPage() {
                   <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                      <Mail className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                      <Mail className="w-5 h-5 text-blue-600 shrink-0" />
                       <div>
                         <p className="text-sm text-gray-500">Email</p>
                         <p className="text-base font-medium text-gray-900">{selectedCandidate.email}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                      <Phone className="w-5 h-5 text-pink-600 flex-shrink-0" />
+                      <Phone className="w-5 h-5 text-green-500 shrink-0" />
                       <div>
                         <p className="text-sm text-gray-500">Phone</p>
                         <p className="text-base font-medium text-gray-900">{selectedCandidate.phone}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                      <MapPin className="w-5 h-5 text-pink-500 flex-shrink-0" />
+                      <MapPin className="w-5 h-5 text-red-600 shrink-0" />
                       <div>
                         <p className="text-sm text-gray-500">Location</p>
                         <p className="text-base font-medium text-gray-900">{selectedCandidate.location}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                      <Clock className="w-5 h-5 text-purple-600 flex-shrink-0" />
+                      <Clock className="w-5 h-5 text-purple-600 shrink-0" />
                       <div>
                         <p className="text-sm text-gray-500">Experience</p>
                         <p className="text-base font-medium text-gray-900">{selectedCandidate.experience}</p>
                       </div>
                     </div>
+                    {selectedCandidate.linkedin && (
+                      <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                        <LinkedinIcon className="w-5 h-5 text-[#0A66C2] shrink-0" />
+                        <div>
+                          <p className="text-sm text-gray-500">LinkedIn</p>
+                          <p className="text-base font-medium text-gray-900">{selectedCandidate.linkedin}</p>
+                        </div>
+                      </div>
+                    )}
+                    {selectedCandidate.github && (
+                      <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                        <Github className="w-5 h-5 text-gray-900 shrink-0" />
+                        <div>
+                          <p className="text-sm text-gray-500">GitHub</p>
+                          <p className="text-base font-medium text-gray-900">{selectedCandidate.github}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -2346,12 +2445,10 @@ export default function ViewApplicationsPage() {
                     <h2 className="text-xl font-semibold text-gray-900 mb-3">Education</h2>
                     <div className="space-y-4">
                       {selectedCandidate.education.map((edu, idx) => (
-                        <div key={idx} className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-bold text-gray-900">{edu.degree}</h4>
-                            <p className="text-gray-600">{edu.institution}</p>
-                            <p className="text-sm text-gray-500">{edu.year}</p>
-                          </div>
+                        <div key={idx} className="border-l-4 border-blue-500 pl-4">
+                          <h4 className="font-bold text-gray-900">{edu.degree}</h4>
+                          <p className="text-blue-600 font-medium">{edu.institution}</p>
+                          <p className="text-sm text-gray-500">{edu.year}</p>
                         </div>
                       ))}
                     </div>
@@ -2362,13 +2459,12 @@ export default function ViewApplicationsPage() {
                 {selectedCandidate.certifications && selectedCandidate.certifications.length > 0 && (
                   <div className="mb-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-3">Certifications</h2>
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {selectedCandidate.certifications.map((cert, idx) => (
-                        <div key={idx} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                          <div>
-                            <h4 className="font-medium text-gray-900">{cert.name}</h4>
-                            <p className="text-sm text-gray-600">{cert.issuer} • {cert.year}</p>
-                          </div>
+                        <div key={idx} className="border-l-4 border-blue-500 pl-4">
+                          <h4 className="font-bold text-gray-900">{cert.name}</h4>
+                          <p className="text-blue-600 font-medium">{cert.issuer}</p>
+                          <p className="text-sm text-gray-500">{cert.year}</p>
                         </div>
                       ))}
                     </div>
@@ -2379,13 +2475,11 @@ export default function ViewApplicationsPage() {
                 {selectedCandidate.languages && selectedCandidate.languages.length > 0 && (
                   <div className="mb-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-3">Languages</h2>
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                       {selectedCandidate.languages.map((lang, idx) => (
-                        <div key={idx} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-gray-900">{lang.name}</span>
-                            <span className="text-sm text-gray-500">({lang.proficiency})</span>
-                          </div>
+                        <div key={idx} className="border-l-4 border-blue-500 pl-4">
+                          <h4 className="font-bold text-gray-900">{lang.name}</h4>
+                          <p className="text-blue-600 font-medium">{lang.proficiency}</p>
                         </div>
                       ))}
                     </div>
@@ -2396,12 +2490,17 @@ export default function ViewApplicationsPage() {
                 {selectedCandidate.resume && (
                   <div className="mb-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-3">Resume</h2>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                      <Download className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                      <p className="text-gray-700 mb-3">Current Resume: {selectedCandidate.resume}</p>
-                      <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
-                        View Resume
-                      </button>
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-8">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                          <FileText className="w-8 h-8 text-blue-600" />
+                        </div>
+                        <p className="text-gray-700 font-medium mb-4">Current Resume</p>
+                        <p className="text-blue-600 font-semibold mb-6">{selectedCandidate.resume}</p>
+                        <button className="bg-blue-600 text-white px-8 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                          View Resume
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -2409,11 +2508,15 @@ export default function ViewApplicationsPage() {
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-3 pt-6 border-t border-gray-200">
                   <div className="grid grid-cols-2 gap-3">
-                    <button className="py-3 px-5 bg-green-50 hover:bg-green-100 text-green-700 font-semibold rounded-xl transition-colors border border-green-300">
-                      Send Message
+                    <button className={`py-3 px-5 font-semibold rounded-xl transition-colors border ${
+                      selectedCandidate.status === "shortlisted"
+                        ? "bg-red-100 hover:bg-red-200 text-red-700 border-red-400"
+                        : "bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
+                    }`}>
+                      {selectedCandidate.status === "shortlisted" ? "Move to Rejected" : "Move to Shortlist"}
                     </button>
                     <button className="py-3 px-5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">
-                      {selectedCandidate.status === "shortlisted" ? "Move to Rejected" : "Shortlist"}
+                      Send Message
                     </button>
                   </div>
                 </div>

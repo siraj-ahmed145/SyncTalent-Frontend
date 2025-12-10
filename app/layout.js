@@ -12,8 +12,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Smart Resume Screening & Job Matching",
+  title: "SyncTalent",
   description: "AI-driven candidate ranking and personalized job recommendations. Connecting the right talent with the right opportunities.",
+  icons: {
+    icon: [
+      { url: '/Icon.png', type: 'image/png' },
+    ],
+    shortcut: '/Icon.png',
+    apple: '/Icon.png',
+  },
 };
 
 export default function RootLayout({ children }) {
