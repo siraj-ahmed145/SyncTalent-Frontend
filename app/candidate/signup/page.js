@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Eye, EyeOff, Moon, Sun } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import api from '../../lib/api';
+import { SIGNUP_API } from '../../../routes/candidate/signup';
+import Loader from '../../../utils/loader';
 
 export default function CandidateSignup() {
   const router = useRouter();
@@ -66,13 +67,24 @@ export default function CandidateSignup() {
     setLoading(true);
 
     try {
-      // Store user data in localStorage
-      localStorage.setItem('candidate_id', Math.random().toString());
-      localStorage.setItem('fullName', formData.fullName);
-      localStorage.setItem('email', formData.email);
-      localStorage.setItem('userType', 'candidate');
-      
-      // Redirect to login page
+      const response = await fetch(SIGNUP_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || data.detail || 'Signup failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
       router.push('/candidate/login');
     } catch (err) {
       setError(err.message || 'Signup failed. Please try again.');
@@ -82,7 +94,8 @@ export default function CandidateSignup() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row relative">
+      {loading && <Loader text="Creating account..." />}
       {/* Left Side - Signup Form */}
       <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12 transition-colors duration-300">
         <div className="w-full max-w-md">
@@ -257,7 +270,7 @@ export default function CandidateSignup() {
             {/* Sign In Link */}
             <p className="text-center text-sm text-gray-600 dark:text-gray-400">
               Already have an account?{' '}
-              <Link href="/login" className="text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 font-medium transition-colors">
+              <Link href="/candidate/login" className="text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 font-medium transition-colors">
                 Sign In
               </Link>
             </p>

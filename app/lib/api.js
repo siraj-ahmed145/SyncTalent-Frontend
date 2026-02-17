@@ -1,10 +1,12 @@
 // app/lib/api.js
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:8000';
 
 const api = {
   // Generic request handler
   request: async (endpoint, options = {}) => {
-    const token = localStorage.getItem('token');
+    const token = typeof window !== 'undefined'
+      ? localStorage.getItem('auth_token') || localStorage.getItem('token')
+      : null;
     
     const config = {
       headers: {

@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Eye, EyeOff, Moon, Sun } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import api from '../../lib/api';
+import { SIGNUP_API } from '../../../routes/employer/signup';
+import Loader from '../../../utils/loader';
 
 export default function EmployerSignup() {
   const router = useRouter();
@@ -66,13 +67,24 @@ export default function EmployerSignup() {
     setLoading(true);
 
     try {
-      // Store user data in localStorage
-      localStorage.setItem('employer_id', Math.random().toString());
-      localStorage.setItem('companyName', formData.companyName);
-      localStorage.setItem('email', formData.email);
-      localStorage.setItem('userType', 'employer');
-      
-      // Redirect to login page
+      const response = await fetch(SIGNUP_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyName: formData.companyName,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || data.detail || 'Signup failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
       router.push('/employer/login');
     } catch (err) {
       setError(err.message || 'Signup failed. Please try again.');
@@ -82,7 +94,8 @@ export default function EmployerSignup() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row relative">
+      {loading && <Loader text="Creating account..." />}
       {/* Left Side - Signup Form */}
       <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12 transition-colors duration-300">
         <div className="w-full max-w-md">

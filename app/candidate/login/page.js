@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Eye, EyeOff, Moon, Sun } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import api from '../../lib/api';
+import { setSession, isUserLoggedIn } from '../../../utils/session';
+import { LOGIN_API } from '../../../routes/candidate/login';
+import Loader from '../../../utils/loader';
 
 export default function CandidateLogin() {
   const router = useRouter();
@@ -27,6 +29,12 @@ export default function CandidateLogin() {
     }
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isUserLoggedIn()) {
+      router.push('/candidate/my-profile');
+    }
+  }, [router]);
+
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     if (!darkMode) {
@@ -44,20 +52,42 @@ export default function CandidateLogin() {
     setLoading(true);
 
     try {
-      // Validate form fields
       if (!formData.email || !formData.password) {
         setError('Please fill in all fields');
         setLoading(false);
         return;
       }
 
-      // Store user data in localStorage
-      localStorage.setItem('candidate_id', '12345');
-      localStorage.setItem('fullName', 'John Doe');
-      localStorage.setItem('userType', 'candidate');
-      
-      // Redirect to profile
-      router.push('/candidate/my-profile');
+      if (isUserLoggedIn()) {
+        setError('Another user is already logged in. Please logout first.');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(LOGIN_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || 'Login failed. Please check your credentials.');
+        setLoading(false);
+        return;
+      }
+
+      const token = data?.access_token;
+      if (token && data?.candidiate_id) {
+        setSession(data, token, 1440);
+        router.push('/candidate/my-profile');
+      } else {
+        setError('Invalid response from server.');
+      }
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
@@ -66,7 +96,8 @@ export default function CandidateLogin() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row relative">
+      {loading && <Loader text="Signing in..." />}
       {/* Left Side - Login Form */}
       <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12 transition-colors duration-300">
         <div className="w-full max-w-md">

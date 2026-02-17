@@ -2,14 +2,36 @@
 import { Bell, MessageCircleMore, Search, Settings, User, LogOut, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
+import { clearSession } from "../../utils/session";
+import { clearEmployerSession } from "../../utils/employerSession";
 
 export default function Topbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const profileButtonRef = useRef(null);
+
+  const handleSignOut = () => {
+    if (pathname.startsWith('/candidate')) {
+      clearSession();
+    } else if (pathname.startsWith('/employer')) {
+      clearEmployerSession();
+    } else {
+      clearSession();
+      clearEmployerSession();
+    }
+    setIsDropdownOpen(false);
+    if (pathname.startsWith("/candidate")) {
+      router.push("/candidate/login");
+    } else if (pathname.startsWith("/employer")) {
+      router.push("/employer/login");
+    } else {
+      router.push("/");
+    }
+  };
 
   // Function to get page name from pathname
   const getPageName = (path) => {
@@ -180,28 +202,16 @@ export default function Topbar() {
               <div className="my-2 mx-5 border-t border-white/10"></div>
 
               {/* Logout */}
-              {isCandidate ? (
-                <Link href="/candidate/login" className="w-full px-5 py-2.5 flex items-center gap-3 text-white hover:bg-white/10 transition-colors">
-                  <div className="w-9 h-9 flex items-center justify-center">
-                    <LogOut className="w-6 h-6" />
-                  </div>
-                  <span className="text-base font-semibold">Sign Out</span>
-                </Link>
-              ) : isEmployer ? (
-                <Link href="/employer/login" className="w-full px-5 py-2.5 flex items-center gap-3 text-white hover:bg-white/10 transition-colors">
-                  <div className="w-9 h-9 flex items-center justify-center">
-                    <LogOut className="w-6 h-6" />
-                  </div>
-                  <span className="text-base font-semibold">Sign Out</span>
-                </Link>
-              ) : (
-                <button className="w-full px-5 py-2.5 flex items-center gap-3 text-white hover:bg-white/10 transition-colors">
-                  <div className="w-9 h-9 flex items-center justify-center">
-                    <LogOut className="w-6 h-6" />
-                  </div>
-                  <span className="text-base font-semibold">Sign Out</span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="w-full px-5 py-2.5 flex items-center gap-3 text-white hover:bg-white/10 transition-colors text-left"
+              >
+                <div className="w-9 h-9 flex items-center justify-center">
+                  <LogOut className="w-6 h-6" />
+                </div>
+                <span className="text-base font-semibold">Sign Out</span>
+              </button>
             </div>
           </div>
         )}

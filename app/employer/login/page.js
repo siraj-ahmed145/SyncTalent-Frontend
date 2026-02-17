@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Eye, EyeOff, Moon, Sun } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import api from '../../lib/api';
+import { setEmployerSession, isEmployerLoggedIn } from '../../../utils/employerSession';
+import { LOGIN_API } from '../../../routes/employer/login';
+import Loader from '../../../utils/loader';
 
 export default function EmployerLogin() {
   const router = useRouter();
@@ -27,6 +29,12 @@ export default function EmployerLogin() {
     }
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && isEmployerLoggedIn()) {
+      router.push('/employer/my-profile');
+    }
+  }, [router]);
+
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     if (!darkMode) {
@@ -44,20 +52,43 @@ export default function EmployerLogin() {
     setLoading(true);
 
     try {
-      // Validate form fields
       if (!formData.email || !formData.password) {
         setError('Please fill in all fields');
         setLoading(false);
         return;
       }
 
-      // Store user data in localStorage
-      localStorage.setItem('employer_id', '12345');
-      localStorage.setItem('companyName', 'Tech Company');
-      localStorage.setItem('userType', 'employer');
-      
-      // Redirect to profile
-      router.push('/employer/my-profile');
+      if (isEmployerLoggedIn()) {
+        setError('Another user is already logged in. Please logout first.');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(LOGIN_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || data.detail || 'Login failed. Please check your credentials.');
+        setLoading(false);
+        return;
+      }
+
+      const token = data?.access_token;
+      const employerId = data?.employer_id ?? data?.id;
+      if (token && employerId) {
+        setEmployerSession(data, token, 1440);
+        router.push('/employer/my-profile');
+      } else {
+        setError('Invalid response from server.');
+      }
     } catch (err) {
       setError(err.message || 'Login failed. Please check your credentials.');
     } finally {
@@ -66,7 +97,8 @@ export default function EmployerLogin() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row relative">
+      {loading && <Loader text="Signing in..." />}
       {/* Left Side - Login Form */}
       <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12 transition-colors duration-300">
         <div className="w-full max-w-md">
