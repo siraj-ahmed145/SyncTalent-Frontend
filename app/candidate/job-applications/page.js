@@ -1,197 +1,121 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { MapPin, Briefcase, Clock, FileText, CheckCircle, XCircle, Loader, Building2, DollarSign, FileCheck } from 'lucide-react';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
+import { GET_APPLICATIONS_API } from '../../../routes/candidate/applyJob';
 
-// Dummy application data for UI
-const APPLICATIONS = [
-  {
-    id: 1,
-    title: "Senior Software Engineer",
-    company: "TechCorp Solutions",
-    location: "San Francisco, CA",
-    jobType: "Full-time",
-    workMode: "Hybrid",
-    salary: "$120k - $160k",
-    level: "Senior",
-    experience: "5+ years",
-    appliedDate: "Nov 20, 2025",
-    status: "Shortlisted",
-    matchScore: 92,
-    tags: ["React", "Node.js", "AWS", "TypeScript", "Docker"],
-    description: "We're seeking an experienced Senior Software Engineer to lead our engineering team. You'll work on cutting-edge projects using React, Node.js, and AWS...",
-  },
-  {
-    id: 2,
-    title: "Machine Learning Engineer",
-    company: "AI Innovations Inc",
-    location: "Remote",
-    jobType: "Full-time",
-    workMode: "Remote",
-    salary: "$140k - $180k",
-    level: "Senior",
-    experience: "5+ years",
-    appliedDate: "Nov 18, 2025",
-    status: "In Progress",
-    matchScore: 88,
-    tags: ["Python", "TensorFlow", "PyTorch", "Machine Learning", "NLP"],
-    description: "Join our ML team to build state-of-the-art machine learning models. Work on NLP, computer vision, recommendation systems. Experience with TensorFlow, PyTorch...",
-  },
-  {
-    id: 3,
-    title: "Product Manager",
-    company: "StartupXYZ",
-    location: "New York, NY",
-    jobType: "Full-time",
-    workMode: "On-site",
-    salary: "$130k - $170k",
-    level: "Mid-Level",
-    experience: "3-5 years",
-    appliedDate: "Nov 15, 2025",
-    status: "Rejected",
-    matchScore: 75,
-    tags: ["Product Strategy", "Agile", "User Research", "Analytics"],
-    description: "Lead product development for our SaaS platform. Define product roadmap, work with cross-functional teams, drive product strategy. 5+ years of product management experience...",
-  },
-  {
-    id: 4,
-    title: "Full Stack Developer",
-    company: "WebDev Agency",
-    location: "Austin, TX",
-    jobType: "Full-time",
-    workMode: "Hybrid",
-    salary: "$100k - $140k",
-    level: "Mid-Level",
-    experience: "2-4 years",
-    appliedDate: "Nov 12, 2025",
-    status: "In Progress",
-    matchScore: 85,
-    tags: ["React", "Node.js", "MongoDB", "JavaScript", "REST API"],
-    description: "Build modern web applications using React, Node.js, and MongoDB. Work in a collaborative environment with designers and other developers...",
-  },
-  {
-    id: 5,
-    title: "DevOps Engineer",
-    company: "CloudScale Systems",
-    location: "Remote",
-    jobType: "Full-time",
-    workMode: "Remote",
-    salary: "$130k - $170k",
-    level: "Senior",
-    experience: "5+ years",
-    appliedDate: "Nov 10, 2025",
-    status: "Shortlisted",
-    matchScore: 95,
-    tags: ["Kubernetes", "Docker", "AWS", "CI/CD", "Terraform"],
-    description: "Manage and optimize our cloud infrastructure. Implement CI/CD pipelines, monitor system performance, ensure high availability...",
-  },
-  {
-    id: 6,
-    title: "UX/UI Designer",
-    company: "Design Studio Pro",
-    location: "Los Angeles, CA",
-    jobType: "Full-time",
-    workMode: "On-site",
-    salary: "$90k - $130k",
-    level: "Mid-Level",
-    experience: "2-4 years",
-    appliedDate: "Nov 8, 2025",
-    status: "In Progress",
-    matchScore: 78,
-    tags: ["Figma", "UI Design", "UX Research", "Prototyping", "User Testing"],
-    description: "Create beautiful and intuitive user interfaces for web/mobile applications. Proficiency in Figma valued. Collaborate with developers...",
-  },
-  {
-    id: 7,
-    title: "Data Scientist",
-    company: "Analytics Pro",
-    location: "Boston, MA",
-    workMode: "Hybrid",
-    salary: "$110k - $150k",
-    level: "Mid-Level",
-    appliedDate: "Nov 5, 2025",
-    status: "Rejected",
-    matchScore: 68,
-    tags: ["Python", "R", "SQL", "Statistics", "Data Visualization"],
-    description: "Analyze complex datasets and provide actionable insights. Build predictive models and present findings to stakeholders...",
-  },
-  {
-    id: 8,
-    title: "Backend Developer",
-    company: "Tech Innovators",
-    location: "Seattle, WA",
-    workMode: "Full-time",
-    salary: "$115k - $145k",
-    level: "Senior",
-    appliedDate: "Nov 3, 2025",
-    status: "Shortlisted",
-    matchScore: 90,
-    tags: ["Java", "Spring Boot", "PostgreSQL", "Microservices"],
-    description: "Design and implement scalable backend systems. Work with modern technologies and cloud-native architecture...",
-  },
-];
+
 
 export default function CandidateApplicationsPage() {
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState("All");
+  const [applications, setApplications] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Calculate statistics
-  const totalApplied = APPLICATIONS.length;
-  const shortlisted = APPLICATIONS.filter(app => app.status === "Shortlisted").length;
-  const rejected = APPLICATIONS.filter(app => app.status === "Rejected").length;
-  const inProgress = APPLICATIONS.filter(app => app.status === "In Progress").length;
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (!token) {
+          setError('Authentication required. Please login first.');
+          setApplications([]);
+          return;
+        }
 
-  // Filter applications
-  const filteredApplications = statusFilter === "All" 
-    ? APPLICATIONS 
-    : APPLICATIONS.filter(app => app.status === statusFilter);
+        const res = await fetch(GET_APPLICATIONS_API, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-  // Get status badge styling
+        if (!res.ok) {
+          throw new Error(`Failed to fetch applications: ${res.status} ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        
+        const mappedApplications = (data.applications || []).map(app => ({
+          id: app.application_id || app.id,
+          title: app.jobTitle,
+          company: app.companyName,
+          location: app.jobLocation || 'Not specified',
+          jobType: app.jobType || 'Full-time',
+          workMode: app.workMode || 'Hybrid',
+          salary: app.salary || 'Not specified',
+          level: app.experience || 'Not specified',
+          experience: app.experience || 'Not specified',
+          appliedDate: app.applied_at
+            ? new Date(app.applied_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+            : 'N/A',
+          status: app.status || 'In Progress',
+          // Keep null as null — don't coerce to 0
+          matchScore: app.similarity_score != null ? Math.round(app.similarity_score) : null,
+          tags: Array.isArray(app.skills) ? app.skills : [],
+          description: app.description || 'No description available',
+        }));
+
+        setApplications(mappedApplications);
+      } catch (err) {
+        console.error('Error fetching applications:', err);
+        setError(err.message || 'Failed to fetch applications');
+        setApplications([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchApplications();
+  }, []);
+
+  const totalApplied = applications.length;
+  const shortlisted = applications.filter(app => app.status === "Shortlisted").length;
+  const rejected = applications.filter(app => app.status === "Rejected").length;
+  const inProgress = applications.filter(app => app.status === "In Progress").length;
+
+  const filteredApplications = statusFilter === "All"
+    ? applications
+    : applications.filter(app => app.status === statusFilter);
+
   const getStatusBadge = (status) => {
     switch(status) {
       case "Shortlisted":
-        return {
-          bg: "bg-green-100",
-          text: "text-green-700",
-          border: "border-green-200",
-          icon: <CheckCircle className="w-4 h-4" />
-        };
+        return { bg: "bg-green-100", text: "text-green-700", border: "border-green-200", icon: <CheckCircle className="w-4 h-4" /> };
       case "Rejected":
-        return {
-          bg: "bg-red-100",
-          text: "text-red-700",
-          border: "border-red-200",
-          icon: <XCircle className="w-4 h-4" />
-        };
+        return { bg: "bg-red-100", text: "text-red-700", border: "border-red-200", icon: <XCircle className="w-4 h-4" /> };
       case "In Progress":
-        return {
-          bg: "bg-purple-100",
-          text: "text-purple-700",
-          border: "border-purple-200",
-          icon: <Loader className="w-4 h-4" />
-        };
+        return { bg: "bg-purple-100", text: "text-purple-700", border: "border-purple-200", icon: <Loader className="w-4 h-4" /> };
       default:
-        return {
-          bg: "bg-gray-100",
-          text: "text-gray-700",
-          border: "border-gray-200",
-          icon: <FileText className="w-4 h-4" />
-        };
+        return { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-200", icon: <FileText className="w-4 h-4" /> };
     }
   };
 
-  // Get match score color
+  // Returns color based on score — null score gets a neutral style
   const getMatchScoreColor = (score) => {
+    if (score === null) return "text-gray-400";
     if (score >= 90) return "text-green-600";
     if (score >= 75) return "text-blue-600";
     if (score >= 60) return "text-orange-600";
     return "text-red-600";
   };
 
-  // Get filter button colors
+  // Returns a label for the score ring background
+  const getMatchScoreBg = (score) => {
+    if (score === null) return "bg-gray-50 border-gray-200";
+    if (score >= 90) return "bg-green-50 border-green-200";
+    if (score >= 75) return "bg-blue-50 border-blue-200";
+    if (score >= 60) return "bg-orange-50 border-orange-200";
+    return "bg-red-50 border-red-200";
+  };
+
   const getFilterColors = (filter) => {
     switch(filter) {
       case "Shortlisted":
@@ -206,7 +130,7 @@ export default function CandidateApplicationsPage() {
         return statusFilter === filter
           ? "bg-red-600 text-white shadow-md"
           : "bg-white text-gray-600 border border-gray-200 hover:border-red-500 hover:text-red-600";
-      default: // "All"
+      default:
         return statusFilter === filter
           ? "bg-blue-600 text-white shadow-md"
           : "bg-white text-gray-600 border border-gray-200 hover:border-blue-500 hover:text-blue-600";
@@ -221,6 +145,7 @@ export default function CandidateApplicationsPage() {
         <main className="p-6 md:p-10 flex-1">
           <section className="w-full pb-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+
               {/* Page Header */}
               <div className="pt-4 pb-6">
                 <div className="flex items-center gap-3 mb-2">
@@ -236,7 +161,6 @@ export default function CandidateApplicationsPage() {
 
               {/* Statistics Scorecard */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                {/* Total Applications */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
@@ -248,8 +172,6 @@ export default function CandidateApplicationsPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Shortlisted */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
@@ -261,8 +183,6 @@ export default function CandidateApplicationsPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Rejected */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
@@ -274,8 +194,6 @@ export default function CandidateApplicationsPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* In Progress */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
@@ -307,8 +225,30 @@ export default function CandidateApplicationsPage() {
                 </p>
               </div>
 
-              {/* Applications Grid */}
-              {filteredApplications.length === 0 ? (
+              {/* Loading State */}
+              {isLoading ? (
+                <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Loader className="w-8 h-8 text-gray-400 animate-spin" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Applications</h3>
+                  <p className="text-gray-500">Fetching your job applications...</p>
+                </div>
+              ) : error ? (
+                <div className="bg-white rounded-2xl border border-red-200 p-12 text-center">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <XCircle className="w-8 h-8 text-red-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Error</h3>
+                  <p className="text-gray-500 mb-4">{error}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : filteredApplications.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <FileText className="w-8 h-8 text-gray-400" />
@@ -321,32 +261,39 @@ export default function CandidateApplicationsPage() {
                   {filteredApplications.map((app) => {
                     const statusBadge = getStatusBadge(app.status);
                     const matchScoreColor = getMatchScoreColor(app.matchScore);
-                    
+                    const matchScoreBg = getMatchScoreBg(app.matchScore);
+
                     return (
                       <div
                         key={app.id}
                         className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex flex-col h-full transition-all hover:shadow-lg hover:border-blue-200"
                       >
-                        {/* Header with Title, Experience Tag and Match Score */}
+                        {/* Header */}
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-1">
-                            <h3 className="text-lg md:text-xl font-semibold text-gray-900">
-                              {app.title}
-                            </h3>
+                              <h3 className="text-lg md:text-xl font-semibold text-gray-900">
+                                {app.title}
+                              </h3>
                               <span className="px-3 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap">
                                 {app.experience}
                               </span>
                             </div>
                             <p className="text-sm font-medium text-blue-600">{app.company}</p>
                           </div>
-                          
-                          {/* Match Score Badge */}
-                          <div className="ml-3 text-center bg-linear-to-br from-gray-50 to-gray-100 rounded-xl px-3 py-2 border border-gray-200 shadow-sm shrink-0">
+
+                          {/* Match Score Badge — shows N/A when no resume was scored */}
+                          <div className={`ml-3 text-center rounded-xl px-3 py-2 border shadow-sm shrink-0 ${matchScoreBg}`}>
                             <div className="text-xs text-gray-500 font-medium mb-0.5">Match</div>
-                            <div className={`text-2xl font-bold ${matchScoreColor}`}>
-                              {app.matchScore}%
-                            </div>
+                            {app.matchScore !== null ? (
+                              <div className={`text-2xl font-bold ${matchScoreColor}`}>
+                                {app.matchScore}%
+                              </div>
+                            ) : (
+                              <div className="text-sm font-semibold text-gray-400 leading-6">
+                                N/A
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -375,17 +322,19 @@ export default function CandidateApplicationsPage() {
 
                         {/* Skills */}
                         <div className="flex flex-wrap gap-2 pb-3 mb-2 border-b border-gray-200">
-                          {app.tags.map((tag) => (
+                          {app.tags.length > 0 ? app.tags.map((tag) => (
                             <span
                               key={tag}
                               className="px-2 py-0.5 bg-zinc-100 text-xs font-medium rounded border border-zinc-200 text-zinc-600"
                             >
                               {tag}
                             </span>
-                          ))}
+                          )) : (
+                            <span className="text-xs text-gray-400">No skills listed</span>
+                          )}
                         </div>
 
-                        {/* Footer with Status and Date */}
+                        {/* Footer */}
                         <div className="mt-auto pt-3 flex items-center justify-between">
                           <span className="text-xs text-gray-400">Applied: {app.appliedDate}</span>
                           <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${statusBadge.bg} ${statusBadge.text} ${statusBadge.border}`}>
@@ -405,4 +354,3 @@ export default function CandidateApplicationsPage() {
     </div>
   );
 }
-

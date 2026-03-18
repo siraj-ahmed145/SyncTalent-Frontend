@@ -4,378 +4,19 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
-import { FileText, MapPin, ArrowLeft, CheckCircle } from 'lucide-react';
+import { FileText, MapPin, ArrowLeft } from 'lucide-react';
+import Popup, { POPUP_TIMEOUT } from '../../components/Popup';
+import Loader from '../../../utils/loader';
+import { GET_JOBS_API } from '../../../routes/employer/getJobs';
+import { UPDATE_JOB_API } from '../../../routes/employer/updateJob';
 
-// Dummy data for jobs (same as in dashboard/view-job)
-const JOBS = [
-  {
-    id: 1,
-    title: "Frontend Developer",
-    location: "Lahore, Pakistan",
-    workMode: "On-site",
-    jobType: "Full-time",
-    level: "Senior",
-    skills: ["React", "Javascript", "Tailwind CSS"],
-    applications: 14,
-    time: "2 days ago",
-    status: "Active",
-    salary: "$80k - $120k",
-    postedDate: "Nov 27, 2025",
-    description: "Join our fast-paced team to create beautiful and performant web interfaces. You'll use React, Tailwind CSS, and newest technologies to build scalable products, work closely with UI/UX, and deliver first-class user experiences.",
-    responsibilities: [
-      "Develop and maintain user-facing features using React.js",
-      "Build reusable components and front-end libraries",
-      "Collaborate with UI/UX designers to implement pixel-perfect designs",
-      "Optimize applications for maximum speed and scalability",
-      "Participate in code reviews and provide constructive feedback"
-    ],
-    requirements: [
-      "5+ years of experience with React and modern JavaScript",
-      "Strong understanding of HTML5, CSS3, and responsive design",
-      "Experience with state management libraries (Redux, MobX)",
-      "Familiarity with RESTful APIs and modern authorization mechanisms",
-      "Bachelor's degree in Computer Science or related field"
-    ],
-    benefits: [
-      "Competitive salary and equity package",
-      "Health, dental, and vision insurance",
-      "Flexible work hours and remote options",
-      "Professional development budget",
-      "Modern office with latest technology"
-    ]
-  },
-  {
-    id: 2,
-    title: "Backend Engineer",
-    location: "Remote",
-    workMode: "Remote",
-    jobType: "Part-time",
-    level: "Junior",
-    skills: ["Node.js", "Express", "MongoDB"],
-    applications: 8,
-    time: "4 days ago",
-    status: "Active",
-    salary: "$50k - $70k",
-    postedDate: "Nov 25, 2025",
-    description: "We are seeking a backend engineer to design RESTful APIs and maintain resilient server-side infrastructure. Responsibilities include database management, system integration, and enhancing real-time features of our product stack.",
-    responsibilities: [
-      "Design and implement RESTful APIs using Node.js and Express",
-      "Manage MongoDB databases and optimize queries",
-      "Integrate third-party services and APIs",
-      "Write clean, maintainable, and well-documented code",
-      "Collaborate with frontend developers on API design"
-    ],
-    requirements: [
-      "2+ years of experience with Node.js and Express",
-      "Strong knowledge of MongoDB and database design",
-      "Understanding of RESTful API principles",
-      "Experience with version control (Git)",
-      "Good problem-solving and communication skills"
-    ],
-    benefits: [
-      "Fully remote position",
-      "Flexible part-time hours (20-30 hours/week)",
-      "Opportunity to work with modern tech stack",
-      "Collaborative team environment",
-      "Growth opportunities"
-    ]
-  },
-  {
-    id: 3,
-    title: "Full Stack Developer",
-    location: "Karachi, Pakistan",
-    workMode: "Hybrid",
-    jobType: "Contract",
-    level: "Junior",
-    skills: ["React", "Node.js", "AWS"],
-    applications: 21,
-    time: "1 week ago",
-    status: "Closed",
-    salary: "$60k - $90k",
-    postedDate: "Nov 22, 2025",
-    description: "Take ownership of projects from frontend through backend deployment. You'll architect solutions, code both client/server, automate deployments on AWS, and collaborate across disciplines to launch new features.",
-    responsibilities: [
-      "Develop full-stack applications using React and Node.js",
-      "Deploy and manage applications on AWS infrastructure",
-      "Design database schemas and implement data models",
-      "Write unit and integration tests",
-      "Participate in agile development processes"
-    ],
-    requirements: [
-      "3+ years of full-stack development experience",
-      "Proficiency in React, Node.js, and AWS services",
-      "Experience with CI/CD pipelines",
-      "Knowledge of containerization (Docker)",
-      "Strong understanding of software design patterns"
-    ],
-    benefits: [
-      "6-month contract with extension possibility",
-      "Hybrid work model (3 days office, 2 days remote)",
-      "Access to modern development tools",
-      "Professional learning opportunities",
-      "Collaborative startup environment"
-    ]
-  },
-  {
-    id: 4,
-    title: "UI/UX Designer",
-    location: "Islamabad, Pakistan",
-    workMode: "On-site",
-    jobType: "Full-time",
-    level: "Mid-Level",
-    skills: ["Figma", "Adobe XD", "Prototyping"],
-    applications: 12,
-    time: "3 days ago",
-    status: "Active",
-    salary: "$55k - $85k",
-    postedDate: "Nov 26, 2025",
-    description: "Design beautiful user interfaces and create intuitive user experiences. Work with product teams to translate requirements into elegant designs that users love.",
-    responsibilities: [
-      "Create wireframes, prototypes, and high-fidelity designs",
-      "Conduct user research and usability testing",
-      "Collaborate with developers to ensure design implementation",
-      "Maintain and evolve design system",
-      "Present design concepts to stakeholders"
-    ],
-    requirements: [
-      "3-5 years of UI/UX design experience",
-      "Expert proficiency in Figma and Adobe XD",
-      "Strong portfolio demonstrating design process",
-      "Understanding of user-centered design principles",
-      "Excellent communication and presentation skills"
-    ],
-    benefits: [
-      "Competitive salary package",
-      "Health insurance coverage",
-      "Annual design conference budget",
-      "Latest design tools and software",
-      "Creative and collaborative work environment"
-    ]
-  },
-  {
-    id: 5,
-    title: "DevOps Engineer",
-    location: "Remote",
-    workMode: "Remote",
-    jobType: "Full-time",
-    level: "Senior",
-    skills: ["Docker", "Kubernetes", "AWS", "CI/CD"],
-    applications: 18,
-    time: "5 days ago",
-    status: "Active",
-    salary: "$90k - $130k",
-    postedDate: "Nov 24, 2025",
-    description: "Build and maintain scalable infrastructure. Implement CI/CD pipelines, monitor systems, and ensure high availability of our services.",
-    responsibilities: [
-      "Design and implement CI/CD pipelines",
-      "Manage Kubernetes clusters and containerized applications",
-      "Monitor system performance and troubleshoot issues",
-      "Automate infrastructure provisioning using Terraform",
-      "Implement security best practices"
-    ],
-    requirements: [
-      "5+ years of DevOps experience",
-      "Strong knowledge of Docker and Kubernetes",
-      "Experience with AWS services (EC2, S3, RDS, etc.)",
-      "Proficiency in scripting (Bash, Python)",
-      "Understanding of networking and security concepts"
-    ],
-    benefits: [
-      "Fully remote position with flexible hours",
-      "Top-tier compensation and equity",
-      "Learning and certification budget",
-      "Latest hardware and tools",
-      "Work-life balance focused culture"
-    ]
-  },
-  {
-    id: 6,
-    title: "Data Analyst",
-    location: "Karachi, Pakistan",
-    workMode: "Hybrid",
-    jobType: "Full-time",
-    level: "Junior",
-    skills: ["Python", "SQL", "Excel", "Power BI"],
-    applications: 16,
-    time: "1 week ago",
-    status: "Closed",
-    salary: "$45k - $65k",
-    postedDate: "Nov 22, 2025",
-    description: "Analyze data to extract meaningful insights. Create reports and dashboards to help stakeholders make data-driven decisions.",
-    responsibilities: [
-      "Analyze large datasets to identify trends and patterns",
-      "Create interactive dashboards using Power BI",
-      "Write SQL queries to extract and manipulate data",
-      "Prepare reports and presentations for stakeholders",
-      "Collaborate with teams to understand data needs"
-    ],
-    requirements: [
-      "2+ years of data analysis experience",
-      "Strong SQL and Excel skills",
-      "Experience with Python for data analysis",
-      "Proficiency in Power BI or similar tools",
-      "Analytical mindset with attention to detail"
-    ],
-    benefits: [
-      "Hybrid work arrangement",
-      "Health insurance",
-      "Professional development opportunities",
-      "Modern office facilities",
-      "Friendly team culture"
-    ]
-  },
-  {
-    id: 7,
-    title: "Mobile App Developer",
-    location: "Lahore, Pakistan",
-    workMode: "On-site",
-    jobType: "Full-time",
-    level: "Senior",
-    skills: ["React Native", "Flutter", "Swift"],
-    applications: 22,
-    time: "3 days ago",
-    status: "Active",
-    salary: "$70k - $110k",
-    postedDate: "Nov 26, 2025",
-    description: "Develop high-performance mobile applications for iOS and Android. Create seamless user experiences and maintain code quality standards.",
-    responsibilities: [
-      "Develop cross-platform mobile applications using React Native or Flutter",
-      "Optimize mobile app performance and user experience",
-      "Integrate backend APIs and third-party services",
-      "Participate in code reviews and best practices",
-      "Release and manage app store submissions"
-    ],
-    requirements: [
-      "4+ years of mobile development experience",
-      "Proficiency in React Native or Flutter",
-      "Understanding of iOS and Android platforms",
-      "Experience with mobile testing frameworks",
-      "Strong problem-solving skills"
-    ],
-    benefits: [
-      "Competitive salary and bonus",
-      "Health and wellness program",
-      "Latest development devices",
-      "Learning and conference budget",
-      "Flexible work arrangements"
-    ]
-  },
-  {
-    id: 8,
-    title: "Cloud Architect",
-    location: "Remote",
-    workMode: "Remote",
-    jobType: "Full-time",
-    level: "Senior",
-    skills: ["AWS", "Azure", "Terraform"],
-    applications: 11,
-    time: "6 days ago",
-    status: "Active",
-    salary: "$120k - $160k",
-    postedDate: "Nov 23, 2025",
-    description: "Design and implement scalable cloud infrastructure solutions. Lead cloud migration initiatives and optimize cloud costs.",
-    responsibilities: [
-      "Design cloud architecture for scalability and reliability",
-      "Lead cloud migration projects",
-      "Implement security best practices in cloud infrastructure",
-      "Optimize cloud costs and resource utilization",
-      "Provide technical guidance to development teams"
-    ],
-    requirements: [
-      "7+ years of cloud architecture experience",
-      "Expert knowledge of AWS or Azure",
-      "Experience with Infrastructure as Code (Terraform)",
-      "Strong understanding of cloud security",
-      "Leadership and communication skills"
-    ],
-    benefits: [
-      "Highest tier compensation",
-      "Stock options and equity",
-      "Unlimited learning budget",
-      "Fully remote with flexible hours",
-      "Executive perks and benefits"
-    ]
-  },
-  {
-    id: 9,
-    title: "QA Engineer",
-    location: "Karachi, Pakistan",
-    workMode: "Hybrid",
-    jobType: "Full-time",
-    level: "Mid-Level",
-    skills: ["Selenium", "TestNG", "JIRA"],
-    applications: 9,
-    time: "4 days ago",
-    status: "Active",
-    salary: "$40k - $60k",
-    postedDate: "Nov 25, 2025",
-    description: "Ensure product quality through comprehensive testing. Develop automated test scripts and report quality metrics.",
-    responsibilities: [
-      "Design and execute automated test suites",
-      "Perform manual and exploratory testing",
-      "Report and track software defects",
-      "Collaborate with development teams",
-      "Maintain test documentation"
-    ],
-    requirements: [
-      "2+ years of QA testing experience",
-      "Proficiency in test automation frameworks",
-      "Knowledge of SQL and databases",
-      "Experience with testing tools like JIRA",
-      "Strong attention to detail"
-    ],
-    benefits: [
-      "Health insurance",
-      "Flexible work hours",
-      "Professional training",
-      "Modern testing tools",
-      "Career growth opportunities"
-    ]
-  },
-  {
-    id: 10,
-    title: "Product Manager",
-    location: "Lahore, Pakistan",
-    workMode: "Hybrid",
-    jobType: "Full-time",
-    level: "Senior",
-    skills: ["Product Strategy", "Analytics", "Leadership"],
-    applications: 15,
-    time: "2 days ago",
-    status: "Active",
-    salary: "$80k - $120k",
-    postedDate: "Nov 27, 2025",
-    description: "Lead product vision and strategy. Manage product roadmap and oversee product launches.",
-    responsibilities: [
-      "Define product vision and strategy",
-      "Manage product roadmap and prioritization",
-      "Conduct market research and competitive analysis",
-      "Lead cross-functional product teams",
-      "Monitor product metrics and KPIs"
-    ],
-    requirements: [
-      "5+ years of product management experience",
-      "Strong analytical and strategic thinking skills",
-      "Experience with product management tools",
-      "Excellent communication skills",
-      "Track record of successful product launches"
-    ],
-    benefits: [
-      "Competitive salary and bonus",
-      "Stock options",
-      "Leadership development program",
-      "Hybrid work flexibility",
-      "Executive coaching"
-    ]
-  },
-];
+// job data will be fetched from backend
 
 export default function EditJobPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const jobId = parseInt(searchParams.get("jobId"));
   
-  const selectedJob = JOBS.find(job => job.id === jobId);
 
   const [formData, setFormData] = useState({
     jobTitle: '',
@@ -389,48 +30,123 @@ export default function EditJobPage() {
     responsibilities: [],
     requirements: [],
     benefits: [],
+    // use same field name as create-job-post for consistency
     shortlistedCandidates: '',
   });
 
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
   const [skillInput, setSkillInput] = useState('');
+
+  // load job data from API
+  useEffect(() => {
+    const loadJob = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const resp = await fetch(GET_JOBS_API, { method: 'GET', headers });
+        const data = await resp.json();
+
+        if (!resp.ok) {
+          setError(data?.message || data?.detail || 'Failed to fetch jobs');
+          setJob(null);
+          return;
+        }
+
+        let jobs = [];
+        if (Array.isArray(data)) {
+          jobs = data;
+        } else if (data.jobs && Array.isArray(data.jobs)) {
+          jobs = data.jobs;
+        } else if (data.data && Array.isArray(data.data)) {
+          jobs = data.data;
+        }
+
+        const found = jobs.find(j => j.id === jobId || j.job_id === jobId);
+        if (found) {
+          // compute the shortlist value once
+          const loadedShortlist = (
+            found.candidateshortlist ??
+            found.candidiateshortlist ??
+            found.shortlistedCandidates ??
+            found.applications ??
+            found.applications_count ??
+            ''
+          ).toString();
+          setJob(found);
+          // populate form using same key fallbacks as view-job-post
+          setFormData({
+            jobTitle: found.title ?? found.jobTitle ?? '',
+            jobDescription: found.description ?? found.jobDescription ?? '',
+            requiredExperience: found.level ?? found.requiredExperience ?? '',
+            salaryRange: found.salary ?? found.salaryRange ?? '',
+            jobType: (found.jobType ?? found.job_type ?? '').toLowerCase(),
+            workMode: (found.workMode ?? found.work_mode ?? '').toLowerCase(),
+            jobLocation: found.location ?? found.jobLocation ?? '',
+            skills: found.skills ?? [],
+            // some responses use keyResponsibilities instead of responsibilities
+            responsibilities: found.responsibilities ?? found.keyResponsibilities ?? [],
+            requirements: found.requirements ?? [],
+            benefits: found.benefits ?? [],
+            // use same field name as create-job-post for consistency
+            shortlistedCandidates: loadedShortlist,
+          });
+          setOriginalShortlist(loadedShortlist);
+        } else {
+          setError('Job not found');
+          setJob(null);
+        }
+      } catch (err) {
+        setError(err?.message || 'Failed to load job');
+        setJob(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (jobId) loadJob();
+  }, [jobId]);
   const [responsibilityInput, setResponsibilityInput] = useState('');
   const [requirementInput, setRequirementInput] = useState('');
   const [benefitInput, setBenefitInput] = useState('');
+  const [originalShortlist, setOriginalShortlist] = useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  // Initialize form with job data
-  useEffect(() => {
-    if (selectedJob) {
-      setFormData({
-        jobTitle: selectedJob.title,
-        jobDescription: selectedJob.description,
-        requiredExperience: selectedJob.level,
-        salaryRange: selectedJob.salary,
-        jobType: selectedJob.jobType.toLowerCase(),
-        workMode: selectedJob.workMode.toLowerCase(),
-        jobLocation: selectedJob.location,
-        skills: selectedJob.skills || [],
-        responsibilities: selectedJob.responsibilities || [],
-        requirements: selectedJob.requirements || [],
-        benefits: selectedJob.benefits || [],
-        shortlistedCandidates: '10',
-      });
-    }
-  }, [selectedJob]);
+  // show loading or error states if necessary
+  if (loading) {
+    return (
+      <div className="min-h-screen flex bg-gray-50">
+        <Sidebar active="Dashboard" type="employer" />
+        <div className="flex-1 flex flex-col md:ml-64 ml-20">
+          <Topbar />
+          <main className="p-6 md:p-10 flex-1 flex items-center justify-center">
+            <Loader />
+          </main>
+        </div>
+      </div>
+    );
+  }
 
-  if (!selectedJob) {
+  if (error) {
     return (
       <div className="min-h-screen flex bg-gray-50">
         <Sidebar active="Dashboard" type="employer" />
         <div className="flex-1 flex flex-col md:ml-64 ml-20">
           <Topbar />
           <main className="p-6 md:p-10 flex-1">
-            <div className="text-center text-gray-500">Job not found</div>
+            <div className="text-center text-red-500">{error}</div>
           </main>
         </div>
       </div>
     );
   }
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -508,19 +224,75 @@ export default function EditJobPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Add API integration here
-    console.log('Updated Form Data:', formData);
-    
-    // Show success message
-    setShowSuccessMessage(true);
-    
-    // Hide success message after 3 seconds and redirect
-    setTimeout(() => {
-      setShowSuccessMessage(false);
-      router.push(`/employer/view-job-post?jobId=${jobId}`);
-    }, 2000);
+    setLoading(true);
+    setError('');
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      // backend expects the field name `candidateshortlist`
+      // create a clean body mirroring create-job-post logic
+      const jobTypeMap = { 'full-time': 'Full-time', 'part-time': 'Part-time', 'contract': 'Contract' };
+      const workModeMap = { 'on-site': 'On-site', 'remote': 'Remote', 'hybrid': 'Hybrid' };
+
+      const {
+        shortlistedCandidates,
+        jobTitle,
+        jobDescription,
+        responsibilities,
+        requirements,
+        benefits,
+        requiredExperience,
+        salaryRange,
+        jobType,
+        workMode,
+        jobLocation,
+        skills,
+      } = formData;
+
+      const apiBody = {
+        jobTitle,
+        jobDescription,
+        // backend uses the field name `candidiateshortlist` (with typo)
+        keyResponsibilities: responsibilities,
+        requirements,
+        benefits,
+        requiredExperience,
+        salaryRange: salaryRange || '',
+        jobType: jobTypeMap[jobType] || jobType,
+        workMode: workModeMap[workMode] || workMode,
+        jobLocation,
+        skills,
+      };
+
+      // only include shortlist value if it has changed from the original
+      if (shortlistedCandidates !== originalShortlist) {
+        apiBody.candidiateshortlist = parseInt(shortlistedCandidates, 10);
+      }
+
+      const resp = await fetch(`${UPDATE_JOB_API}/${jobId}`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(apiBody),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        setError(data?.message || data?.detail || 'Failed to update job');
+      } else {
+        setShowSuccessMessage(true);
+        setTimeout(() => {
+          setShowSuccessMessage(false);
+          router.push(`/employer/view-job-post?jobId=${jobId}`);
+        }, POPUP_TIMEOUT);
+      }
+    } catch (err) {
+      setError(err?.message || 'Failed to update job');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -557,17 +329,7 @@ export default function EditJobPage() {
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
         
-        {/* Success Notification */}
-        {showSuccessMessage && (
-          <div className="fixed top-0 left-0 right-0 md:ml-64 ml-20 flex justify-center pt-6 z-50 pointer-events-none">
-            <div className="bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce-in">
-              <div className="bg-white/20 p-1.5 rounded-full">
-                <CheckCircle className="w-5 h-5" />
-              </div>
-              <span className="font-semibold text-base">Job Post updated successfully</span>
-            </div>
-          </div>
-        )}
+        <Popup show={showSuccessMessage} message="Job Post updated successfully" type="success" />
         
         <main className="p-6 md:p-10 flex-1 flex justify-center">
           <div className="w-full max-w-5xl">

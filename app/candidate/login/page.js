@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { setSession, isUserLoggedIn } from '../../../utils/session';
 import { LOGIN_API } from '../../../routes/candidate/login';
 import Loader from '../../../utils/loader';
+import Popup, { POPUP_TIMEOUT } from '../../components/Popup';
 
 export default function CandidateLogin() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [error, setError] = useState('');
@@ -20,6 +22,17 @@ export default function CandidateLogin() {
     password: '',
     keepLoggedIn: false
   });
+  const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
+
+  const showPopup = (message, type = 'success') => {
+    setPopup({ show: true, message, type });
+  };
+
+  useEffect(() => {
+    if (!popup.show) return;
+    const t = setTimeout(() => setPopup(prev => ({ ...prev, show: false })), POPUP_TIMEOUT);
+    return () => clearTimeout(t);
+  }, [popup.show]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -34,6 +47,23 @@ export default function CandidateLogin() {
       router.push('/candidate/my-profile');
     }
   }, [router]);
+
+  useEffect(() => {
+    if (!searchParams) return;
+    if (searchParams.get('loggedOut') === '1') {
+      showPopup('Signed out successfully', 'success');
+      router.replace('/candidate/login');
+    }
+  }, [searchParams, router]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const flag = localStorage.getItem('signup_success_candidate');
+    if (flag === '1') {
+      localStorage.removeItem('signup_success_candidate');
+      setPopup({ show: true, message: 'Account created successfully. Please sign in.', type: 'success' });
+    }
+  }, []);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
@@ -53,13 +83,17 @@ export default function CandidateLogin() {
 
     try {
       if (!formData.email || !formData.password) {
-        setError('Please fill in all fields');
+        const msg = 'Please fill in all fields';
+        setError(msg);
+        showPopup(msg, 'error');
         setLoading(false);
         return;
       }
 
       if (isUserLoggedIn()) {
-        setError('Another user is already logged in. Please logout first.');
+        const msg = 'Another user is already logged in. Please logout first.';
+        setError(msg);
+        showPopup(msg, 'error');
         setLoading(false);
         return;
       }
@@ -76,7 +110,9 @@ export default function CandidateLogin() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || 'Login failed. Please check your credentials.');
+        const msg = data.message || 'Login failed. Please check your credentials.';
+        setError(msg);
+        showPopup(msg, 'error');
         setLoading(false);
         return;
       }
@@ -84,19 +120,26 @@ export default function CandidateLogin() {
       const token = data?.access_token;
       if (token && data?.candidiate_id) {
         setSession(data, token, 1440);
+        if (typeof window !== 'undefined') localStorage.setItem('login_success_candidate', '1');
         router.push('/candidate/my-profile');
+        // Keep loader visible until navigation completes - do not set loading false
       } else {
-        setError('Invalid response from server.');
+        const msg = 'Invalid response from server.';
+        setError(msg);
+        showPopup(msg, 'error');
+        setLoading(false);
       }
     } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.');
-    } finally {
+      const msg = err.message || 'Login failed. Please check your credentials.';
+      setError(msg);
+      showPopup(msg, 'error');
       setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row relative">
+      <Popup show={popup.show} message={popup.message} type={popup.type} />
       {loading && <Loader text="Signing in..." />}
       {/* Left Side - Login Form */}
       <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12 transition-colors duration-300">
@@ -112,12 +155,6 @@ export default function CandidateLogin() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
-                {error}
-              </div>
-            )}
 
             {/* Google Sign In Button */}
             <button

@@ -1,374 +1,58 @@
 "use client";
 import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Briefcase, Users, Search, MapPin, Calendar, DollarSign, Clock, LayoutGrid, FileText, Building2 } from "lucide-react";
-import api from "../../lib/api";
+import { getSearchJobsUrl } from "../../../routes/employer/searchJobs";
+import { isEmployerLoggedIn } from "../../../utils/employerSession";
+import Loader from "../../../utils/loader";
+import Popup, { POPUP_TIMEOUT } from "../../components/Popup";
 
-// Dummy data for jobs
-const JOBS = [
-  {
-    id: 1,
-    title: "Frontend Developer",
-    location: "Lahore, Pakistan",
-    workMode: "On-site",
-    jobType: "Full-time",
-    level: "Senior",
-    skills: ["React", "Javascript", "Tailwind CSS"],
-    applications: 8,
-    time: "2 days ago",
-    status: "Active",
-    salary: "$80k - $120k",
-    postedDate: "Nov 27, 2025",
-    description: "Join our fast-paced team to create beautiful and performant web interfaces. You'll use React, Tailwind CSS, and newest technologies to build scalable products, work closely with UI/UX, and deliver first-class user experiences.",
-    responsibilities: [
-      "Develop and maintain user-facing features using React.js",
-      "Build reusable components and front-end libraries",
-      "Collaborate with UI/UX designers to implement pixel-perfect designs",
-      "Optimize applications for maximum speed and scalability",
-      "Participate in code reviews and provide constructive feedback"
-    ],
-    requirements: [
-      "5+ years of experience with React and modern JavaScript",
-      "Strong understanding of HTML5, CSS3, and responsive design",
-      "Experience with state management libraries (Redux, MobX)",
-      "Familiarity with RESTful APIs and modern authorization mechanisms",
-      "Bachelor's degree in Computer Science or related field"
-    ],
-    benefits: [
-      "Competitive salary and equity package",
-      "Health, dental, and vision insurance",
-      "Flexible work hours and remote options",
-      "Professional development budget",
-      "Modern office with latest technology"
-    ]
-  },
-  {
-    id: 2,
-    title: "Backend Engineer",
-    location: "Remote",
-    workMode: "Remote",
-    jobType: "Part-time",
-    level: "Junior",
-    skills: ["Node.js", "Express", "MongoDB"],
-    applications: 5,
-    time: "4 days ago",
-    status: "Active",
-    salary: "$50k - $70k",
-    postedDate: "Nov 25, 2025",
-    description: "We are seeking a backend engineer to design RESTful APIs and maintain resilient server-side infrastructure. Responsibilities include database management, system integration, and enhancing real-time features of our product stack.",
-    responsibilities: [
-      "Design and implement RESTful APIs using Node.js and Express",
-      "Manage MongoDB databases and optimize queries",
-      "Integrate third-party services and APIs",
-      "Write clean, maintainable, and well-documented code",
-      "Collaborate with frontend developers on API design"
-    ],
-    requirements: [
-      "2+ years of experience with Node.js and Express",
-      "Strong knowledge of MongoDB and database design",
-      "Understanding of RESTful API principles",
-      "Experience with version control (Git)",
-      "Good problem-solving and communication skills"
-    ],
-    benefits: [
-      "Fully remote position",
-      "Flexible part-time hours (20-30 hours/week)",
-      "Opportunity to work with modern tech stack",
-      "Collaborative team environment",
-      "Growth opportunities"
-    ]
-  },
-  {
-    id: 3,
-    title: "Full Stack Developer",
-    location: "Karachi, Pakistan",
-    workMode: "Hybrid",
-    jobType: "Contract",
-    level: "Junior",
-    skills: ["React", "Node.js", "AWS"],
-    applications: 5,
-    time: "1 week ago",
-    status: "Closed",
-    salary: "$60k - $90k",
-    postedDate: "Nov 22, 2025",
-    description: "Take ownership of projects from frontend through backend deployment. You'll architect solutions, code both client/server, automate deployments on AWS, and collaborate across disciplines to launch new features.",
-    responsibilities: [
-      "Develop full-stack applications using React and Node.js",
-      "Deploy and manage applications on AWS infrastructure",
-      "Design database schemas and implement data models",
-      "Write unit and integration tests",
-      "Participate in agile development processes"
-    ],
-    requirements: [
-      "3+ years of full-stack development experience",
-      "Proficiency in React, Node.js, and AWS services",
-      "Experience with CI/CD pipelines",
-      "Knowledge of containerization (Docker)",
-      "Strong understanding of software design patterns"
-    ],
-    benefits: [
-      "6-month contract with extension possibility",
-      "Hybrid work model (3 days office, 2 days remote)",
-      "Access to modern development tools",
-      "Professional learning opportunities",
-      "Collaborative startup environment"
-    ]
-  },
-  {
-    id: 4,
-    title: "UI/UX Designer",
-    location: "Islamabad, Pakistan",
-    workMode: "On-site",
-    jobType: "Full-time",
-    level: "Mid-Level",
-    skills: ["Figma", "Adobe XD", "Prototyping"],
-    applications: 5,
-    time: "3 days ago",
-    status: "Active",
-    salary: "$55k - $85k",
-    postedDate: "Nov 26, 2025",
-    description: "Design beautiful user interfaces and create intuitive user experiences. Work with product teams to translate requirements into elegant designs that users love.",
-    responsibilities: [
-      "Create wireframes, prototypes, and high-fidelity designs",
-      "Conduct user research and usability testing",
-      "Collaborate with developers to ensure design implementation",
-      "Maintain and evolve design system",
-      "Present design concepts to stakeholders"
-    ],
-    requirements: [
-      "3-5 years of UI/UX design experience",
-      "Expert proficiency in Figma and Adobe XD",
-      "Strong portfolio demonstrating design process",
-      "Understanding of user-centered design principles",
-      "Excellent communication and presentation skills"
-    ],
-    benefits: [
-      "Competitive salary package",
-      "Health insurance coverage",
-      "Annual design conference budget",
-      "Latest design tools and software",
-      "Creative and collaborative work environment"
-    ]
-  },
-  {
-    id: 5,
-    title: "DevOps Engineer",
-    location: "Remote",
-    workMode: "Remote",
-    jobType: "Full-time",
-    level: "Senior",
-    skills: ["Docker", "Kubernetes", "AWS", "CI/CD"],
-    applications: 5,
-    time: "5 days ago",
-    status: "Active",
-    salary: "$90k - $130k",
-    postedDate: "Nov 24, 2025",
-    description: "Build and maintain scalable infrastructure. Implement CI/CD pipelines, monitor systems, and ensure high availability of our services.",
-    responsibilities: [
-      "Design and implement CI/CD pipelines",
-      "Manage Kubernetes clusters and containerized applications",
-      "Monitor system performance and troubleshoot issues",
-      "Automate infrastructure provisioning using Terraform",
-      "Implement security best practices"
-    ],
-    requirements: [
-      "5+ years of DevOps experience",
-      "Strong knowledge of Docker and Kubernetes",
-      "Experience with AWS services (EC2, S3, RDS, etc.)",
-      "Proficiency in scripting (Bash, Python)",
-      "Understanding of networking and security concepts"
-    ],
-    benefits: [
-      "Fully remote position with flexible hours",
-      "Top-tier compensation and equity",
-      "Learning and certification budget",
-      "Latest hardware and tools",
-      "Work-life balance focused culture"
-    ]
-  },
-  {
-    id: 6,
-    title: "Data Analyst",
-    location: "Karachi, Pakistan",
-    workMode: "Hybrid",
-    jobType: "Full-time",
-    level: "Junior",
-    skills: ["Python", "SQL", "Excel", "Power BI"],
-    applications: 5,
-    time: "1 week ago",
-    status: "Closed",
-    salary: "$45k - $65k",
-    postedDate: "Nov 22, 2025",
-    description: "Analyze data to extract meaningful insights. Create reports and dashboards to help stakeholders make data-driven decisions.",
-    responsibilities: [
-      "Analyze large datasets to identify trends and patterns",
-      "Create interactive dashboards using Power BI",
-      "Write SQL queries to extract and manipulate data",
-      "Prepare reports and presentations for stakeholders",
-      "Collaborate with teams to understand data needs"
-    ],
-    requirements: [
-      "2+ years of data analysis experience",
-      "Strong SQL and Excel skills",
-      "Experience with Python for data analysis",
-      "Proficiency in Power BI or similar tools",
-      "Analytical mindset with attention to detail"
-    ],
-    benefits: [
-      "Hybrid work arrangement",
-      "Health insurance",
-      "Professional development opportunities",
-      "Modern office facilities",
-      "Friendly team culture"
-    ]
-  },
-  {
-    id: 7,
-    title: "Mobile App Developer",
-    location: "Lahore, Pakistan",
-    workMode: "On-site",
-    jobType: "Full-time",
-    level: "Senior",
-    skills: ["React Native", "Flutter", "Swift"],
-    applications: 5,
-    time: "3 days ago",
-    status: "Active",
-    salary: "$70k - $110k",
-    postedDate: "Nov 26, 2025",
-    description: "Develop high-performance mobile applications for iOS and Android. Create seamless user experiences and maintain code quality standards.",
-    responsibilities: [
-      "Develop cross-platform mobile applications using React Native or Flutter",
-      "Optimize mobile app performance and user experience",
-      "Integrate backend APIs and third-party services",
-      "Participate in code reviews and best practices",
-      "Release and manage app store submissions"
-    ],
-    requirements: [
-      "4+ years of mobile development experience",
-      "Proficiency in React Native or Flutter",
-      "Understanding of iOS and Android platforms",
-      "Experience with mobile testing frameworks",
-      "Strong problem-solving skills"
-    ],
-    benefits: [
-      "Competitive salary and bonus",
-      "Health and wellness program",
-      "Latest development devices",
-      "Learning and conference budget",
-      "Flexible work arrangements"
-    ]
-  },
-  {
-    id: 8,
-    title: "Cloud Architect",
-    location: "Remote",
-    workMode: "Remote",
-    jobType: "Full-time",
-    level: "Senior",
-    skills: ["AWS", "Azure", "Terraform"],
-    applications: 5,
-    time: "6 days ago",
-    status: "Active",
-    salary: "$120k - $160k",
-    postedDate: "Nov 23, 2025",
-    description: "Design and implement scalable cloud infrastructure solutions. Lead cloud migration initiatives and optimize cloud costs.",
-    responsibilities: [
-      "Design cloud architecture for scalability and reliability",
-      "Lead cloud migration projects",
-      "Implement security best practices in cloud infrastructure",
-      "Optimize cloud costs and resource utilization",
-      "Provide technical guidance to development teams"
-    ],
-    requirements: [
-      "7+ years of cloud architecture experience",
-      "Expert knowledge of AWS or Azure",
-      "Experience with Infrastructure as Code (Terraform)",
-      "Strong understanding of cloud security",
-      "Leadership and communication skills"
-    ],
-    benefits: [
-      "Highest tier compensation",
-      "Stock options and equity",
-      "Unlimited learning budget",
-      "Fully remote with flexible hours",
-      "Executive perks and benefits"
-    ]
-  },
-  {
-    id: 9,
-    title: "QA Engineer",
-    location: "Karachi, Pakistan",
-    workMode: "Hybrid",
-    jobType: "Full-time",
-    level: "Mid-Level",
-    skills: ["Selenium", "TestNG", "JIRA"],
-    applications: 5,
-    time: "4 days ago",
-    status: "Active",
-    salary: "$40k - $60k",
-    postedDate: "Nov 25, 2025",
-    description: "Ensure product quality through comprehensive testing. Develop automated test scripts and report quality metrics.",
-    responsibilities: [
-      "Design and execute automated test suites",
-      "Perform manual and exploratory testing",
-      "Report and track software defects",
-      "Collaborate with development teams",
-      "Maintain test documentation"
-    ],
-    requirements: [
-      "2+ years of QA testing experience",
-      "Proficiency in test automation frameworks",
-      "Knowledge of SQL and databases",
-      "Experience with testing tools like JIRA",
-      "Strong attention to detail"
-    ],
-    benefits: [
-      "Health insurance",
-      "Flexible work hours",
-      "Professional training",
-      "Modern testing tools",
-      "Career growth opportunities"
-    ]
-  },
-  {
-    id: 10,
-    title: "Product Manager",
-    location: "Lahore, Pakistan",
-    workMode: "Hybrid",
-    jobType: "Full-time",
-    level: "Senior",
-    skills: ["Product Strategy", "Analytics", "Leadership"],
-    applications: 5,
-    time: "2 days ago",
-    status: "Active",
-    salary: "$80k - $120k",
-    postedDate: "Nov 27, 2025",
-    description: "Lead product vision and strategy. Manage product roadmap and oversee product launches.",
-    responsibilities: [
-      "Define product vision and strategy",
-      "Manage product roadmap and prioritization",
-      "Conduct market research and competitive analysis",
-      "Lead cross-functional product teams",
-      "Monitor product metrics and KPIs"
-    ],
-    requirements: [
-      "5+ years of product management experience",
-      "Strong analytical and strategic thinking skills",
-      "Experience with product management tools",
-      "Excellent communication skills",
-      "Track record of successful product launches"
-    ],
-    benefits: [
-      "Competitive salary and bonus",
-      "Stock options",
-      "Leadership development program",
-      "Hybrid work flexibility",
-      "Executive coaching"
-    ]
+// Map API job to dashboard card format
+const mapApiJobToCard = (job) => ({
+  id: job.id ?? job.job_id,
+  title: job.title ?? job.jobTitle,
+  location: job.location ?? job.jobLocation,
+  workMode: job.workMode ?? job.work_mode,
+  jobType: job.jobType ?? job.job_type,
+  level: job.level ?? (job.requiredExperience ? mapExperienceToLevel(job.requiredExperience) : 'Mid-Level'),
+  skills: job.skills ?? [],
+  applications: job.applications ?? job.applications_count ?? 0,
+  time: job.time ?? job.posted_at ?? job.postedDate ?? '',
+  status: job.status ?? 'Active',
+  salary: job.salary ?? job.salaryRange ?? '',
+  postedDate: job.postedDate ?? job.posted_at ?? job.created_at ?? '',
+  description: job.description ?? job.jobDescription ?? '',
+  responsibilities: job.responsibilities ?? job.keyResponsibilities ?? [],
+  requirements: job.requirements ?? [],
+  benefits: job.benefits ?? [],
+});
+
+const mapExperienceToLevel = (exp) => {
+  if (!exp || typeof exp !== 'string') return 'Mid-Level';
+  const lower = exp.toLowerCase();
+  if (lower.includes('0-1') || lower.includes('junior')) return 'Junior';
+  if (lower.includes('5+') || lower.includes('senior')) return 'Senior';
+  return 'Mid-Level';
+};
+
+const formatJobTime = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return date.toLocaleDateString();
+  } catch {
+    return dateStr;
   }
-];
+};
 
 const REGIONS = [
   "Lahore, Pakistan",
@@ -383,7 +67,97 @@ const SORTS = ["Most Relevant", "Newest", "Oldest", "Most Applications"];
 
 export default function EmployerDashboard() {
   const router = useRouter();
-  
+  const [authChecked, setAuthChecked] = useState(false);
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [region, setRegion] = useState("All Regions");
+  const [mode, setMode] = useState("All Work Modes");
+  const [type, setType] = useState("All Types");
+  const [status, setStatus] = useState("All Status");
+  const [sort, setSort] = useState(SORTS[0]);
+  const [search, setSearch] = useState("");
+  const [showJobCreatedSuccess, setShowJobCreatedSuccess] = useState(false);
+
+  const fetchJobs = async (skillsQuery = '', titleQuery = '', companyQuery = '') => {
+    setLoading(true);
+    setError('');
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const url = getSearchJobsUrl(skillsQuery, titleQuery, companyQuery);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        let errorMsg = data.message || 'Failed to fetch jobs. Please try again.';
+        if (data.detail) {
+          errorMsg = Array.isArray(data.detail)
+            ? data.detail.map((d) => d.msg ?? d.message ?? JSON.stringify(d)).join('. ')
+            : typeof data.detail === 'string' ? data.detail : errorMsg;
+        }
+        setError(errorMsg);
+        setJobs([]);
+        setLoading(false);
+        return;
+      }
+
+      const rawJobs = Array.isArray(data) ? data : (data.jobs ?? data.data ?? []);
+      const mapped = rawJobs.map((j) => {
+        const card = mapApiJobToCard(j);
+        card.time = card.time ? formatJobTime(card.time) : '';
+        return card;
+      });
+      setJobs(mapped);
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.');
+      setJobs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!isEmployerLoggedIn()) {
+      router.push('/employer/login');
+      return;
+    }
+    setAuthChecked(true);
+    fetchJobs('');
+  }, [router]);
+
+  const handleSearch = () => {
+    // For now the single `search` state is used for skills filter; additional
+    // inputs (title/company) could be added later and passed through here.
+    fetchJobs(search, '', '');
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const flag = localStorage.getItem('job_created_success');
+    if (flag === '1') {
+      localStorage.removeItem('job_created_success');
+      setShowJobCreatedSuccess(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!showJobCreatedSuccess) return;
+    const t = setTimeout(() => setShowJobCreatedSuccess(false), POPUP_TIMEOUT);
+    return () => clearTimeout(t);
+  }, [showJobCreatedSuccess]);
+
+  if (!authChecked) {
+    return <Loader text="Verifying access..." />;
+  }
+
   // Helper function to convert level to experience years
   const getLevelInYears = (level) => {
     const levelMap = {
@@ -394,18 +168,11 @@ export default function EmployerDashboard() {
     return levelMap[level] || level;
   };
 
-  const [region, setRegion] = useState("All Regions");
-  const [mode, setMode] = useState("All Work Modes");
-  const [type, setType] = useState("All Types");
-  const [status, setStatus] = useState("All Status");
-  const [sort, setSort] = useState(SORTS[0]);
-  const [search, setSearch] = useState("");
-
-  // Filtered jobs (UI only)
-  const filteredJobs = JOBS.filter((job) => {
+  // Client-side filters (region, mode, type, status) applied on API results
+  const filteredJobs = jobs.filter((job) => {
     const matchesSearch =
-      job.title.toLowerCase().includes(search.toLowerCase()) ||
-      job.skills.join(" ").toLowerCase().includes(search.toLowerCase());
+      (job.title ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (Array.isArray(job.skills) ? job.skills.join(' ') : '').toLowerCase().includes(search.toLowerCase());
     const matchesRegion = region === "All Regions" || job.location === region;
     const matchesMode = mode === "All Work Modes" || job.workMode === mode;
     const matchesType = type === "All Types" || job.jobType === type;
@@ -415,6 +182,8 @@ export default function EmployerDashboard() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
+      <Popup show={showJobCreatedSuccess} message="Job created successfully" type="success" />
+      {loading && <Loader text="Loading jobs..." />}
       <Sidebar active="Dashboard" type="employer" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
@@ -440,7 +209,7 @@ export default function EmployerDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-500 font-medium mb-1">Total Jobs Posted</p>
-                      <p className="text-3xl font-bold text-gray-900">{JOBS.length}</p>
+                      <p className="text-3xl font-bold text-gray-900">{jobs.length}</p>
                     </div>
                     <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
                       <FileText className="w-6 h-6 text-blue-600" />
@@ -451,7 +220,7 @@ export default function EmployerDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-500 font-medium mb-1">Total Applications</p>
-                      <p className="text-3xl font-bold text-purple-600">{JOBS.reduce((acc, j) => acc + j.applications, 0)}</p>
+                      <p className="text-3xl font-bold text-purple-600">{jobs.reduce((acc, j) => acc + (j.applications ?? 0), 0)}</p>
                     </div>
                     <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
                       <Users className="w-6 h-6 text-purple-600" />
@@ -473,7 +242,7 @@ export default function EmployerDashboard() {
                       className="w-full max-w-md h-10 rounded-xl bg-zinc-100 border border-zinc-100 px-3 text-base placeholder:text-gray-400 text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm flex items-center"
                       style={{ backgroundClip: 'padding-box' }}
                     />
-                    <button className="h-10 ml-2 md:ml-3 mr-4 md:mr-6 flex items-center gap-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm">
+                    <button type="button" onClick={handleSearch} className="h-10 ml-2 md:ml-3 mr-4 md:mr-6 flex items-center gap-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm">
                       <Search className="w-4 h-4" />
                       <span>Search</span>
                     </button>
@@ -509,6 +278,11 @@ export default function EmployerDashboard() {
                 {/* Job List */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-7">
                   <h2 className="text-xl font-bold mb-4 text-blue-700">Your Job Posts</h2>
+                  {error && (
+                    <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+                      {error}
+                    </div>
+                  )}
                   {filteredJobs.length === 0 ? (
                     <div className="text-gray-500 text-center p-6">No job posts found.</div>
                   ) : (
@@ -553,10 +327,10 @@ export default function EmployerDashboard() {
                           </div>
                           {/* Bottom row: posted and total applications */}
                           <div className="mt-auto flex items-end flex-row justify-between pt-4 border-t border-gray-100 text-sm gap-2">
-                            <span className="text-gray-400">Job Posted: {job.time}</span>
+                            <span className="text-gray-400">Job Posted: {job.time || '-'}</span>
                             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-purple-100 text-purple-700 border border-purple-200"><Users className="w-4 h-4" />{job.applications} Applications</span>
                           </div>
-                          <div className="w-full mt-auto flex justify-center mb">
+                          <div className="w-full flex justify-center mt-4">
                             <button
                               onClick={() => router.push(`/employer/view-job-post?jobId=${job.id}`)}
                               className="font-semibold text-sm text-blue-700 px-4 py-2 rounded-full bg-blue-100 hover:bg-blue-200 hover:text-blue-800 active:bg-blue-200 active:text-blue-800 transition-all focus:outline-none"

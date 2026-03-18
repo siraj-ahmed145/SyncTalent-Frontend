@@ -1,10 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Briefcase, Bookmark, CheckCircle, Building2, DollarSign } from 'lucide-react';
+import { MapPin, Briefcase, Bookmark, Building2, DollarSign } from 'lucide-react';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
+import Popup, { POPUP_TIMEOUT } from '../../components/Popup';
+import { SAVE_JOB_API, GET_SAVED_JOBS_API } from '../../../routes/candidate/savedJobs';
+
+// Helper converts tags to array
+const ensureTagsArray = (tags) => {
+  if (!tags) return [];
+  if (Array.isArray(tags)) return tags;
+  if (typeof tags === 'string') {
+    return tags.split(',').map(t => t.trim()).filter(t => t);
+  }
+  return [];
+};
+
+const formatTime = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return date.toLocaleDateString();
+  } catch {
+    return dateStr;
+  }
+};
+
+const mapApiJobToCard = (job) => ({
+  id: job.id ?? job.job_id,
+  title: job.title ?? job.jobTitle,
+  company: job.company ?? job.companyName,
+  location: job.location ?? job.jobLocation,
+  jobType: job.jobType ?? job.job_type,
+  workMode: job.workMode ?? job.work_mode,
+  salary: job.salary ?? job.salaryRange ?? '',
+  experience: job.experience ?? job.requiredExperience ?? '',
+  tags: ensureTagsArray(job.tags ?? job.skills),
+  time: job.time ?? job.posted_at ?? job.created_at ?? '',
+  description: job.description ?? job.jobDescription ?? '',
+});
 
 // Dummy saved jobs data - in real app, this would come from localStorage or API
 const INITIAL_SAVED_JOBS = [
@@ -54,9 +97,39 @@ const INITIAL_SAVED_JOBS = [
 
 export default function SavedJobsPage() {
   const router = useRouter();
-  const [savedJobs, setSavedJobs] = useState(INITIAL_SAVED_JOBS);
+  const [savedJobs, setSavedJobs] = useState([]);
   const [showRemoveNotification, setShowRemoveNotification] = useState(false);
   const [showApplicationNotification, setShowApplicationNotification] = useState(false);
+
+  // load saved jobs from API
+  useEffect(() => {
+    const fetchSaved = async () => {
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const url = GET_SAVED_JOBS_API;
+        console.debug('fetching saved jobs from', url);
+        const res = await fetch(url, { headers });
+        const data = await res.json();
+        console.debug('saved jobs response', res.status, data);
+        // backend returns { message, saved_jobs: [...] }
+        const list = Array.isArray(data.saved_jobs) ? data.saved_jobs : data;
+        if (res.ok && Array.isArray(list)) {
+          const mapped = list.map(j => {
+            const card = mapApiJobToCard(j);
+            card.time = formatTime(card.time);
+            return card;
+          });
+          setSavedJobs(mapped);
+        }
+      } catch (e) {
+        console.error('Failed to load saved jobs', e);
+        setSavedJobs([]);
+      }
+    };
+    fetchSaved();
+  }, []);
 
   // Application modal states
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
@@ -65,11 +138,27 @@ export default function SavedJobsPage() {
   const [useCustomResume, setUseCustomResume] = useState(false);
   const [uploadedResume, setUploadedResume] = useState(null);
 
-  const handleRemoveJob = (jobId) => {
-    setSavedJobs(savedJobs.filter(job => job.id !== jobId));
-    // Show notification
-    setShowRemoveNotification(true);
-    setTimeout(() => setShowRemoveNotification(false), 2000);
+  const handleRemoveJob = async (jobId) => {
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(`${SAVE_JOB_API}/${jobId}`, { method: 'POST', headers, body: JSON.stringify({ action: 'unsave' }) });
+      if (!res.ok) {
+        console.error('Remove saved job request failed', res.status, res.statusText);
+        throw new Error('Failed to remove saved job');
+      }
+      // only update UI if server call succeeded
+      setSavedJobs(savedJobs.filter(job => job.id !== jobId));
+      setShowRemoveNotification(true);
+      setTimeout(() => setShowRemoveNotification(false), POPUP_TIMEOUT);
+    } catch (e) {
+      console.error('Error removing saved job', e);
+      // still update locally to keep UI responsive
+      setSavedJobs(savedJobs.filter(job => job.id !== jobId));
+      setShowRemoveNotification(true);
+      setTimeout(() => setShowRemoveNotification(false), POPUP_TIMEOUT);
+    }
   };
 
   const handleApplyClick = (job) => {
@@ -112,7 +201,7 @@ export default function SavedJobsPage() {
     
     // Show success notification
     setShowApplicationNotification(true);
-    setTimeout(() => setShowApplicationNotification(false), 2000);
+    setTimeout(() => setShowApplicationNotification(false), POPUP_TIMEOUT);
   };
 
   const closeModal = () => {
@@ -129,29 +218,8 @@ export default function SavedJobsPage() {
       <div className="flex-1 flex flex-col md:ml-64 ml-20 relative">
         <Topbar />
         
-        {/* Remove Notification Popup */}
-        {showRemoveNotification && (
-          <div className="fixed top-0 left-0 right-0 md:ml-64 ml-20 flex justify-center pt-6 z-50 pointer-events-none">
-            <div className="bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce-in">
-              <div className="bg-white/20 p-1.5 rounded-full">
-                <CheckCircle className="w-5 h-5" />
-              </div>
-              <span className="font-semibold text-base">Job Removed from Saved Jobs</span>
-            </div>
-          </div>
-        )}
-        
-        {/* Application Submitted Notification Popup */}
-        {showApplicationNotification && (
-          <div className="fixed top-0 left-0 right-0 md:ml-64 ml-20 flex justify-center pt-6 z-50 pointer-events-none">
-            <div className="bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce-in">
-              <div className="bg-white/20 p-1.5 rounded-full">
-                <CheckCircle className="w-5 h-5" />
-              </div>
-              <span className="font-semibold text-base">Application Submitted Successfully</span>
-            </div>
-          </div>
-        )}
+        <Popup show={showRemoveNotification} message="Job Removed from Saved Jobs" type="success" />
+        <Popup show={showApplicationNotification} message="Application Submitted Successfully" type="success" />
         
         <main className="p-6 md:p-10 flex-1">
           <section className="w-full pb-10">

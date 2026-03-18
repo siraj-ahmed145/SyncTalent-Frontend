@@ -1,10 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Briefcase, Clock, Search, Bookmark, CheckCircle, Building2, DollarSign } from 'lucide-react';
+import { MapPin, Briefcase, Clock, Search, Bookmark, Building2, DollarSign } from 'lucide-react';
+import Popup, { POPUP_TIMEOUT } from '../../components/Popup';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
+import Loader from '../../../utils/loader';
+import { GET_JOBS_API } from '../../../routes/candidate/getJobs';
+import { SAVE_JOB_API, GET_SAVED_JOBS_API } from '../../../routes/candidate/savedJobs';
 
 // Randomized dropdown lists as described
 const REGIONS = [
@@ -23,108 +27,101 @@ const MODES = ["All Work Modes", "Remote", "On-site", "Hybrid"];
 const TYPES = ["All Types", "Full time", "Part time", "Contract"];
 const SORTS = ["Most Relevant", "Newest", "Oldest", "Highest Salary"];
 
-// Dummy job data for UI only
-const JOBS = [
-  {
-    id: 1,
-    title: "Senior Software Engineer",
-    company: "TechCorp Solutions",
-    location: "San Francisco, CA",
-    jobType: "Full-time",
-    workMode: "On-site",
-    salary: "$120k - $160k",
-    level: "Senior",
-    experience: "5+ years",
-    tags: ["React", "Node.js", "AWS", "TypeScript", "Docker"],
-    time: "2 days ago",
-    description:
-      "We're seeking an experienced Senior Software Engineer to lead our engineering team. You'll work on cutting-edge projects using React, Node.js, and AWS...",
-  },
-  {
-    id: 2,
-    title: "Machine Learning Engineer",
-    company: "AI Innovations Inc",
-    location: "Remote",
-    jobType: "Full-time",
-    workMode: "Remote",
-    salary: "$140k - $180k",
-    level: "Senior",
-    experience: "5+ years",
-    tags: ["Python", "TensorFlow", "PyTorch", "Machine Learning", "NLP"],
-    time: "1 day ago",
-    description:
-      "Join our ML team to build state-of-the-art machine learning models. Work on NLP, computer vision, recommendation systems. Experience with TensorFlow, PyTorch...",
-  },
-  {
-    id: 3,
-    title: "Product Manager",
-    company: "StartupXYZ",
-    location: "New York, NY",
-    jobType: "Full-time",
-    workMode: "Hybrid",
-    salary: "$130k - $170k",
-    level: "Mid-Level",
-    experience: "2-4 years",
-    tags: ["Product Strategy", "Agile", "User Research", "Analytics"],
-    time: "3 days ago",
-    description:
-      "Lead product development for our SaaS platform. Define product roadmap, work with cross-functional teams, drive product strategy. 5+ years of product management experience...",
-  },
-  {
-    id: 4,
-    title: "Full Stack Developer",
-    company: "WebDev Agency",
-    location: "Austin, TX",
-    jobType: "Full-time",
-    workMode: "On-site",
-    salary: "$100k - $140k",
-    level: "Mid-Level",
-    experience: "2-4 years",
-    tags: ["React", "Node.js", "MongoDB", "JavaScript", "REST API"],
-    time: "5 days ago",
-    description:
-      "Build modern web applications using React, Node.js, and MongoDB. Work in a collaborative environment with designers and other developers...",
-  },
-  {
-    id: 5,
-    title: "DevOps Engineer",
-    company: "CloudScale Systems",
-    location: "Remote",
-    jobType: "Full-time",
-    workMode: "Remote",
-    salary: "$130k - $170k",
-    level: "Senior",
-    experience: "5+ years",
-    tags: ["Kubernetes", "Docker", "AWS", "CI/CD", "Terraform"],
-    time: "4 days ago",
-    description:
-      "Manage and optimize our cloud infrastructure. Implement CI/CD pipelines, monitor system performance, ensure high availability...",
-  },
-  {
-    id: 6,
-    title: "UX/UI Designer",
-    company: "Design Studio Pro",
-    location: "Los Angeles, CA",
-    jobType: "Full-time",
-    workMode: "On-site",
-    salary: "$90k - $130k",
-    level: "Mid-Level",
-    experience: "2-4 years",
-    tags: ["Figma", "UI Design", "UX Research", "Prototyping", "User Testing"],
-    time: "1 week ago",
-    description:
-      "Create beautiful and intuitive user interfaces for web/mobile applications. Proficiency in Figma valued. Collaborate with developers...",
-  },
-];
+// Helper function to ensure tags are always an array
+const ensureTagsArray = (tags) => {
+  if (!tags) return [];
+  if (Array.isArray(tags)) return tags;
+  if (typeof tags === 'string') {
+    return tags.split(',').map(t => t.trim()).filter(t => t);
+  }
+  return [];
+};
+
+// Map API job to card format
+const mapApiJobToCard = (job) => ({
+  id: job.id ?? job.job_id,
+  title: job.title ?? job.jobTitle,
+  company: job.company ?? job.companyName,
+  location: job.location ?? job.jobLocation,
+  jobType: job.jobType ?? job.job_type,
+  workMode: job.workMode ?? job.work_mode,
+  salary: job.salary ?? job.salaryRange ?? '',
+  experience: job.experience ?? job.requiredExperience ?? '',
+  tags: ensureTagsArray(job.tags ?? job.skills),
+  time: job.time ?? job.posted_at ?? job.created_at ?? '',
+  description: job.description ?? job.jobDescription ?? '',
+});
+
+const formatTime = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return '1 day ago';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return date.toLocaleDateString();
+  } catch {
+    return dateStr;
+  }
+};
 
 export default function CandidateJobSearchPage() {
   const router = useRouter();
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [region, setRegion] = useState(REGIONS[0]);
   const [mode, setMode] = useState(MODES[0]);
   const [type, setType] = useState(TYPES[0]);
   const [sort, setSort] = useState(SORTS[0]);
   const [search, setSearch] = useState("");
-  
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch(GET_JOBS_API, {
+          method: 'GET',
+          headers,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          const errorMsg = data.message || data.detail || 'Failed to fetch jobs. Please try again.';
+          setError(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+          setJobs([]);
+          setLoading(false);
+          return;
+        }
+
+        const rawJobs = Array.isArray(data) ? data : (data.jobs ?? data.data ?? []);
+        const mapped = rawJobs.map((j) => {
+          const card = mapApiJobToCard(j);
+          card.time = formatTime(card.time);
+          return card;
+        });
+        setJobs(mapped);
+      } catch (err) {
+        setError(err.message || 'Something went wrong. Please try again.');
+        setJobs([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJobs();
+  }, []);
+
   // Application modal states
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -136,21 +133,75 @@ export default function CandidateJobSearchPage() {
   const [savedJobIds, setSavedJobIds] = useState([]);
   const [showSaveNotification, setShowSaveNotification] = useState(false);
   const [showUnsaveNotification, setShowUnsaveNotification] = useState(false);
+  const [showErrorNotification, setShowErrorNotification] = useState(false);
   const [showApplicationNotification, setShowApplicationNotification] = useState(false);
 
-  // For UI, all jobs are shown - for real implementation add filtering logic
-  
-  const handleSaveJob = (jobId) => {
-    if (savedJobIds.includes(jobId)) {
-      setSavedJobIds(savedJobIds.filter(id => id !== jobId));
-      // Show unsave notification
-      setShowUnsaveNotification(true);
-      setTimeout(() => setShowUnsaveNotification(false), 2000);
-    } else {
-      setSavedJobIds([...savedJobIds, jobId]);
-      // Show save notification
-      setShowSaveNotification(true);
-      setTimeout(() => setShowSaveNotification(false), 2000);
+  // load saved job ids from server
+  useEffect(() => {
+    const fetchSaved = async () => {
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(GET_SAVED_JOBS_API, { headers });
+        const data = await res.json();
+        if (res.ok && Array.isArray(data)) {
+          setSavedJobIds(data.map(j => j.id ?? j.job_id));
+        }
+      } catch (e) {
+        console.error('Failed to load saved jobs', e);
+      }
+    };
+    fetchSaved();
+  }, []);
+
+  // Client-side filtering
+  const filteredJobs = jobs.filter((job) => {
+    const matchesSearch =
+      !search.trim() ||
+      (job.title ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (job.company ?? '').toLowerCase().includes(search.toLowerCase()) ||
+      (Array.isArray(job.tags) ? job.tags.join(' ').toLowerCase() : '').includes(search.toLowerCase());
+    const matchesRegion = region === REGIONS[0] || job.location === region;
+    const matchesMode = mode === MODES[0] || job.workMode === mode;
+    const matchesType = type === TYPES[0] || job.jobType === type;
+    return matchesSearch && matchesRegion && matchesMode && matchesType;
+  });
+
+  const handleSaveJob = async (jobId) => {
+    const isSaved = savedJobIds.includes(jobId);
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      // use POST to save and DELETE to unsave; backend may require explicit verb
+      const url = `${SAVE_JOB_API}/${jobId}`;
+      const method = 'POST';
+      const body = JSON.stringify({ action: isSaved ? 'unsave' : 'save' });
+      console.debug('saving job', { url, method, body });
+      const res = await fetch(url, { method, headers, body });
+      if (!res.ok) {
+        // log full response for debugging
+        console.error('Save job request failed', res.status, res.statusText);
+        setShowErrorNotification(true);
+        setTimeout(() => setShowErrorNotification(false), POPUP_TIMEOUT);
+        return; // abort without toggling UI
+      }
+      if (isSaved) {
+        setSavedJobIds(savedJobIds.filter(id => id !== jobId));
+        setShowUnsaveNotification(true);
+        setTimeout(() => setShowUnsaveNotification(false), POPUP_TIMEOUT);
+      } else {
+        setSavedJobIds([...savedJobIds, jobId]);
+        setShowSaveNotification(true);
+        setTimeout(() => setShowSaveNotification(false), POPUP_TIMEOUT);
+      }
+    } catch (err) {
+      console.error('handleSaveJob error', err);
+      // notify user of failure
+      setShowErrorNotification(true);
+      setTimeout(() => setShowErrorNotification(false), POPUP_TIMEOUT);
+      // don't modify local state if request failed
     }
   };
   
@@ -196,7 +247,7 @@ export default function CandidateJobSearchPage() {
     
     // Show success notification
     setShowApplicationNotification(true);
-    setTimeout(() => setShowApplicationNotification(false), 2000);
+    setTimeout(() => setShowApplicationNotification(false), POPUP_TIMEOUT);
   };
 
   const closeModal = () => {
@@ -209,45 +260,15 @@ export default function CandidateJobSearchPage() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
+      {loading && <Loader text="Loading jobs..." />}
       <Sidebar active="Search Job" type="candidate" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20 relative">
         <Topbar />
         
-        {/* Save Notification Popup */}
-        {showSaveNotification && (
-          <div className="fixed top-0 left-0 right-0 md:ml-64 ml-20 flex justify-center pt-6 z-50 pointer-events-none">
-            <div className="bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce-in">
-              <div className="bg-white/20 p-1.5 rounded-full">
-                <CheckCircle className="w-5 h-5" />
-              </div>
-              <span className="font-semibold text-base">Job Saved for later</span>
-            </div>
-          </div>
-        )}
-        
-        {/* Unsave Notification Popup */}
-        {showUnsaveNotification && (
-          <div className="fixed top-0 left-0 right-0 md:ml-64 ml-20 flex justify-center pt-6 z-50 pointer-events-none">
-            <div className="bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce-in">
-              <div className="bg-white/20 p-1.5 rounded-full">
-                <CheckCircle className="w-5 h-5" />
-              </div>
-              <span className="font-semibold text-base">Job Removed from Saved Jobs</span>
-            </div>
-          </div>
-        )}
-        
-        {/* Application Submitted Notification Popup */}
-        {showApplicationNotification && (
-          <div className="fixed top-0 left-0 right-0 md:ml-64 ml-20 flex justify-center pt-6 z-50 pointer-events-none">
-            <div className="bg-green-500 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce-in">
-              <div className="bg-white/20 p-1.5 rounded-full">
-                <CheckCircle className="w-5 h-5" />
-              </div>
-              <span className="font-semibold text-base">Application Submitted Successfully</span>
-            </div>
-          </div>
-        )}
+        <Popup show={showSaveNotification} message="Job Saved for later" type="success" />
+        <Popup show={showUnsaveNotification} message="Job Removed from Saved Jobs" type="success" />
+        <Popup show={showErrorNotification} message="Could not update saved jobs" type="error" />
+        <Popup show={showApplicationNotification} message="Application Submitted Successfully" type="success" />
         
         <main className="p-6 md:p-10 flex-1">
           <section className="w-full pb-10">
@@ -276,7 +297,7 @@ export default function CandidateJobSearchPage() {
                     className="w-full max-w-md h-10 rounded-xl bg-zinc-100 border border-zinc-100 px-3 text-base placeholder:text-gray-400 text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm flex items-center"
                     style={{backgroundClip: 'padding-box'}}
                   />
-                  <button className="h-10 ml-2 md:ml-3 mr-4 md:mr-6 flex items-center gap-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm">
+                  <button type="button" className="h-10 ml-2 md:ml-3 mr-4 md:mr-6 flex items-center gap-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm">
                     <Search className="w-4 h-4" />
                     <span>Search</span>
                   </button>
@@ -295,70 +316,86 @@ export default function CandidateJobSearchPage() {
                 </div>
               </div>
 
+              {error && (
+                <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+                  {error}
+                </div>
+              )}
+
               <div className="flex items-center justify-between mt-6 mb-3">
-                <p className="text-sm text-gray-600">Showing 12 jobs</p>
+                <p className="text-sm text-gray-600">Showing {filteredJobs.length} jobs</p>
                 <select value={sort} onChange={e => setSort(e.target.value)} className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 py-2 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm w-44">
                   {SORTS.map(opt => <option value={opt} key={opt}>{opt}</option>)}
                 </select>
               </div>
 
               <div className="grid md:grid-cols-2 gap-5 mb-6">
-                {JOBS.map((job, i) => (
-                  <div
-                    key={i}
-                    className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-lg hover:border-blue-200"
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg md:text-xl font-semibold text-gray-900">
-                        {job.title}
-                      </h3>
-                      <span className="px-3 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap">
-                        {job.experience}
-                      </span>
-                    </div>
-
-                    <p className="text-sm font-medium mb-2 text-blue-600">{job.company}</p>
-                    <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-3">
-                      {job.workMode !== 'Remote' && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {job.location}</span>}
-                      <span className="flex items-center gap-1"><Building2 className="w-4 h-4" /> {job.workMode}</span>
-                      <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" /> {job.jobType}</span>
-                      <span className="flex items-center gap-1"><DollarSign className="w-4 h-4" /> {job.salary}</span>
-                    </div>
-                    
-                    <div className="border-t border-gray-200 pt-3 mb-3">
-                      <p className="text-xs md:text-sm text-gray-700 line-clamp-2">{job.description}</p>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2 pb-3 mb-2 border-b border-gray-200">
-                      {job.tags.map(tag => (
-                        <span key={tag} className="px-2 py-0.5 bg-zinc-100 text-xs font-medium rounded border border-zinc-200 text-zinc-600">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    
-                    <div className="mt-auto">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <span className="text-xs text-gray-400">Job Posted: {job.time}</span>
-                        <button
-                          onClick={() => handleSaveJob(i)}
-                          className={`p-2 rounded-lg transition-all ${savedJobIds.includes(i) ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
-                          title={savedJobIds.includes(i) ? "Remove from saved" : "Save for later"}
-                        >
-                          <Bookmark className={`w-6 h-6 ${savedJobIds.includes(i) ? 'fill-blue-600' : ''}`} />
-                        </button>
+                {filteredJobs.length === 0 ? (
+                  <div className="col-span-2 text-gray-500 text-center py-12">No jobs found.</div>
+                ) : (
+                  filteredJobs.map((job) => (
+                    <div
+                      key={job.id}
+                      className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-lg hover:border-blue-200"
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg md:text-xl font-semibold text-gray-900">
+                          {job.title}
+                        </h3>
+                        {job.experience && (
+                          <span className="px-3 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap">
+                            {job.experience}
+                          </span>
+                        )}
                       </div>
-                      <div className="w-full flex justify-center -mt-1.5">
-                        <button 
-                          onClick={() => router.push(`/candidate/view-job-post?jobId=${job.id}`)}
-                          className="px-5 py-2 rounded-full text-blue-700 bg-blue-100 hover:bg-blue-200 hover:text-blue-800 active:bg-blue-200 active:text-blue-800 text-sm font-semibold transition-all"
-                        >
-                          View Job Post
-                        </button>
+
+                      <p className="text-sm font-medium mb-2 text-blue-600">{job.company}</p>
+                      <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-3">
+                        {job.location && job.workMode !== 'Remote' && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {job.location}</span>}
+                        <span className="flex items-center gap-1"><Building2 className="w-4 h-4" /> {job.workMode}</span>
+                        <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" /> {job.jobType}</span>
+                        {job.salary && <span className="flex items-center gap-1"><DollarSign className="w-4 h-4" /> {job.salary}</span>}
+                      </div>
+                      
+                      {job.description && (
+                        <div className="border-t border-gray-200 pt-3 mb-3">
+                          <p className="text-xs md:text-sm text-gray-700 line-clamp-2">{job.description}</p>
+                        </div>
+                      )}
+
+                      {Array.isArray(job.tags) && job.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pb-3 mb-2 border-b border-gray-200">
+                          {job.tags.map((tag) => (
+                            <span key={tag} className="px-2 py-0.5 bg-zinc-100 text-xs font-medium rounded border border-zinc-200 text-zinc-600">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      
+                      <div className="mt-auto">
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-xs text-gray-400">Job Posted: {job.time || '-'}</span>
+                          <button
+                            onClick={() => handleSaveJob(job.id)}
+                            className={`p-2 rounded-lg transition-all ${savedJobIds.includes(job.id) ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
+                            title={savedJobIds.includes(job.id) ? "Remove from saved" : "Save for later"}
+                          >
+                            <Bookmark className={`w-6 h-6 ${savedJobIds.includes(job.id) ? 'fill-blue-600' : ''}`} />
+                          </button>
+                        </div>
+                        <div className="w-full flex justify-center -mt-1.5">
+                          <button 
+                            onClick={() => router.push(`/candidate/view-job-post?jobId=${job.id}`)}
+                            className="px-5 py-2 rounded-full text-blue-700 bg-blue-100 hover:bg-blue-200 hover:text-blue-800 active:bg-blue-200 active:text-blue-800 text-sm font-semibold transition-all"
+                          >
+                            View Job Post
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </section>

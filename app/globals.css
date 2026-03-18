@@ -53,3 +53,16 @@ body {
 .animate-scale-in {
   animation: scale-in 0.2s ease-out;
 }
+
+@keyframes loader-shimmer {
+  0%, 100% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(400%);
+  }
+}
+
+.loader-shimmer {
+  animation: loader-shimmer 1.5s ease-in-out infinite;
+}

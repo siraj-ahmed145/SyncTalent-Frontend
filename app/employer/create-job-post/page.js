@@ -1,11 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 import { FileText, MapPin } from 'lucide-react';
+import { POST_JOB_API } from '../../../routes/employer/postJob';
+import { isEmployerLoggedIn } from '../../../utils/employerSession';
+import Loader from '../../../utils/loader';
 
 export default function CreateJobPage() {
+  const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     jobTitle: '',
     jobDescription: '',
@@ -25,6 +33,19 @@ export default function CreateJobPage() {
   const [responsibilityInput, setResponsibilityInput] = useState('');
   const [requirementInput, setRequirementInput] = useState('');
   const [benefitInput, setBenefitInput] = useState('');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!isEmployerLoggedIn()) {
+      router.push('/employer/login');
+      return;
+    }
+    setAuthChecked(true);
+  }, [router]);
+
+  if (!authChecked) {
+    return <Loader text="Verifying access..." />;
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -102,10 +123,78 @@ export default function CreateJobPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const getAuthHeaders = () => {
+    const headers = { 'Content-Type': 'application/json' };
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+    return headers;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Add API integration here
-    console.log('Form Data:', formData);
+    setError('');
+    setLoading(true);
+
+    try {
+      if (!formData.jobTitle || !formData.jobDescription || !formData.requiredExperience ||
+          !formData.jobType || !formData.workMode || !formData.jobLocation ||
+          formData.responsibilities.length === 0 || formData.requirements.length === 0 ||
+          formData.skills.length === 0 || formData.benefits.length === 0 ||
+          !formData.shortlistedCandidates) {
+        setError('Please fill in all required fields.');
+        setLoading(false);
+        return;
+      }
+
+      const jobTypeMap = { 'full-time': 'Full-time', 'part-time': 'Part-time', 'contract': 'Contract' };
+      const workModeMap = { 'on-site': 'On-site', 'remote': 'Remote', 'hybrid': 'Hybrid' };
+
+      const apiBody = {
+        jobTitle: formData.jobTitle,
+        jobDescription: formData.jobDescription,
+        keyResponsibilities: formData.responsibilities,
+        requirements: formData.requirements,
+        benefits: formData.benefits,
+        requiredExperience: formData.requiredExperience,
+        salaryRange: formData.salaryRange || '',
+        jobType: jobTypeMap[formData.jobType] || formData.jobType,
+        workMode: workModeMap[formData.workMode] || formData.workMode,
+        jobLocation: formData.jobLocation,
+        skills: formData.skills,
+        candidiateshortlist: parseInt(formData.shortlistedCandidates, 10),
+      };
+
+      const response = await fetch(POST_JOB_API, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(apiBody),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        let errorMsg = data.message || 'Failed to create job post. Please try again.';
+        if (data.detail) {
+          errorMsg = Array.isArray(data.detail)
+            ? data.detail.map((d) => d.msg || d.message || JSON.stringify(d)).join('. ')
+            : typeof data.detail === 'string' ? data.detail : errorMsg;
+        }
+        setError(errorMsg);
+        setLoading(false);
+        return;
+      }
+
+      if (typeof window !== 'undefined') localStorage.setItem('job_created_success', '1');
+      router.push('/employer/dashboard');
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -138,6 +227,7 @@ export default function CreateJobPage() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
+      {loading && <Loader text="Posting job..." />}
       <Sidebar active="Create Job Post" type="employer" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
@@ -158,6 +248,11 @@ export default function CreateJobPage() {
 
             {/* Form */}
             <form onSubmit={handleSubmit}>
+              {error && (
+                <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+                  {error}
+                </div>
+              )}
               {/* Single Section */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
                 {/* Job Title */}
@@ -513,11 +608,12 @@ export default function CreateJobPage() {
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white text-base font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                  disabled={loading}
+                  className="px-6 py-2 bg-blue-600 text-white text-base font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:bg-blue-400 disabled:cursor-not-allowed"
                   style={{ width: 'clamp(250px, 30%, 350px)' }}
                 >
                   <FileText className="w-4 h-4" />
-                  Post Job
+                  {loading ? 'Posting job...' : 'Post Job'}
                 </button>
               </div>
             </form>

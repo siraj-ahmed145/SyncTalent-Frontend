@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
 import { Phone, Mail, Globe, MapPin, Briefcase, Award, Users } from "lucide-react";
+import { isEmployerLoggedIn } from "../../../utils/employerSession";
+import Loader from "../../../utils/loader";
+import Popup, { POPUP_TIMEOUT } from "../../components/Popup";
 
 // Custom LinkedIn Icon
 const LinkedinIcon = ({ className }) => (
@@ -21,6 +25,9 @@ const EmailIcon = ({ className }) => (
 );
 
 export default function EmployerProfile() {
+  const router = useRouter();
+  const [authChecked, setAuthChecked] = useState(false);
+  const [showLoginSuccess, setShowLoginSuccess] = useState(false);
   const [isEditing, setIsEditing] = useState({});
   const [profile, setProfile] = useState({
     companyName: "Tech Innovations Inc.",
@@ -56,6 +63,29 @@ export default function EmployerProfile() {
     github: "github.com/techinnovations"
   });
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isEmployerLoggedIn()) {
+      router.push("/employer/login");
+      return;
+    }
+    setAuthChecked(true);
+    if (localStorage.getItem("login_success_employer") === "1") {
+      localStorage.removeItem("login_success_employer");
+      setShowLoginSuccess(true);
+    }
+  }, [router]);
+
+  useEffect(() => {
+    if (!showLoginSuccess) return;
+    const t = setTimeout(() => setShowLoginSuccess(false), POPUP_TIMEOUT);
+    return () => clearTimeout(t);
+  }, [showLoginSuccess]);
+
+  if (!authChecked) {
+    return <Loader text="Verifying access..." />;
+  }
+
   const toggleEdit = (section) => {
     setIsEditing(prev => ({ ...prev, [section]: !prev[section] }));
   };
@@ -75,9 +105,11 @@ export default function EmployerProfile() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      <Sidebar active="" type="employer" />
-      <div className="flex-1 flex flex-col md:ml-64 ml-20">
+    <>
+      <Popup show={showLoginSuccess} message="Sign in successful" type="success" />
+      <div className="min-h-screen flex bg-gray-50">
+        <Sidebar active="" type="employer" />
+        <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
         <main className="p-6 md:p-10 flex-1">
           <section className="w-full pb-10">
@@ -391,7 +423,8 @@ export default function EmployerProfile() {
             </div>
           </section>
         </main>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { SIGNUP_API } from '../../../routes/employer/signup';
 import Loader from '../../../utils/loader';
+import Popup, { POPUP_TIMEOUT } from '../../components/Popup';
 
 export default function EmployerSignup() {
   const router = useRouter();
@@ -22,6 +23,17 @@ export default function EmployerSignup() {
     confirmPassword: '',
     agreeToTerms: false
   });
+  const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
+
+  const showPopup = (message, type = 'success') => {
+    setPopup({ show: true, message, type });
+  };
+
+  useEffect(() => {
+    if (!popup.show) return;
+    const t = setTimeout(() => setPopup(prev => ({ ...prev, show: false })), POPUP_TIMEOUT);
+    return () => clearTimeout(t);
+  }, [popup.show]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -48,19 +60,25 @@ export default function EmployerSignup() {
 
     // Validation: Check if passwords match
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      const msg = 'Passwords do not match';
+      setError(msg);
+      showPopup(msg, 'error');
       return;
     }
 
     // Validation: Check if terms are agreed
     if (!formData.agreeToTerms) {
-      setError('Please agree to the Terms and Conditions');
+      const msg = 'Please agree to the Terms and Conditions';
+      setError(msg);
+      showPopup(msg, 'error');
       return;
     }
 
     // Validation: Check if all fields are filled
     if (!formData.companyName || !formData.email || !formData.password) {
-      setError('Please fill in all fields');
+      const msg = 'Please fill in all fields';
+      setError(msg);
+      showPopup(msg, 'error');
       return;
     }
 
@@ -80,14 +98,19 @@ export default function EmployerSignup() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || data.detail || 'Signup failed. Please try again.');
+        const msg = data.message || data.detail || 'Signup failed. Please try again.';
+        setError(msg);
+        showPopup(msg, 'error');
         setLoading(false);
         return;
       }
 
+      if (typeof window !== 'undefined') localStorage.setItem('signup_success_employer', '1');
       router.push('/employer/login');
     } catch (err) {
-      setError(err.message || 'Signup failed. Please try again.');
+      const msg = err.message || 'Signup failed. Please try again.';
+      setError(msg);
+      showPopup(msg, 'error');
     } finally {
       setLoading(false);
     }
@@ -95,6 +118,7 @@ export default function EmployerSignup() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row relative">
+      <Popup show={popup.show} message={popup.message} type={popup.type} />
       {loading && <Loader text="Creating account..." />}
       {/* Left Side - Signup Form */}
       <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12 transition-colors duration-300">
@@ -110,12 +134,6 @@ export default function EmployerSignup() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Error Message */}
-            {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
-                {error}
-              </div>
-            )}
 
             {/* Google Sign Up Button */}
             <button
