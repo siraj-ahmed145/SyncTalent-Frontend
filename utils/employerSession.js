@@ -3,6 +3,27 @@ const EXPIRY_PREFIX = 'employer_session_expiry_';
 const CURRENT_USER_KEY = 'current_employer_id';
 const USER_TYPE_KEY = 'user_type';
 
+const getExpiryTimeFromToken = (token, fallbackMinutes = 1440) => {
+  try {
+    const tokenParts = String(token || '').split('.');
+    if (tokenParts.length < 2) {
+      return new Date().getTime() + fallbackMinutes * 60 * 1000;
+    }
+
+    const base64 = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+    const payloadJson = atob(padded);
+    const payload = JSON.parse(payloadJson);
+
+    if (payload?.exp) {
+      return Number(payload.exp) * 1000;
+    }
+  } catch (e) {
+    console.warn('Could not parse token exp, using fallback expiry.', e);
+  }
+  return new Date().getTime() + fallbackMinutes * 60 * 1000;
+};
+
 export const setEmployerSession = (data, token, expiryMinutes) => {
   const employerId = data?.employer_id ?? data?.id;
   const companyName = data?.companyName ?? data?.company_name;
@@ -14,7 +35,8 @@ export const setEmployerSession = (data, token, expiryMinutes) => {
 
   const sessionKey = SESSION_PREFIX + employerId;
   const expiryKey = EXPIRY_PREFIX + employerId;
-  const expiryTime = new Date().getTime() + expiryMinutes * 60 * 1000;
+  const fallbackMinutes = Number.isFinite(Number(expiryMinutes)) ? Number(expiryMinutes) : 1440;
+  const expiryTime = getExpiryTimeFromToken(token, fallbackMinutes);
 
   const employerData = {
     employer_id: employerId,

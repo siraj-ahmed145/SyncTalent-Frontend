@@ -12,17 +12,30 @@ import { APPLY_JOB_API } from "../../../routes/candidate/applyJob";
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const ensureTagsArray = (tags) => {
   if (!tags) return [];
-  if (Array.isArray(tags)) return tags;
+  if (Array.isArray(tags)) {
+    return tags
+      .flatMap((item) => (typeof item === "string" ? item.split(/[\n|,]/) : []))
+      .map((t) => t.trim())
+      .filter((t) => t);
+  }
   if (typeof tags === "string")
-    return tags.split(",").map((t) => t.trim()).filter((t) => t);
+    return tags.split(/[\n|,]/).map((t) => t.trim()).filter((t) => t);
   return [];
 };
 
 const ensureArray = (data) => {
   if (!data) return [];
-  if (Array.isArray(data)) return data;
+  if (Array.isArray(data)) {
+    return data
+      .flatMap((item) => (typeof item === "string" ? item.split(/(?:\r?\n|\|)/) : []))
+      .map((item) => item.replace(/^[•\-\*]\s*/, "").trim())
+      .filter((item) => item);
+  }
   if (typeof data === "string")
-    return data.split("\n").map((item) => item.trim()).filter((item) => item);
+    return data
+      .split(/(?:\r?\n|\|)/)
+      .map((item) => item.replace(/^[•\-\*]\s*/, "").trim())
+      .filter((item) => item);
   return [];
 };
 

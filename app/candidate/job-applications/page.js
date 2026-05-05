@@ -7,6 +7,23 @@ import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 import { GET_APPLICATIONS_API } from '../../../routes/candidate/applyJob';
 
+const ensureTagsArray = (tags) => {
+  if (!tags) return [];
+  if (Array.isArray(tags)) {
+    return tags
+      .flatMap((t) => (typeof t === 'string' ? t.split(/[,|\n]/) : []))
+      .map((x) => x.trim())
+      .filter(Boolean);
+  }
+  if (typeof tags === 'string') {
+    return tags
+      .split(/[,|\n]/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
+
 
 
 export default function CandidateApplicationsPage() {
@@ -43,25 +60,35 @@ export default function CandidateApplicationsPage() {
 
         const data = await res.json();
         
-        const mappedApplications = (data.applications || []).map(app => ({
+        const mappedApplications = (data.applications || []).map(app => {
+          // Backend often returns similarity in range [0,1]; display as percentage.
+          // If API already returns [0,100], keep as-is.
+          const rawScore = app.similarity_score;
+          let normalizedScore = null;
+          if (rawScore != null && !Number.isNaN(Number(rawScore))) {
+            const numeric = Number(rawScore);
+            normalizedScore = numeric <= 1 ? Math.round(numeric * 100) : Math.round(numeric);
+          }
+
+          return {
           id: app.application_id || app.id,
-          title: app.jobTitle,
-          company: app.companyName,
+          title: app.jobTitle || app.title || 'Untitled Job',
+          company: app.companyName || app.company || 'Unknown Company',
           location: app.jobLocation || 'Not specified',
           jobType: app.jobType || 'Full-time',
           workMode: app.workMode || 'Hybrid',
-          salary: app.salary || 'Not specified',
-          level: app.experience || 'Not specified',
-          experience: app.experience || 'Not specified',
+          salary: app.salaryRange || app.salary || 'Not specified',
+          level: app.requiredExperience || app.experience || 'Not specified',
+          experience: app.requiredExperience || app.experience || 'Not specified',
           appliedDate: app.applied_at
             ? new Date(app.applied_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
             : 'N/A',
-          status: app.status || 'In Progress',
-          // Keep null as null — don't coerce to 0
-          matchScore: app.similarity_score != null ? Math.round(app.similarity_score) : null,
-          tags: Array.isArray(app.skills) ? app.skills : [],
-          description: app.description || 'No description available',
-        }));
+          status: app.status || 'pending',
+          matchScore: normalizedScore,
+          tags: ensureTagsArray(app.skills),
+          description: app.jobDescription || app.description || 'No description available',
+        };
+      });
 
         setApplications(mappedApplications);
       } catch (err) {
@@ -76,22 +103,37 @@ export default function CandidateApplicationsPage() {
     fetchApplications();
   }, []);
 
+  const normalizeStatus = (status) => String(status || '').trim().toLowerCase();
   const totalApplied = applications.length;
-  const shortlisted = applications.filter(app => app.status === "Shortlisted").length;
-  const rejected = applications.filter(app => app.status === "Rejected").length;
-  const inProgress = applications.filter(app => app.status === "In Progress").length;
+  const shortlisted = applications.filter(app => normalizeStatus(app.status) === "shortlisted").length;
+  const rejected = applications.filter(app => normalizeStatus(app.status) === "rejected").length;
+  const inProgress = applications.filter(app => {
+    const s = normalizeStatus(app.status);
+    return s === "in progress" || s === "pending";
+  }).length;
 
   const filteredApplications = statusFilter === "All"
     ? applications
-    : applications.filter(app => app.status === statusFilter);
+    : applications.filter(app => {
+        const s = normalizeStatus(app.status);
+        if (statusFilter === "Shortlisted") return s === "shortlisted";
+        if (statusFilter === "Rejected") return s === "rejected";
+        if (statusFilter === "In Progress") return s === "in progress" || s === "pending";
+        return true;
+      });
 
   const getStatusBadge = (status) => {
-    switch(status) {
+    const normalized = String(status || '').trim().toLowerCase();
+    switch(normalized) {
       case "Shortlisted":
+      case "shortlisted":
         return { bg: "bg-green-100", text: "text-green-700", border: "border-green-200", icon: <CheckCircle className="w-4 h-4" /> };
       case "Rejected":
+      case "rejected":
         return { bg: "bg-red-100", text: "text-red-700", border: "border-red-200", icon: <XCircle className="w-4 h-4" /> };
       case "In Progress":
+      case "in progress":
+      case "pending":
         return { bg: "bg-purple-100", text: "text-purple-700", border: "border-purple-200", icon: <Loader className="w-4 h-4" /> };
       default:
         return { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-200", icon: <FileText className="w-4 h-4" /> };
