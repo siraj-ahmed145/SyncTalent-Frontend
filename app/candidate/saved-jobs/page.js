@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { MapPin, Briefcase, Bookmark, Building2, DollarSign } from 'lucide-react';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
-import Popup, { POPUP_TIMEOUT } from '../../components/Popup';
+import MessagePopup, { POPUP_TIMEOUT } from '../../components/MessagePopup';
 import { SAVE_JOB_API, GET_SAVED_JOBS_API } from '../../../routes/candidate/savedJobs';
 
 // Helper converts tags to array
@@ -218,8 +218,8 @@ export default function SavedJobsPage() {
       <div className="flex-1 flex flex-col md:ml-64 ml-20 relative">
         <Topbar />
         
-        <Popup show={showRemoveNotification} message="Job Removed from Saved Jobs" type="success" />
-        <Popup show={showApplicationNotification} message="Application Submitted Successfully" type="success" />
+        <MessagePopup show={showRemoveNotification} message="Job Removed from Saved Jobs" type="success" />
+        <MessagePopup show={showApplicationNotification} message="Application Submitted Successfully" type="success" />
         
         <main className="p-6 md:p-10 flex-1">
           <section className="w-full pb-10">

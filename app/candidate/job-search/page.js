@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { MapPin, Briefcase, Clock, Search, Bookmark, Building2, DollarSign } from 'lucide-react';
-import Popup, { POPUP_TIMEOUT } from '../../components/Popup';
+import MessagePopup, { POPUP_TIMEOUT } from '../../components/MessagePopup';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 import Loader from '../../../utils/loader';
@@ -30,9 +30,24 @@ const SORTS = ["Most Relevant", "Newest", "Oldest", "Highest Salary"];
 // Helper function to ensure tags are always an array
 const ensureTagsArray = (tags) => {
   if (!tags) return [];
-  if (Array.isArray(tags)) return tags;
+  if (Array.isArray(tags)) {
+    // Sometimes backend returns ["React|Next.js"] or ["React, Next.js"]
+    // Normalize each entry into separate tags.
+    return tags
+      .flatMap((t) => {
+        if (typeof t !== "string") return [];
+        return t
+          .split(/[,|]/)
+          .map((x) => x.trim())
+          .filter(Boolean);
+      })
+      .filter(Boolean);
+  }
   if (typeof tags === 'string') {
-    return tags.split(',').map(t => t.trim()).filter(t => t);
+    return tags
+      .split(/[,|]/) // support "a,b" and "a|b" formats
+      .map((t) => t.trim())
+      .filter((t) => t);
   }
   return [];
 };
@@ -265,10 +280,10 @@ export default function CandidateJobSearchPage() {
       <div className="flex-1 flex flex-col md:ml-64 ml-20 relative">
         <Topbar />
         
-        <Popup show={showSaveNotification} message="Job Saved for later" type="success" />
-        <Popup show={showUnsaveNotification} message="Job Removed from Saved Jobs" type="success" />
-        <Popup show={showErrorNotification} message="Could not update saved jobs" type="error" />
-        <Popup show={showApplicationNotification} message="Application Submitted Successfully" type="success" />
+        <MessagePopup show={showSaveNotification} message="Job Saved for later" type="success" />
+        <MessagePopup show={showUnsaveNotification} message="Job Removed from Saved Jobs" type="success" />
+        <MessagePopup show={showErrorNotification} message="Could not update saved jobs" type="error" />
+        <MessagePopup show={showApplicationNotification} message="Application Submitted Successfully" type="success" />
         
         <main className="p-6 md:p-10 flex-1">
           <section className="w-full pb-10">
@@ -366,7 +381,7 @@ export default function CandidateJobSearchPage() {
                       {Array.isArray(job.tags) && job.tags.length > 0 && (
                         <div className="flex flex-wrap gap-2 pb-3 mb-2 border-b border-gray-200">
                           {job.tags.map((tag) => (
-                            <span key={tag} className="px-2 py-0.5 bg-zinc-100 text-xs font-medium rounded border border-zinc-200 text-zinc-600">
+                            <span key={tag} className="px-4 py-2 bg-blue-50 text-blue-600 text-xs font-medium rounded-full">
                               {tag}
                             </span>
                           ))}

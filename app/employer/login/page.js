@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { setEmployerSession, isEmployerLoggedIn } from '../../../utils/employerSession';
 import { LOGIN_API } from '../../../routes/employer/login';
 import Loader from '../../../utils/loader';
-import Popup, { POPUP_TIMEOUT } from '../../components/Popup';
+import MessagePopup, { POPUP_TIMEOUT } from '../../components/MessagePopup';
 
 export default function EmployerLogin() {
   const router = useRouter();
@@ -140,7 +140,7 @@ export default function EmployerLogin() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row relative">
-      <Popup show={popup.show} message={popup.message} type={popup.type} />
+      <MessagePopup show={popup.show} message={popup.message} type={popup.type} />
       {loading && <Loader text="Signing in..." />}
       {/* Left Side - Login Form */}
       <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12 transition-colors duration-300">

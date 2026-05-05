@@ -7,7 +7,7 @@ import { Briefcase, Users, Search, MapPin, Calendar, DollarSign, Clock, LayoutGr
 import { getSearchJobsUrl } from "../../../routes/employer/searchJobs";
 import { isEmployerLoggedIn } from "../../../utils/employerSession";
 import Loader from "../../../utils/loader";
-import Popup, { POPUP_TIMEOUT } from "../../components/Popup";
+import MessagePopup, { POPUP_TIMEOUT } from "../../components/MessagePopup";
 
 // Map API job to dashboard card format
 const mapApiJobToCard = (job) => ({
@@ -51,6 +51,19 @@ const formatJobTime = (dateStr) => {
     return date.toLocaleDateString();
   } catch {
     return dateStr;
+  }
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  try {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  } catch {
+    return dateString;
   }
 };
 
@@ -182,7 +195,7 @@ export default function EmployerDashboard() {
 
   return (
     <div className="min-h-screen flex bg-gray-50">
-      <Popup show={showJobCreatedSuccess} message="Job created successfully" type="success" />
+      <MessagePopup show={showJobCreatedSuccess} message="Job created successfully" type="success" />
       {loading && <Loader text="Loading jobs..." />}
       <Sidebar active="Dashboard" type="employer" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
@@ -300,7 +313,7 @@ export default function EmployerDashboard() {
                                 {getLevelInYears(job.level)}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                            <div className="flex items-center gap-2 ml-2 shrink-0">
                               {/* Status badge */}
                               <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${job.status === 'Active' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'} border whitespace-nowrap`}>
                                 {job.status}
@@ -320,14 +333,16 @@ export default function EmployerDashboard() {
                           {/* Skills badges */}
                           <div className="flex flex-wrap gap-2 mb-4">
                             {job.skills && job.skills.map((skill) => (
-                              <span key={skill} className="px-2 py-0.5 bg-zinc-100 text-xs font-medium rounded border border-zinc-200 text-zinc-600">
+                              <span key={skill} className="px-4 py-2 bg-blue-50 text-blue-600 text-xs font-medium rounded-full">
                                 {skill}
                               </span>
                             ))}
                           </div>
                           {/* Bottom row: posted and total applications */}
                           <div className="mt-auto flex items-end flex-row justify-between pt-4 border-t border-gray-100 text-sm gap-2">
-                            <span className="text-gray-400">Job Posted: {job.time || '-'}</span>
+                            <span className="text-gray-400">
+                              Job Posted: {formatDate(job.postedDate) || job.time || "-"}
+                            </span>
                             <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-purple-100 text-purple-700 border border-purple-200"><Users className="w-4 h-4" />{job.applications} Applications</span>
                           </div>
                           <div className="w-full flex justify-center mt-4">

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 import { FileText, MapPin, ArrowLeft } from 'lucide-react';
-import Popup, { POPUP_TIMEOUT } from '../../components/Popup';
+import MessagePopup, { POPUP_TIMEOUT } from '../../components/MessagePopup';
 import Loader from '../../../utils/loader';
 import { GET_JOBS_API } from '../../../routes/employer/getJobs';
 import { UPDATE_JOB_API } from '../../../routes/employer/updateJob';
@@ -329,7 +329,7 @@ export default function EditJobPage() {
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
         
-        <Popup show={showSuccessMessage} message="Job Post updated successfully" type="success" />
+        <MessagePopup show={showSuccessMessage} message="Job Post updated successfully" type="success" />
         
         <main className="p-6 md:p-10 flex-1 flex justify-center">
           <div className="w-full max-w-5xl">

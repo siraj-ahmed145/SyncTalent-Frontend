@@ -3,7 +3,7 @@ import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Users, MapPin, Briefcase, Calendar, DollarSign, Building2, X } from "lucide-react";
-import Popup, { POPUP_TIMEOUT } from "../../components/Popup";
+import MessagePopup, { POPUP_TIMEOUT } from "../../components/MessagePopup";
 import Loader from "../../../utils/loader";
 import { useState, useEffect } from "react";
 import { GET_JOBS_API } from "../../../routes/employer/getJobs";
@@ -203,7 +203,7 @@ export default function ViewJobPostPage() {
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
         
-        <Popup show={showSuccessMessage} message={successMessage} type="success" />
+        <MessagePopup show={showSuccessMessage} message={successMessage} type="success" />
         
         {/* Confirmation Modal */}
         {showConfirmModal && (
