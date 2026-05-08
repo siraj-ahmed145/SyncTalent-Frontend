@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Briefcase, Clock, FileText, CheckCircle, XCircle, Loader, Building2, DollarSign, FileCheck } from 'lucide-react';
+import { MapPin, Briefcase, Clock, FileText, CheckCircle, XCircle, Clock3, Building2, DollarSign, FileCheck } from 'lucide-react';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
+import Loader from '../../../utils/loader';
+import { normalizeExperienceText } from '../../../utils/experience';
 import { GET_APPLICATIONS_API } from '../../../routes/candidate/applyJob';
+import { getMatchScoreColor, getMatchScoreBg } from '../../../utils/matchScoreUtils';
 
 const ensureTagsArray = (tags) => {
   if (!tags) return [];
@@ -24,6 +27,144 @@ const ensureTagsArray = (tags) => {
   return [];
 };
 
+const getFirstNonEmpty = (...values) => {
+  for (const value of values) {
+    if (value === 0) return 0;
+    if (value || value === false) {
+      const text = String(value).trim();
+      if (text) return text;
+    }
+  }
+  return '';
+};
+
+const mapApplicationToCard = (app) => {
+  const job = app.job ?? app.job_post ?? app.jobDetails ?? app.job_data ?? app.job_detail ?? app.jobInfo ?? app.applicationJob ?? null;
+  const rawScore = app.similarity_score ?? app.matchingScore ?? app.match_score ?? job?.similarity_score ?? job?.match_score;
+  let normalizedScore = null;
+  if (rawScore != null && !Number.isNaN(Number(rawScore))) {
+    const numeric = Number(rawScore);
+    normalizedScore = numeric <= 1 ? Math.round(numeric * 100) : Math.round(numeric);
+  }
+
+  const title = getFirstNonEmpty(
+    app.jobTitle,
+    app.title,
+    app.position,
+    app.job_title,
+    app.job_name,
+    job?.jobTitle,
+    job?.title,
+    job?.position,
+    job?.job_title,
+    job?.job_name
+  );
+  const company = getFirstNonEmpty(
+    app.companyName,
+    app.company,
+    app.employerName,
+    app.company_name,
+    job?.companyName,
+    job?.company,
+    job?.employerName,
+    job?.company_name
+  );
+  const location = getFirstNonEmpty(
+    app.jobLocation,
+    app.location,
+    app.workLocation,
+    app.job_location,
+    app.location_name,
+    job?.jobLocation,
+    job?.location,
+    job?.workLocation,
+    job?.job_location,
+    job?.location_name
+  );
+  const jobType = getFirstNonEmpty(
+    app.jobType,
+    app.job_type,
+    app.type,
+    app.employmentType,
+    job?.jobType,
+    job?.job_type,
+    job?.type,
+    job?.employmentType
+  );
+  const workMode = getFirstNonEmpty(
+    app.workMode,
+    app.work_mode,
+    app.mode,
+    app.schedule,
+    job?.workMode,
+    job?.work_mode,
+    job?.mode,
+    job?.schedule
+  );
+  const salary = getFirstNonEmpty(
+    app.salaryRange,
+    app.salary,
+    app.compensation,
+    app.salary_range,
+    job?.salaryRange,
+    job?.salary,
+    job?.compensation,
+    job?.salary_range
+  );
+  const experience = getFirstNonEmpty(
+    app.requiredExperience,
+    app.experience,
+    app.required_experience,
+    app.level,
+    job?.requiredExperience,
+    job?.experience,
+    job?.required_experience,
+    job?.level
+  );
+  const description = getFirstNonEmpty(
+    app.jobDescription,
+    app.description,
+    app.job_description,
+    app.summary,
+    app.details,
+    app.jobDetails,
+    job?.jobDescription,
+    job?.description,
+    job?.job_description,
+    job?.summary,
+    job?.details,
+    job?.jobDetails,
+    ''
+  );
+
+  return {
+    id: app.application_id ?? app.id ?? app.job_id ?? app.jobId ?? job?.id ?? job?.job_id,
+    title: title || 'Untitled Job',
+    company: company || 'Unknown Company',
+    location: location || 'Not specified',
+    jobType: jobType || 'Full-time',
+    workMode: workMode || 'Hybrid',
+    salary: salary || undefined,
+    experience,
+    appliedDate: app.applied_at
+      ? new Date(app.applied_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+      : 'N/A',
+    status: getFirstNonEmpty(
+      app.status,
+      app.application_status,
+      app.state,
+      app.statusText,
+      app.status_text,
+      job?.status,
+      'pending'
+    ),
+    matchScore: normalizedScore,
+    tags: ensureTagsArray(
+      app.skills ?? app.tags ?? app.jobTags ?? job?.skills ?? job?.tags ?? job?.jobTags
+    ),
+    description: description || 'No description available',
+  };
+};
 
 
 export default function CandidateApplicationsPage() {
@@ -59,37 +200,8 @@ export default function CandidateApplicationsPage() {
         }
 
         const data = await res.json();
-        
-        const mappedApplications = (data.applications || []).map(app => {
-          // Backend often returns similarity in range [0,1]; display as percentage.
-          // If API already returns [0,100], keep as-is.
-          const rawScore = app.similarity_score;
-          let normalizedScore = null;
-          if (rawScore != null && !Number.isNaN(Number(rawScore))) {
-            const numeric = Number(rawScore);
-            normalizedScore = numeric <= 1 ? Math.round(numeric * 100) : Math.round(numeric);
-          }
-
-          return {
-          id: app.application_id || app.id,
-          title: app.jobTitle || app.title || 'Untitled Job',
-          company: app.companyName || app.company || 'Unknown Company',
-          location: app.jobLocation || 'Not specified',
-          jobType: app.jobType || 'Full-time',
-          workMode: app.workMode || 'Hybrid',
-          salary: app.salaryRange || app.salary || 'Not specified',
-          level: app.requiredExperience || app.experience || 'Not specified',
-          experience: app.requiredExperience || app.experience || 'Not specified',
-          appliedDate: app.applied_at
-            ? new Date(app.applied_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
-            : 'N/A',
-          status: app.status || 'pending',
-          matchScore: normalizedScore,
-          tags: ensureTagsArray(app.skills),
-          description: app.jobDescription || app.description || 'No description available',
-        };
-      });
-
+        const rawApplications = Array.isArray(data.applications) ? data.applications : [];
+        const mappedApplications = rawApplications.map((app) => mapApplicationToCard(app));
         setApplications(mappedApplications);
       } catch (err) {
         console.error('Error fetching applications:', err);
@@ -107,7 +219,7 @@ export default function CandidateApplicationsPage() {
   const totalApplied = applications.length;
   const shortlisted = applications.filter(app => normalizeStatus(app.status) === "shortlisted").length;
   const rejected = applications.filter(app => normalizeStatus(app.status) === "rejected").length;
-  const inProgress = applications.filter(app => {
+  const pending = applications.filter(app => {
     const s = normalizeStatus(app.status);
     return s === "in progress" || s === "pending";
   }).length;
@@ -118,7 +230,7 @@ export default function CandidateApplicationsPage() {
         const s = normalizeStatus(app.status);
         if (statusFilter === "Shortlisted") return s === "shortlisted";
         if (statusFilter === "Rejected") return s === "rejected";
-        if (statusFilter === "In Progress") return s === "in progress" || s === "pending";
+        if (statusFilter === "Pending") return s === "in progress" || s === "pending";
         return true;
       });
 
@@ -131,32 +243,16 @@ export default function CandidateApplicationsPage() {
       case "Rejected":
       case "rejected":
         return { bg: "bg-red-100", text: "text-red-700", border: "border-red-200", icon: <XCircle className="w-4 h-4" /> };
-      case "In Progress":
       case "in progress":
       case "pending":
-        return { bg: "bg-purple-100", text: "text-purple-700", border: "border-purple-200", icon: <Loader className="w-4 h-4" /> };
+        return { bg: "bg-amber-100", text: "text-amber-700", border: "border-amber-200", icon: <Clock3 className="w-4 h-4" /> };
       default:
         return { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-200", icon: <FileText className="w-4 h-4" /> };
     }
   };
 
   // Returns color based on score — null score gets a neutral style
-  const getMatchScoreColor = (score) => {
-    if (score === null) return "text-gray-400";
-    if (score >= 90) return "text-green-600";
-    if (score >= 75) return "text-blue-600";
-    if (score >= 60) return "text-orange-600";
-    return "text-red-600";
-  };
 
-  // Returns a label for the score ring background
-  const getMatchScoreBg = (score) => {
-    if (score === null) return "bg-gray-50 border-gray-200";
-    if (score >= 90) return "bg-green-50 border-green-200";
-    if (score >= 75) return "bg-blue-50 border-blue-200";
-    if (score >= 60) return "bg-orange-50 border-orange-200";
-    return "bg-red-50 border-red-200";
-  };
 
   const getFilterColors = (filter) => {
     switch(filter) {
@@ -164,10 +260,10 @@ export default function CandidateApplicationsPage() {
         return statusFilter === filter
           ? "bg-green-600 text-white shadow-md"
           : "bg-white text-gray-600 border border-gray-200 hover:border-green-500 hover:text-green-600";
-      case "In Progress":
+      case "Pending":
         return statusFilter === filter
-          ? "bg-purple-600 text-white shadow-md"
-          : "bg-white text-gray-600 border border-gray-200 hover:border-purple-500 hover:text-purple-600";
+          ? "bg-amber-600 text-white shadow-md"
+          : "bg-white text-gray-600 border border-gray-200 hover:border-amber-500 hover:text-amber-600";
       case "Rejected":
         return statusFilter === filter
           ? "bg-red-600 text-white shadow-md"
@@ -217,6 +313,17 @@ export default function CandidateApplicationsPage() {
                 <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
+                      <p className="text-sm text-gray-500 font-medium mb-1">Pending</p>
+                      <p className="text-3xl font-bold text-amber-700">{pending}</p>
+                    </div>
+                    <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                      <Clock3 className="w-6 h-6 text-amber-600" />
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <div>
                       <p className="text-sm text-gray-500 font-medium mb-1">Shortlisted</p>
                       <p className="text-3xl font-bold text-green-600">{shortlisted}</p>
                     </div>
@@ -236,23 +343,12 @@ export default function CandidateApplicationsPage() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-500 font-medium mb-1">In Progress</p>
-                      <p className="text-3xl font-bold text-purple-600">{inProgress}</p>
-                    </div>
-                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                      <Loader className="w-6 h-6 text-purple-600" />
-                    </div>
-                  </div>
-                </div>
               </div>
 
               {/* Filter Tabs */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex flex-wrap gap-2">
-                  {["All", "Shortlisted", "In Progress", "Rejected"].map((filter) => (
+                  {["All", "Pending", "Shortlisted", "Rejected"].map((filter) => (
                     <button
                       key={filter}
                       onClick={() => setStatusFilter(filter)}
@@ -269,12 +365,8 @@ export default function CandidateApplicationsPage() {
 
               {/* Loading State */}
               {isLoading ? (
-                <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Loader className="w-8 h-8 text-gray-400 animate-spin" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Loading Applications</h3>
-                  <p className="text-gray-500">Fetching your job applications...</p>
+                <div className="py-24">
+                  <Loader text="Loading applications..." />
                 </div>
               ) : error ? (
                 <div className="bg-white rounded-2xl border border-red-200 p-12 text-center">
@@ -308,7 +400,11 @@ export default function CandidateApplicationsPage() {
                     return (
                       <div
                         key={app.id}
-                        className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex flex-col h-full transition-all hover:shadow-lg hover:border-blue-200"
+                        className={`rounded-2xl border p-5 shadow-sm flex flex-col h-full transition-all hover:shadow-lg ${
+                          app.status === 'shortlisted' ? 'bg-green-50 border-green-100 hover:border-green-200' :
+                          app.status === 'rejected'    ? 'bg-red-50 border-red-100 hover:border-red-200'   :
+                                                           'bg-amber-50 border-amber-100 hover:border-amber-200'
+                        }`}
                       >
                         {/* Header */}
                         <div className="flex items-start justify-between mb-2">
@@ -318,7 +414,7 @@ export default function CandidateApplicationsPage() {
                                 {app.title}
                               </h3>
                               <span className="px-3 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap">
-                                {app.experience}
+                                {app.experience ? normalizeExperienceText(app.experience) : 'Not specified'}
                               </span>
                             </div>
                             <p className="text-sm font-medium text-blue-600">{app.company}</p>
@@ -352,9 +448,11 @@ export default function CandidateApplicationsPage() {
                           <span className="flex items-center gap-1">
                             <Briefcase className="w-4 h-4" /> {app.jobType}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <DollarSign className="w-4 h-4" /> {app.salary}
-                          </span>
+                          {app.salary && (
+                            <span className="flex items-center gap-1">
+                              <DollarSign className="w-4 h-4" /> {app.salary}
+                            </span>
+                          )}
                         </div>
 
                         {/* Description */}
@@ -367,7 +465,7 @@ export default function CandidateApplicationsPage() {
                           {app.tags.length > 0 ? app.tags.map((tag) => (
                             <span
                               key={tag}
-                              className="px-2 py-0.5 bg-zinc-100 text-xs font-medium rounded border border-zinc-200 text-zinc-600"
+                              className="px-4 py-2 bg-blue-50 text-blue-600 text-xs font-medium rounded-full"
                             >
                               {tag}
                             </span>

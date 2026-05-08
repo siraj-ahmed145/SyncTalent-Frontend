@@ -8,6 +8,7 @@ import Loader from "../../../utils/loader";
 import { useState, useEffect, useRef } from "react";
 import { GET_JOBS_API } from "../../../routes/candidate/getJobs";
 import { APPLY_JOB_API } from "../../../routes/candidate/applyJob";
+import { getMatchScoreColor, getMatchScoreBgColor, getMatchScoreBorder } from "../../../utils/matchScoreUtils";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const ensureTagsArray = (tags) => {
@@ -329,37 +330,26 @@ export default function CandidateViewJobPostPage() {
 
               {/* Header */}
               <div className="mb-6 pb-6 border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1">
+                <div className="flex items-center justify-between gap-6">
+                  <div className="flex-1">
                     <h1 className="text-3xl font-bold text-gray-900">{job.title}</h1>
+                    <p className="text-lg font-semibold text-blue-600 mb-3 mt-2">{job.company}</p>
                   </div>
                   {matchScore && (
-                    <div className="ml-3 text-center bg-linear-to-br from-gray-50 to-gray-100 rounded-xl px-4 py-3 border border-gray-200 shadow-sm shrink-0">
-                      <div className="text-xs text-gray-500 font-medium mb-0.5">Match</div>
-                      <div className={`text-3xl font-bold ${
-                        parseInt(matchScore) >= 90 ? "text-green-600" :
-                        parseInt(matchScore) >= 80 ? "text-blue-600"  :
-                        parseInt(matchScore) >= 70 ? "text-yellow-600":
-                                                     "text-orange-600"
-                      }`}>
+                    <div className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 shrink-0 ${getMatchScoreBgColor(parseInt(matchScore))} ${getMatchScoreBorder(parseInt(matchScore))}`}>
+                      <p className={`text-3xl font-bold ${getMatchScoreColor(parseInt(matchScore))}`}>
                         {matchScore}%
-                      </div>
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">Job Match Score</p>
                     </div>
                   )}
                 </div>
-                <p className="text-lg font-semibold text-blue-600 mb-3 mt-1">{job.company}</p>
                 <div className="flex flex-wrap gap-3 text-base text-gray-600">
                   {job.workMode !== "Remote" && <span className="flex items-center gap-1"><MapPin className="w-5 h-5" />{job.location}</span>}
                   <span className="flex items-center gap-1"><Building2 className="w-5 h-5" />{job.workMode}</span>
                   <span className="flex items-center gap-1"><Briefcase className="w-5 h-5" />{job.jobType}</span>
                   {job.salary && <span className="flex items-center gap-1"><DollarSign className="w-5 h-5" />{job.salary}</span>}
                 </div>
-              </div>
-
-              {/* Description */}
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Job Description</h2>
-                <p className="text-gray-700 leading-relaxed">{job.description}</p>
               </div>
 
               {/* Key Details */}
@@ -386,6 +376,12 @@ export default function CandidateViewJobPostPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Description */}
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">Job Description</h2>
+                <p className="text-gray-700 leading-relaxed">{job.description}</p>
               </div>
 
               {/* Skills */}

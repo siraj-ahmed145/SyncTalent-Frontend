@@ -7,8 +7,10 @@ import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 import Loader from '../../../utils/loader';
 import MessagePopup, { POPUP_TIMEOUT } from '../../components/MessagePopup';
+import { normalizeExperienceText } from '../../../utils/experience';
 import { GET_JOB_RECOMMENDATIONS_API } from '../../../routes/candidate/jobRecommendations';
 import { SAVE_JOB_API, GET_SAVED_JOBS_API } from '../../../routes/candidate/savedJobs';
+import { getMatchScoreColor, getMatchScoreBg } from '../../../utils/matchScoreUtils';
 
 const ensureTagsArray = (tags) => {
   if (!tags) return [];
@@ -43,12 +45,7 @@ const formatTime = (dateStr) => {
   }
 };
 
-const getMatchScoreColor = (score) => {
-  if (score >= 90) return 'text-green-600';
-  if (score >= 80) return 'text-blue-600';
-  if (score >= 70) return 'text-orange-600';
-  return 'text-gray-600';
-};
+
 
 const mapRecommendationToCard = (job) => {
   const percentage = Math.max(0, Math.min(100, Number(job.similarity_score || 0) * 100));
@@ -272,13 +269,13 @@ export default function JobRecommendationsPage() {
                               <h3 className="text-lg md:text-xl font-semibold text-gray-900">{job.title}</h3>
                               {job.experience && (
                                 <span className="px-3 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap">
-                                  {job.experience}
+                                  {normalizeExperienceText(job.experience)}
                                 </span>
                               )}
                             </div>
                             <p className="text-sm font-medium text-blue-600">{job.company}</p>
                           </div>
-                          <div className="ml-3 text-center bg-linear-to-br from-gray-50 to-gray-100 rounded-xl px-3 py-2 border border-gray-200 shadow-sm shrink-0">
+                          <div className={`ml-3 text-center rounded-xl px-3 py-2 border shadow-sm shrink-0 ${getMatchScoreBg(job.matchScore)}`}>
                             <div className="text-xs text-gray-500 font-medium mb-0.5">Match</div>
                             <div className={`text-2xl font-bold ${matchScoreColor}`}>{job.matchScore}%</div>
                           </div>

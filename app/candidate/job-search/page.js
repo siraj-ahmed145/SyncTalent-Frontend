@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Briefcase, Clock, Search, Bookmark, Building2, DollarSign } from 'lucide-react';
+import { MapPin, Briefcase, Clock, Search, Bookmark, Building2, DollarSign, X } from 'lucide-react';
 import MessagePopup, { POPUP_TIMEOUT } from '../../components/MessagePopup';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 import Loader from '../../../utils/loader';
+import { normalizeExperienceText } from '../../../utils/experience';
 import { GET_JOBS_API } from '../../../routes/candidate/getJobs';
-import { SAVE_JOB_API, GET_SAVED_JOBS_API } from '../../../routes/candidate/savedJobs';
+import { SAVE_JOB_API, UNSAVE_JOB_API, GET_SAVED_JOBS_API } from '../../../routes/candidate/savedJobs';
 
 // Randomized dropdown lists as described
 const REGIONS = [
@@ -120,11 +121,17 @@ export default function CandidateJobSearchPage() {
         }
 
         const rawJobs = Array.isArray(data) ? data : (data.jobs ?? data.data ?? []);
-        const mapped = rawJobs.map((j) => {
-          const card = mapApiJobToCard(j);
-          card.time = formatTime(card.time);
-          return card;
-        });
+
+        const mapped = rawJobs
+          .filter((j) => {
+            return j.status?.toLowerCase() === "active";
+          })
+          .map((j) => {
+            const card = mapApiJobToCard(j);
+            card.time = formatTime(card.time);
+            return card;
+          });
+
         setJobs(mapped);
       } catch (err) {
         setError(err.message || 'Something went wrong. Please try again.');
@@ -143,30 +150,58 @@ export default function CandidateJobSearchPage() {
   const [applicationStep, setApplicationStep] = useState('choice'); // 'choice', 'upload', 'confirm'
   const [useCustomResume, setUseCustomResume] = useState(false);
   const [uploadedResume, setUploadedResume] = useState(null);
-  
+
   // Saved jobs state
   const [savedJobIds, setSavedJobIds] = useState([]);
   const [showSaveNotification, setShowSaveNotification] = useState(false);
   const [showUnsaveNotification, setShowUnsaveNotification] = useState(false);
   const [showErrorNotification, setShowErrorNotification] = useState(false);
   const [showApplicationNotification, setShowApplicationNotification] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedJobToUnsave, setSelectedJobToUnsave] = useState(null);
 
   // load saved job ids from server
   useEffect(() => {
     const fetchSaved = async () => {
       try {
-        const headers = { 'Content-Type': 'application/json' };
-        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        const res = await fetch(GET_SAVED_JOBS_API, { headers });
-        const data = await res.json();
-        if (res.ok && Array.isArray(data)) {
-          setSavedJobIds(data.map(j => j.id ?? j.job_id));
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+
+        const token =
+          typeof window !== 'undefined'
+            ? localStorage.getItem('auth_token')
+            : null;
+
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
         }
+
+        const res = await fetch(GET_SAVED_JOBS_API, {
+          method: 'GET',
+          headers
+        });
+
+        const data = await res.json();
+
+        // backend returns { message, saved_jobs: [...] }
+        const savedJobs = Array.isArray(data.saved_jobs)
+          ? data.saved_jobs
+          : [];
+
+        if (res.ok) {
+          const ids = savedJobs.map(
+            (job) => job.job_id ?? job.id
+          );
+
+          setSavedJobIds(ids);
+        }
+
       } catch (e) {
         console.error('Failed to load saved jobs', e);
       }
     };
+
     fetchSaved();
   }, []);
 
@@ -184,42 +219,107 @@ export default function CandidateJobSearchPage() {
   });
 
   const handleSaveJob = async (jobId) => {
-    const isSaved = savedJobIds.includes(jobId);
     try {
-      const headers = { 'Content-Type': 'application/json' };
-      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      // use POST to save and DELETE to unsave; backend may require explicit verb
-      const url = `${SAVE_JOB_API}/${jobId}`;
-      const method = 'POST';
-      const body = JSON.stringify({ action: isSaved ? 'unsave' : 'save' });
-      console.debug('saving job', { url, method, body });
-      const res = await fetch(url, { method, headers, body });
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('auth_token')
+          : null;
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(
+        `${SAVE_JOB_API}/${jobId}`,
+        {
+          method: 'POST',
+          headers
+        }
+      );
+
+      const data = await res.json();
+
       if (!res.ok) {
-        // log full response for debugging
-        console.error('Save job request failed', res.status, res.statusText);
-        setShowErrorNotification(true);
-        setTimeout(() => setShowErrorNotification(false), POPUP_TIMEOUT);
-        return; // abort without toggling UI
+        throw new Error(
+          data.detail || 'Failed to save job'
+        );
       }
-      if (isSaved) {
-        setSavedJobIds(savedJobIds.filter(id => id !== jobId));
-        setShowUnsaveNotification(true);
-        setTimeout(() => setShowUnsaveNotification(false), POPUP_TIMEOUT);
-      } else {
-        setSavedJobIds([...savedJobIds, jobId]);
-        setShowSaveNotification(true);
-        setTimeout(() => setShowSaveNotification(false), POPUP_TIMEOUT);
-      }
+
+      setSavedJobIds((prev) => [...prev, jobId]);
+
+      setShowSaveNotification(true);
+
+      setTimeout(() => {
+        setShowSaveNotification(false);
+      }, POPUP_TIMEOUT);
+
     } catch (err) {
-      console.error('handleSaveJob error', err);
-      // notify user of failure
+      console.error(err);
+
       setShowErrorNotification(true);
-      setTimeout(() => setShowErrorNotification(false), POPUP_TIMEOUT);
-      // don't modify local state if request failed
+
+      setTimeout(() => {
+        setShowErrorNotification(false);
+      }, POPUP_TIMEOUT);
     }
   };
-  
+
+  const handleUnsaveJob = async (jobId) => {
+    try {
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('auth_token')
+          : null;
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(
+        `${UNSAVE_JOB_API}/${jobId}`,
+        {
+          method: 'DELETE',
+          headers
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.detail || 'Failed to unsave job'
+        );
+      }
+
+      setSavedJobIds((prev) =>
+        prev.filter((id) => id !== jobId)
+      );
+
+      setShowUnsaveNotification(true);
+
+      setTimeout(() => {
+        setShowUnsaveNotification(false);
+      }, POPUP_TIMEOUT);
+
+    } catch (err) {
+      console.error(err);
+
+      setShowErrorNotification(true);
+
+      setTimeout(() => {
+        setShowErrorNotification(false);
+      }, POPUP_TIMEOUT);
+    }
+  };
+
   const handleApplyClick = (job) => {
     setSelectedJob(job);
     setIsApplicationModalOpen(true);
@@ -252,14 +352,14 @@ export default function CandidateJobSearchPage() {
       useCustomResume,
       resume: uploadedResume
     });
-    
+
     // Close modal and reset
     setIsApplicationModalOpen(false);
     setSelectedJob(null);
     setApplicationStep('choice');
     setUseCustomResume(false);
     setUploadedResume(null);
-    
+
     // Show success notification
     setShowApplicationNotification(true);
     setTimeout(() => setShowApplicationNotification(false), POPUP_TIMEOUT);
@@ -279,12 +379,12 @@ export default function CandidateJobSearchPage() {
       <Sidebar active="Search Job" type="candidate" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20 relative">
         <Topbar />
-        
+
         <MessagePopup show={showSaveNotification} message="Job Saved for later" type="success" />
         <MessagePopup show={showUnsaveNotification} message="Job Removed from Saved Jobs" type="success" />
         <MessagePopup show={showErrorNotification} message="Could not update saved jobs" type="error" />
         <MessagePopup show={showApplicationNotification} message="Application Submitted Successfully" type="success" />
-        
+
         <main className="p-6 md:p-10 flex-1">
           <section className="w-full pb-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
@@ -310,7 +410,7 @@ export default function CandidateJobSearchPage() {
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Search by job title, company, or skills..."
                     className="w-full max-w-md h-10 rounded-xl bg-zinc-100 border border-zinc-100 px-3 text-base placeholder:text-gray-400 text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm flex items-center"
-                    style={{backgroundClip: 'padding-box'}}
+                    style={{ backgroundClip: 'padding-box' }}
                   />
                   <button type="button" className="h-10 ml-2 md:ml-3 mr-4 md:mr-6 flex items-center gap-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm">
                     <Search className="w-4 h-4" />
@@ -359,7 +459,7 @@ export default function CandidateJobSearchPage() {
                         </h3>
                         {job.experience && (
                           <span className="px-3 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap">
-                            {job.experience}
+                            {normalizeExperienceText(job.experience)}
                           </span>
                         )}
                       </div>
@@ -371,7 +471,7 @@ export default function CandidateJobSearchPage() {
                         <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" /> {job.jobType}</span>
                         {job.salary && <span className="flex items-center gap-1"><DollarSign className="w-4 h-4" /> {job.salary}</span>}
                       </div>
-                      
+
                       {job.description && (
                         <div className="border-t border-gray-200 pt-3 mb-3">
                           <p className="text-xs md:text-sm text-gray-700 line-clamp-2">{job.description}</p>
@@ -387,20 +487,39 @@ export default function CandidateJobSearchPage() {
                           ))}
                         </div>
                       )}
-                      
+
                       <div className="mt-auto">
                         <div className="flex items-center justify-between mb-0.5">
                           <span className="text-xs text-gray-400">Job Posted: {job.time || '-'}</span>
                           <button
-                            onClick={() => handleSaveJob(job.id)}
-                            className={`p-2 rounded-lg transition-all ${savedJobIds.includes(job.id) ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
-                            title={savedJobIds.includes(job.id) ? "Remove from saved" : "Save for later"}
+                            onClick={() => {
+                              if (savedJobIds.includes(job.id)) {
+                                setSelectedJobToUnsave(job.id);
+                                setShowConfirmModal(true);
+                              } else {
+                                handleSaveJob(job.id);
+                              }
+                            }}
+                            className={`p-2 rounded-lg transition-all ${savedJobIds.includes(job.id)
+                              ? 'bg-blue-50 text-blue-600'
+                              : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'
+                              }`}
+                            title={
+                              savedJobIds.includes(job.id)
+                                ? 'Remove from saved'
+                                : 'Save for later'
+                            }
                           >
-                            <Bookmark className={`w-6 h-6 ${savedJobIds.includes(job.id) ? 'fill-blue-600' : ''}`} />
+                            <Bookmark
+                              className={`w-6 h-6 ${savedJobIds.includes(job.id)
+                                ? 'fill-blue-600'
+                                : ''
+                                }`}
+                            />
                           </button>
                         </div>
                         <div className="w-full flex justify-center -mt-1.5">
-                          <button 
+                          <button
                             onClick={() => router.push(`/candidate/view-job-post?jobId=${job.id}`)}
                             className="px-5 py-2 rounded-full text-blue-700 bg-blue-100 hover:bg-blue-200 hover:text-blue-800 active:bg-blue-200 active:text-blue-800 text-sm font-semibold transition-all"
                           >
@@ -417,6 +536,62 @@ export default function CandidateJobSearchPage() {
         </main>
       </div>
 
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+
+            <div className="flex justify-between items-start mb-4">
+
+              <h3 className="text-xl font-bold text-gray-900">
+                Confirm Action
+              </h3>
+
+              <button
+                onClick={() => {
+                  setShowConfirmModal(false);
+                  setSelectedJobToUnsave(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to unsave this job?
+            </p>
+
+            <div className="flex gap-3">
+
+              <button
+                onClick={async () => {
+                  await handleUnsaveJob(selectedJobToUnsave);
+
+                  setShowConfirmModal(false);
+                  setSelectedJobToUnsave(null);
+                }}
+                className="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+              >
+                Yes
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowConfirmModal(false);
+                  setSelectedJobToUnsave(null);
+                }}
+                className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors"
+              >
+                No
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Application Modal */}
       {isApplicationModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -424,7 +599,7 @@ export default function CandidateJobSearchPage() {
             {/* Modal Header */}
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
               <h2 className="text-xl font-bold text-gray-900">Apply for Position</h2>
-              <button 
+              <button
                 onClick={closeModal}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >

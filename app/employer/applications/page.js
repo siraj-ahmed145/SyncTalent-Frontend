@@ -9,8 +9,9 @@ import { getViewApplicationsUrl } from "../../../routes/employer/viewApplication
 import { getUpdateApplicationStatusUrl } from "../../../routes/employer/updateApplicationStatus";
 import {
   ArrowLeft, Users, CheckCircle, XCircle, Mail, Phone,
-  MapPin, Clock, Github, FileText, AlertCircle
+  MapPin, Clock, Github, FileText, Clock3
 } from "lucide-react";
+import { getMatchScoreColor, getMatchScoreBgColor, getMatchScoreBorder } from "../../../utils/matchScoreUtils";
 
 // ─── LinkedIn Icon ────────────────────────────────────────────────────────────
 const LinkedinIcon = ({ className }) => (
@@ -102,27 +103,7 @@ const mapApplication = (app) => {
 };
 
 // ─── Score colour helpers ─────────────────────────────────────────────────────
-const getScoreColor = (score) => {
-  if (score == null) return "text-gray-400";
-  if (score >= 85) return "text-green-600";
-  if (score >= 70) return "text-blue-600";
-  if (score >= 60) return "text-yellow-600";
-  return "text-red-600";
-};
-const getScoreBgColor = (score) => {
-  if (score == null) return "bg-gray-50";
-  if (score >= 85) return "bg-green-50";
-  if (score >= 70) return "bg-blue-50";
-  if (score >= 60) return "bg-yellow-50";
-  return "bg-red-50";
-};
-const getScoreBorderColor = (score) => {
-  if (score == null) return "border-gray-200";
-  if (score >= 85) return "border-green-200";
-  if (score >= 70) return "border-blue-200";
-  if (score >= 60) return "border-yellow-200";
-  return "border-red-200";
-};
+// Using centralized utility functions from matchScoreUtils for consistency
 
 // ─── Reusable profile section ─────────────────────────────────────────────────
 const ProfileSection = ({ title, items, renderItem }) =>
@@ -193,10 +174,12 @@ export default function ViewApplicationsPage() {
   // ── Derived lists ──────────────────────────────────────────────────────────
   const shortlistedCandidates = candidates.filter((c) => c.status === "shortlisted");
   const rejectedCandidates    = candidates.filter((c) => c.status === "rejected");
+  const pendingCandidates     = candidates.filter((c) => c.status === "pending");
 
   const filteredCandidates =
     filterStatus === "shortlisted" ? shortlistedCandidates :
     filterStatus === "rejected"    ? rejectedCandidates    :
+    filterStatus === "pending"     ? pendingCandidates     :
     candidates;
 
   // ── Status toggle ──────────────────────────────────────────────────────────
@@ -285,9 +268,10 @@ export default function ViewApplicationsPage() {
 
               {/* Stats */}
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   {[
                     { label: "Total Applications", value: candidates.length,            color: "text-gray-900",  bg: "bg-purple-100", icon: <Users       className="w-6 h-6 text-purple-600" /> },
+                    { label: "Pending",              value: pendingCandidates.length,     color: "text-amber-700",  bg: "bg-amber-100", icon: <Clock3 className="w-6 h-6 text-amber-600" /> },
                     { label: "Shortlisted",         value: shortlistedCandidates.length, color: "text-green-600", bg: "bg-green-100",  icon: <CheckCircle className="w-6 h-6 text-green-600" /> },
                     { label: "Rejected",            value: rejectedCandidates.length,    color: "text-red-600",   bg: "bg-red-100",    icon: <XCircle     className="w-6 h-6 text-red-600"   /> },
                   ].map(({ label, value, color, bg, icon }) => (
@@ -308,17 +292,16 @@ export default function ViewApplicationsPage() {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-8">
                 <div className="flex items-center gap-3 flex-wrap">
                   {[
-                    { key: "all",         label: "All",         active: "bg-blue-600  text-white shadow-md" },
-                    { key: "shortlisted", label: "Shortlisted", active: "bg-green-600 text-white shadow-md" },
-                    { key: "rejected",    label: "Rejected",    active: "bg-red-600   text-white shadow-md" },
-                  ].map(({ key, label, active }) => (
+                    { key: "all",         label: "All",         active: "bg-blue-600  text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-blue-500 hover:text-blue-600" },
+                    { key: "pending",     label: "Pending",     active: "bg-amber-600 text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-amber-500 hover:text-amber-600" },
+                    { key: "shortlisted", label: "Shortlisted", active: "bg-green-600 text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-green-500 hover:text-green-600" },
+                    { key: "rejected",    label: "Rejected",    active: "bg-red-600   text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-red-500 hover:text-red-600" },
+                  ].map(({ key, label, active, inactive }) => (
                     <button
                       key={key}
                       onClick={() => setFilterStatus(key)}
                       className={`px-6 py-2.5 rounded-full font-semibold transition-all text-sm ${
-                        filterStatus === key
-                          ? active
-                          : "bg-white text-gray-700 border border-gray-200 hover:border-gray-300"
+                        filterStatus === key ? active : inactive
                       }`}
                     >
                       {label}
@@ -332,6 +315,7 @@ export default function ViewApplicationsPage() {
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-7">
                   <h2 className="text-xl font-bold text-gray-900 mb-6">
                     {filterStatus === "all"         ? "All Candidates"         :
+                     filterStatus === "pending"     ? "Pending Candidates"     :
                      filterStatus === "shortlisted" ? "Shortlisted Candidates" :
                                                       "Rejected Candidates"}
                   </h2>
@@ -350,12 +334,14 @@ export default function ViewApplicationsPage() {
                         .map((candidate) => {
                           const isShortlisted = candidate.status === "shortlisted";
                           const isRejected    = candidate.status === "rejected";
+                          const isPending     = candidate.status === "pending";
                           return (
                             <div
                               key={candidate.applicationId}
                               className={`rounded-2xl border p-5 shadow-sm hover:shadow-lg transition-all duration-300 flex items-center justify-between ${
-                                isShortlisted ? "bg-green-50 border-green-100" :
-                                isRejected    ? "bg-red-50   border-red-100"   :
+                                isShortlisted ? "bg-green-50 border-green-100 hover:border-green-200" :
+                                isRejected    ? "bg-red-50   border-red-100 hover:border-red-200"   :
+                                isPending     ? "bg-amber-50 border-amber-100 hover:border-amber-200" :
                                                "bg-gray-50  border-gray-200"
                               }`}
                             >
@@ -363,6 +349,7 @@ export default function ViewApplicationsPage() {
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-base font-bold shrink-0 ${
                                   isShortlisted ? "bg-green-100 text-green-600" :
                                   isRejected    ? "bg-red-100   text-red-600"   :
+                                  isPending     ? "bg-amber-100 text-amber-700" :
                                                  "bg-gray-200  text-gray-600"
                                 }`}>
                                   {candidate.name.charAt(0).toUpperCase()}
@@ -376,9 +363,9 @@ export default function ViewApplicationsPage() {
                               </div>
 
                               <div className="flex items-center gap-4 shrink-0 ml-4">
-                                <div className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 ${getScoreBgColor(candidate.matchingScore)} ${getScoreBorderColor(candidate.matchingScore)}`}>
+                                <div className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 ${getMatchScoreBgColor(candidate.matchingScore)} ${getMatchScoreBorder(candidate.matchingScore)}`}>
                                   <p className="text-xs text-gray-600 font-medium">Match</p>
-                                  <p className={`text-2xl font-bold ${getScoreColor(candidate.matchingScore)}`}>
+                                  <p className={`text-2xl font-bold ${getMatchScoreColor(candidate.matchingScore)}`}>
                                     {candidate.matchingScore != null ? `${candidate.matchingScore}%` : "N/A"}
                                   </p>
                                 </div>
@@ -421,8 +408,8 @@ export default function ViewApplicationsPage() {
                       </div>
                       <h1 className="text-3xl font-bold text-gray-900">{selectedCandidate.name}</h1>
                     </div>
-                    <div className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 ${getScoreBgColor(selectedCandidate.matchingScore)} ${getScoreBorderColor(selectedCandidate.matchingScore)}`}>
-                      <p className={`text-3xl font-bold ${getScoreColor(selectedCandidate.matchingScore)}`}>
+                    <div className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 ${getMatchScoreBgColor(selectedCandidate.matchingScore)} ${getMatchScoreBorder(selectedCandidate.matchingScore)}`}>
+                      <p className={`text-3xl font-bold ${getMatchScoreColor(selectedCandidate.matchingScore)}`}>
                         {selectedCandidate.matchingScore != null ? `${selectedCandidate.matchingScore}%` : "N/A"}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">Job Match Score</p>
@@ -435,7 +422,7 @@ export default function ViewApplicationsPage() {
                     ) : selectedCandidate.status === "rejected" ? (
                       <><XCircle className="w-5 h-5 text-red-600" /><span className="px-3 py-1 bg-red-100 text-red-700 rounded-full font-medium text-sm">Rejected</span></>
                     ) : (
-                      <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full font-medium text-sm">Pending Review</span>
+                      <><Clock3 className="w-5 h-5 text-amber-600" /><span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full font-medium text-sm">Pending Review</span></>
                     )}
                   </div>
                 </div>
