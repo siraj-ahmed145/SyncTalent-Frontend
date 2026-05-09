@@ -11,22 +11,9 @@ import { normalizeExperienceText } from '../../../utils/experience';
 import { GET_JOBS_API } from '../../../routes/candidate/getJobs';
 import { SAVE_JOB_API, UNSAVE_JOB_API, GET_SAVED_JOBS_API } from '../../../routes/candidate/savedJobs';
 
-// Randomized dropdown lists as described
-const REGIONS = [
-  "All Regions",
-  "New York, US",
-  "Paris, France",
-  "Karachi, Pakistan",
-  "Berlin, Germany",
-  "Tokyo, Japan",
-  "Lahore, Pakistan",
-  "London, UK",
-  "Dubai, UAE",
-  "Remote, Global"
-];
 const MODES = ["All Work Modes", "Remote", "On-site", "Hybrid"];
-const TYPES = ["All Types", "Full time", "Part time", "Contract"];
-const SORTS = ["Most Relevant", "Newest", "Oldest", "Highest Salary"];
+const TYPES = ["All Types", "Full-time", "Part-time", "Contract"];
+const SORTS = ["Most Relevant", "Newest", "Oldest"];
 
 // Helper function to ensure tags are always an array
 const ensureTagsArray = (tags) => {
@@ -64,22 +51,22 @@ const mapApiJobToCard = (job) => ({
   salary: job.salary ?? job.salaryRange ?? '',
   experience: job.experience ?? job.requiredExperience ?? '',
   tags: ensureTagsArray(job.tags ?? job.skills),
+  rawDate: job.posted_at ?? job.created_at ?? '',
   time: job.time ?? job.posted_at ?? job.created_at ?? '',
   description: job.description ?? job.jobDescription ?? '',
 });
 
-const formatTime = (dateStr) => {
-  if (!dateStr) return '';
+const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+
   try {
     const date = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return '1 day ago';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    return date.toLocaleDateString();
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
   } catch {
     return dateStr;
   }
@@ -90,11 +77,28 @@ export default function CandidateJobSearchPage() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [region, setRegion] = useState(REGIONS[0]);
+  const [location, setLocation] = useState("All Locations");
   const [mode, setMode] = useState(MODES[0]);
   const [type, setType] = useState(TYPES[0]);
   const [sort, setSort] = useState(SORTS[0]);
   const [search, setSearch] = useState("");
+
+  // Dynamic locations extracted from jobs
+  const dynamicLocations = [
+    "All Locations",
+    ...Array.from(
+      new Set(
+        jobs
+          .map((job) => job.location)
+          .filter(
+            (loc) =>
+              loc &&
+              loc.trim() !== "" &&
+              loc.toLowerCase() !== "remote"
+          )
+      )
+    ),
+  ];
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -128,7 +132,7 @@ export default function CandidateJobSearchPage() {
           })
           .map((j) => {
             const card = mapApiJobToCard(j);
-            card.time = formatTime(card.time);
+            card.time = formatDate(card.rawDate);
             return card;
           });
 
@@ -206,17 +210,110 @@ export default function CandidateJobSearchPage() {
   }, []);
 
   // Client-side filtering
-  const filteredJobs = jobs.filter((job) => {
-    const matchesSearch =
-      !search.trim() ||
-      (job.title ?? '').toLowerCase().includes(search.toLowerCase()) ||
-      (job.company ?? '').toLowerCase().includes(search.toLowerCase()) ||
-      (Array.isArray(job.tags) ? job.tags.join(' ').toLowerCase() : '').includes(search.toLowerCase());
-    const matchesRegion = region === REGIONS[0] || job.location === region;
-    const matchesMode = mode === MODES[0] || job.workMode === mode;
-    const matchesType = type === TYPES[0] || job.jobType === type;
-    return matchesSearch && matchesRegion && matchesMode && matchesType;
-  });
+  const filteredJobs = jobs
+    .filter((job) => {
+      const matchesSearch =
+        !search.trim() ||
+        (job.title ?? "")
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        (job.company ?? "")
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        (Array.isArray(job.tags)
+          ? job.tags.join(" ").toLowerCase()
+          : ""
+        ).includes(search.toLowerCase());
+
+      const matchesLocation =
+        location === "All Locations" ||
+        job.location === location;
+
+      const matchesMode =
+        mode === "All Work Modes" ||
+        (job.workMode ?? "").toLowerCase() ===
+        mode.toLowerCase();
+
+      const matchesType =
+        type === "All Types" ||
+        (job.jobType ?? "").toLowerCase() ===
+        type.toLowerCase();
+
+      return (
+        matchesSearch &&
+        matchesLocation &&
+        matchesMode &&
+        matchesType
+      );
+    })
+    .sort((a, b) => {
+      // MOST RELEVANT
+      if (sort === "Most Relevant") {
+
+        // If no search, show newest first
+        if (!search.trim()) {
+          return new Date(b.rawDate) - new Date(a.rawDate);
+        }
+
+        const searchLower = search.toLowerCase();
+
+        const aTitleMatch = (a.title ?? "")
+          .toLowerCase()
+          .includes(searchLower);
+
+        const bTitleMatch = (b.title ?? "")
+          .toLowerCase()
+          .includes(searchLower);
+
+        const aCompanyMatch = (a.company ?? "")
+          .toLowerCase()
+          .includes(searchLower);
+
+        const bCompanyMatch = (b.company ?? "")
+          .toLowerCase()
+          .includes(searchLower);
+
+        const aTagMatch = (a.tags ?? [])
+          .join(" ")
+          .toLowerCase()
+          .includes(searchLower);
+
+        const bTagMatch = (b.tags ?? [])
+          .join(" ")
+          .toLowerCase()
+          .includes(searchLower);
+
+        const aScore =
+          (aTitleMatch ? 3 : 0) +
+          (aCompanyMatch ? 2 : 0) +
+          (aTagMatch ? 1 : 0);
+
+        const bScore =
+          (bTitleMatch ? 3 : 0) +
+          (bCompanyMatch ? 2 : 0) +
+          (bTagMatch ? 1 : 0);
+
+        // Higher relevance score first
+        if (bScore !== aScore) {
+          return bScore - aScore;
+        }
+
+        // If same relevance, newer first
+        return new Date(b.rawDate) - new Date(a.rawDate);
+      }
+
+      // NEWEST
+      if (sort === "Newest") {
+        return new Date(b.rawDate) - new Date(a.rawDate);
+      }
+
+      // OLDEST
+      if (sort === "Oldest") {
+        return new Date(a.rawDate) - new Date(b.rawDate);
+      }
+
+      return 0;
+    })
 
   const handleSaveJob = async (jobId) => {
     try {
@@ -408,7 +505,7 @@ export default function CandidateJobSearchPage() {
                     type="text"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    placeholder="Search by job title, company, or skills..."
+                    placeholder="Search by Job Title, Company, or Skills"
                     className="w-full max-w-md h-10 rounded-xl bg-zinc-100 border border-zinc-100 px-3 text-base placeholder:text-gray-400 text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm flex items-center"
                     style={{ backgroundClip: 'padding-box' }}
                   />
@@ -419,8 +516,16 @@ export default function CandidateJobSearchPage() {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto md:gap-3 mt-2 md:mt-0">
                   {/* Dropdowns with bg color and no border or matching border */}
-                  <select value={region} onChange={e => setRegion(e.target.value)} className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm">
-                    {REGIONS.map(opt => <option value={opt} key={opt}>{opt}</option>)}
+                  <select
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm"
+                  >
+                    {dynamicLocations.map((opt) => (
+                      <option value={opt} key={opt}>
+                        {opt}
+                      </option>
+                    ))}
                   </select>
                   <select value={mode} onChange={e => setMode(e.target.value)} className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm">
                     {MODES.map(opt => <option value={opt} key={opt}>{opt}</option>)}

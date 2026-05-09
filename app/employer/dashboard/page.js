@@ -1,9 +1,9 @@
 "use client";
 import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Briefcase, Users, Search, MapPin, Calendar, DollarSign, Clock, LayoutGrid, FileText, Building2 } from "lucide-react";
+import { Briefcase, Users, Search, MapPin, DollarSign, LayoutGrid, FileText, Building2 } from "lucide-react";
 import { GET_JOBS_API } from "../../../routes/employer/getJobs";
 import { isEmployerLoggedIn } from "../../../utils/employerSession";
 import { normalizeExperienceText } from "../../../utils/experience";
@@ -33,22 +33,22 @@ const getApplicationsCount = (job) => {
 };
 
 // Map API job to dashboard card format
+// API returns: jobLocation, jobTitle, jobType, workMode, salaryRange, jobDescription, etc.
 const mapApiJobToCard = (job) => ({
-  id: job.id ?? job.job_id,
-  title: job.title ?? job.jobTitle,
-  location: job.location ?? job.jobLocation,
+  id: job.job_id ?? job.id,
+  title: job.jobTitle ?? job.title,
+  location: job.jobLocation ?? job.location ?? "",   // API field is jobLocation
   workMode: job.workMode ?? job.work_mode,
   jobType: job.jobType ?? job.job_type,
   level: job.requiredExperience ?? job.experience ?? job.level ?? "Mid-Level",
   skills: job.skills ?? [],
   applications: getApplicationsCount(job),
   time: job.time ?? job.posted_at ?? job.postedDate ?? "",
-  // FIX: never default to 'Active' — use actual value from API or null
   status: job.status ?? null,
-  salary: job.salary ?? job.salaryRange ?? "",
-  postedDate: job.postedDate ?? job.posted_at ?? job.created_at ?? "",
-  description: job.description ?? job.jobDescription ?? "",
-  responsibilities: job.responsibilities ?? job.keyResponsibilities ?? [],
+  salary: job.salaryRange ?? job.salary ?? "",
+  postedDate: job.created_at ?? job.postedDate ?? job.posted_at ?? "",
+  description: job.jobDescription ?? job.description ?? "",
+  responsibilities: job.keyResponsibilities ?? job.responsibilities ?? [],
   requirements: job.requirements ?? [],
   benefits: job.benefits ?? [],
 });
@@ -83,12 +83,6 @@ const formatDate = (dateString) => {
   }
 };
 
-const REGIONS = [
-  "Lahore, Pakistan",
-  "Karachi, Pakistan",
-  "Islamabad, Pakistan",
-  "Remote",
-];
 const MODES = ["On-site", "Remote", "Hybrid"];
 const TYPES = ["Full-time", "Part-time", "Contract"];
 const STATUS = ["Active", "Closed"];
@@ -100,7 +94,7 @@ export default function EmployerDashboard() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [region, setRegion] = useState("All Regions");
+  const [location, setLocation] = useState("All Locations");
   const [mode, setMode] = useState("All Work Modes");
   const [type, setType] = useState("All Types");
   const [status, setStatus] = useState("All Status");
@@ -108,119 +102,110 @@ export default function EmployerDashboard() {
   const [search, setSearch] = useState("");
   const [showJobCreatedSuccess, setShowJobCreatedSuccess] = useState(false);
 
-  // FIX: fetch from GET_JOBS_API (employer-specific endpoint) which returns real status
+  // Dynamically derive unique locations from jobs — sourced from API field: jobLocation
+  const dynamicLocations = useMemo(() => {
+    const locs = jobs
+      .map((job) => job.location)
+      .filter((loc) => loc && loc.trim() !== "" && loc.toLowerCase() !== "remote");
+    return [...new Set(locs)].sort();
+  }, [jobs]);
+
   const fetchJobs = async () => {
-  setLoading(true);
-  setError("");
+    setLoading(true);
+    setError("");
 
-  try {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("auth_token")
-        : null;
+    try {
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("auth_token")
+          : null;
 
-    const headers = {
-      "Content-Type": "application/json",
-    };
+      const headers = {
+        "Content-Type": "application/json",
+      };
 
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
-
-    // 1️⃣ Fetch jobs
-    const response = await fetch(GET_JOBS_API, {
-      method: "GET",
-      headers,
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      let errorMsg =
-        data.message || "Failed to fetch jobs. Please try again.";
-
-      if (data.detail) {
-        errorMsg = Array.isArray(data.detail)
-          ? data.detail
-              .map((d) => d.msg ?? d.message ?? JSON.stringify(d))
-              .join(". ")
-          : typeof data.detail === "string"
-          ? data.detail
-          : errorMsg;
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
       }
 
-      setError(errorMsg);
-      setJobs([]);
-      return;
-    }
+      // 1️⃣ Fetch jobs from GET /employer/getjobs
+      const response = await fetch(GET_JOBS_API, {
+        method: "GET",
+        headers,
+      });
 
-    const rawJobs = Array.isArray(data)
-      ? data
-      : data.jobs ?? data.data ?? [];
+      const data = await response.json();
 
-    // 2️⃣ Fetch REAL application counts for every job
-    const jobsWithLiveCounts = await Promise.all(
-      rawJobs.map(async (job) => {
-        try {
-          const applicationsResponse = await fetch(
-            getViewApplicationsUrl(job.id ?? job.job_id),
-            {
-              method: "GET",
-              headers,
-            }
-          );
+      if (!response.ok) {
+        let errorMsg =
+          data.message || "Failed to fetch jobs. Please try again.";
 
-          const applicationsData =
-            await applicationsResponse.json();
-
-          const liveApplications = Array.isArray(
-            applicationsData.applications
-          )
-            ? applicationsData.applications.length
-            : 0;
-
-          return {
-            ...job,
-            applications: liveApplications,
-          };
-        } catch (err) {
-          console.error(
-            `Failed to fetch applications for job ${
-              job.id ?? job.job_id
-            }`,
-            err
-          );
-
-          return job;
+        if (data.detail) {
+          errorMsg = Array.isArray(data.detail)
+            ? data.detail
+                .map((d) => d.msg ?? d.message ?? JSON.stringify(d))
+                .join(". ")
+            : typeof data.detail === "string"
+            ? data.detail
+            : errorMsg;
         }
-      })
-    );
 
-    // 3️⃣ Map jobs
-    const mapped = jobsWithLiveCounts.map((j) => {
-      const card = mapApiJobToCard(j);
+        setError(errorMsg);
+        setJobs([]);
+        return;
+      }
 
-      card.time = card.time
-        ? formatJobTime(card.time)
-        : "";
+      // API returns { message: "Jobs Retrieved Successfully", jobs: [...] }
+      const rawJobs = Array.isArray(data)
+        ? data
+        : data.jobs ?? data.data ?? [];
 
-      return card;
-    });
+      // 2️⃣ Fetch REAL application counts for every job
+      const jobsWithLiveCounts = await Promise.all(
+        rawJobs.map(async (job) => {
+          try {
+            const applicationsResponse = await fetch(
+              getViewApplicationsUrl(job.job_id ?? job.id),
+              {
+                method: "GET",
+                headers,
+              }
+            );
 
-    // ✅ REAL-TIME UPDATED COUNTS
-    setJobs(mapped);
+            const applicationsData = await applicationsResponse.json();
 
-  } catch (err) {
-    setError(
-      err.message ||
-        "Something went wrong. Please try again."
-    );
+            const liveApplications = Array.isArray(
+              applicationsData.applications
+            )
+              ? applicationsData.applications.length
+              : 0;
 
-    setJobs([]);
-  } finally {
-    setLoading(false);
-  }
-};
+            return { ...job, applications: liveApplications };
+          } catch (err) {
+            console.error(
+              `Failed to fetch applications for job ${job.job_id ?? job.id}`,
+              err
+            );
+            return job;
+          }
+        })
+      );
+
+      // 3️⃣ Map to card format — API's jobLocation becomes card's location
+      const mapped = jobsWithLiveCounts.map((j) => {
+        const card = mapApiJobToCard(j);
+        card.time = card.time ? formatJobTime(card.time) : "";
+        return card;
+      });
+
+      setJobs(mapped);
+    } catch (err) {
+      setError(err.message || "Something went wrong. Please try again.");
+      setJobs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -232,8 +217,7 @@ export default function EmployerDashboard() {
     fetchJobs();
   }, [router]);
 
-  // Re-fetch on window focus so status updates made in view-job-post are
-  // reflected immediately when the employer returns to the dashboard
+  // Re-fetch on window focus so status updates are reflected immediately
   useEffect(() => {
     const handleFocus = () => {
       if (isEmployerLoggedIn()) fetchJobs();
@@ -257,11 +241,17 @@ export default function EmployerDashboard() {
     return () => clearTimeout(t);
   }, [showJobCreatedSuccess]);
 
+  // Reset location filter if the selected location no longer exists in fetched jobs
+  useEffect(() => {
+    if (location !== "All Locations" && !dynamicLocations.includes(location)) {
+      setLocation("All Locations");
+    }
+  }, [dynamicLocations, location]);
+
   if (!authChecked) {
     return <Loader text="Verifying access..." />;
   }
 
-  // Client-side search + filters applied on top of the already-fetched jobs
   const filteredJobs = jobs
     .filter((job) => {
       const matchesSearch =
@@ -269,15 +259,14 @@ export default function EmployerDashboard() {
         (Array.isArray(job.skills) ? job.skills.join(" ") : "")
           .toLowerCase()
           .includes(search.toLowerCase());
-      const matchesRegion =
-        region === "All Regions" || job.location === region;
+      const matchesLocation =
+        location === "All Locations" || job.location === location;
       const matchesMode = mode === "All Work Modes" || job.workMode === mode;
       const matchesType = type === "All Types" || job.jobType === type;
-      const matchesStatus =
-        status === "All Status" || job.status === status;
+      const matchesStatus = status === "All Status" || job.status === status;
       return (
         matchesSearch &&
-        matchesRegion &&
+        matchesLocation &&
         matchesMode &&
         matchesType &&
         matchesStatus
@@ -290,7 +279,7 @@ export default function EmployerDashboard() {
         return new Date(a.postedDate) - new Date(b.postedDate);
       if (sort === "Most Applications")
         return (b.applications ?? 0) - (a.applications ?? 0);
-      return 0; // Most Relevant — preserve API order
+      return 0;
     });
 
   return (
@@ -369,12 +358,13 @@ export default function EmployerDashboard() {
                     type="text"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && setSearch(e.target.value)}
-                    placeholder="Search by job title, company, or skills..."
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && setSearch(e.target.value)
+                    }
+                    placeholder="Search by Job Title or Skills"
                     className="w-full max-w-md h-10 rounded-xl bg-zinc-100 border border-zinc-100 px-3 text-base placeholder:text-gray-400 text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm flex items-center"
                     style={{ backgroundClip: "padding-box" }}
                   />
-                  {/* Search button now just triggers re-filter (no extra API call needed) */}
                   <button
                     type="button"
                     onClick={() => setSearch(search)}
@@ -385,15 +375,16 @@ export default function EmployerDashboard() {
                   </button>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto md:gap-3 mt-2 md:mt-0">
+                  {/* Location filter — populated purely from API jobLocation values */}
                   <select
-                    value={region}
-                    onChange={(e) => setRegion(e.target.value)}
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
                     className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm"
                   >
-                    <option value="All Regions">Regions</option>
-                    {REGIONS.map((opt) => (
-                      <option value={opt} key={opt}>
-                        {opt}
+                    <option value="All Locations">Locations</option>
+                    {dynamicLocations.map((loc) => (
+                      <option value={loc} key={loc}>
+                        {loc}
                       </option>
                     ))}
                   </select>
@@ -486,7 +477,6 @@ export default function EmployerDashboard() {
                             </span>
                           </div>
                           <div className="flex items-center gap-2 ml-2 shrink-0">
-                            {/* FIX: status now reflects real DB value */}
                             <span
                               className={`px-2 py-0.5 text-xs rounded-full font-medium border whitespace-nowrap flex items-center justify-center ${
                                 job.status === "Active"
@@ -502,7 +492,7 @@ export default function EmployerDashboard() {
                         </div>
 
                         <div className="flex flex-wrap gap-3 items-center text-sm text-gray-500 mb-4 pb-4 border-b border-gray-100">
-                          {job.workMode !== "Remote" && (
+                          {job.workMode !== "Remote" && job.location && (
                             <span className="flex items-center gap-1">
                               <MapPin className="w-4 h-4" />
                               {job.location}
