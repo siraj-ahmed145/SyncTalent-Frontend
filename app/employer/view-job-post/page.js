@@ -120,7 +120,7 @@ export default function ViewJobPostPage() {
       setError("");
 
       try {
-        const headers = { "Content-Type": "application/json" };
+        const headers = {};
 
         const token =
           typeof window !== "undefined"
@@ -378,9 +378,7 @@ export default function ViewJobPostPage() {
             ? localStorage.getItem("auth_token")
             : null;
 
-        const headers = {
-          "Content-Type": "application/json",
-        };
+        const headers = {};
 
         if (token) {
           headers["Authorization"] = `Bearer ${token}`;
@@ -420,6 +418,8 @@ export default function ViewJobPostPage() {
 
         setTimeout(() => {
           setShowSuccessMessage(false);
+
+          // redirect after delete
           router.push("/employer/dashboard");
         }, 1500);
 

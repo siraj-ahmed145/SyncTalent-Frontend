@@ -36,6 +36,18 @@ const formatTime = (dateStr) => {
   }
 };
 
+const formatDateOnly = (dateStr) => {
+  if (!dateStr) return '';
+  try {
+    const date = new Date(dateStr);
+
+    return date.toLocaleDateString('en-GB'); 
+    // Example output: 09/05/2026
+  } catch {
+    return dateStr;
+  }
+};
+
 const mapApiJobToCard = (job) => ({
   id: job.id ?? job.job_id,
   title: job.title ?? job.jobTitle,
@@ -47,7 +59,10 @@ const mapApiJobToCard = (job) => ({
   experience: job.experience ?? job.requiredExperience ?? '',
   tags: ensureTagsArray(job.tags ?? job.skills),
   time: job.time ?? job.posted_at ?? job.created_at ?? '',
+
   description: job.description ?? job.jobDescription ?? '',
+
+  savedDate: job.saved_date ? formatDateOnly(job.saved_date) : '',
 });
 
 // Dummy saved jobs data - in real app, this would come from localStorage or API
@@ -119,7 +134,6 @@ export default function SavedJobsPage() {
         if (res.ok && Array.isArray(list)) {
           const mapped = list.map(j => {
             const card = mapApiJobToCard(j);
-            card.time = formatTime(card.time);
             return card;
           });
           setSavedJobs(mapped);

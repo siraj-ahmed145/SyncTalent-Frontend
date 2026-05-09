@@ -9,8 +9,9 @@ import Loader from '../../../utils/loader';
 import MessagePopup, { POPUP_TIMEOUT } from '../../components/MessagePopup';
 import { normalizeExperienceText } from '../../../utils/experience';
 import { GET_JOB_RECOMMENDATIONS_API } from '../../../routes/candidate/jobRecommendations';
-import { SAVE_JOB_API, GET_SAVED_JOBS_API } from '../../../routes/candidate/savedJobs';
+import { SAVE_JOB_API, UNSAVE_JOB_API, GET_SAVED_JOBS_API } from '../../../routes/candidate/savedJobs';
 import { getMatchScoreColor, getMatchScoreBg } from '../../../utils/matchScoreUtils';
+import { X } from 'lucide-react';
 
 const ensureTagsArray = (tags) => {
   if (!tags) return [];
@@ -131,6 +132,8 @@ export default function JobRecommendationsPage() {
   const [showUnsaveNotification, setShowUnsaveNotification] = useState(false);
   const [showErrorNotification, setShowErrorNotification] = useState(false);
 
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedJobToUnsave, setSelectedJobToUnsave] = useState(null);
   useEffect(() => {
     const loadRecommendations = async () => {
       setLoading(true);
@@ -159,16 +162,38 @@ export default function JobRecommendationsPage() {
 
     const fetchSaved = async () => {
       try {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
         const headers = {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          'Content-Type': 'application/json'
         };
-        const res = await fetch(GET_SAVED_JOBS_API, { headers });
-        const data = await res.json().catch(() => null);
-        if (res.ok && Array.isArray(data)) {
-          setSavedJobIds(data.map((j) => j.id ?? j.job_id));
+
+        const token =
+          typeof window !== 'undefined'
+            ? localStorage.getItem('auth_token')
+            : null;
+
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
         }
+
+        const res = await fetch(GET_SAVED_JOBS_API, {
+          method: 'GET',
+          headers
+        });
+
+        const data = await res.json();
+
+        const savedJobs = Array.isArray(data.saved_jobs)
+          ? data.saved_jobs
+          : [];
+
+        if (res.ok) {
+          const ids = savedJobs.map(
+            (job) => job.job_id ?? job.id
+          );
+
+          setSavedJobIds(ids);
+        }
+
       } catch (e) {
         console.error('Failed to load saved jobs', e);
       }
@@ -179,39 +204,104 @@ export default function JobRecommendationsPage() {
   }, []);
 
   const handleSaveJob = async (jobId) => {
-    const isSaved = savedJobIds.includes(jobId);
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
       const headers = {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        'Content-Type': 'application/json'
       };
 
-      const res = await fetch(`${SAVE_JOB_API}/${jobId}`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ action: isSaved ? 'unsave' : 'save' }),
-      });
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('auth_token')
+          : null;
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(
+        `${SAVE_JOB_API}/${jobId}`,
+        {
+          method: 'POST',
+          headers
+        }
+      );
+
+      const data = await res.json();
 
       if (!res.ok) {
-        setShowErrorNotification(true);
-        setTimeout(() => setShowErrorNotification(false), POPUP_TIMEOUT);
-        return;
+        throw new Error(
+          data.detail || 'Failed to save job'
+        );
       }
 
-      if (isSaved) {
-        setSavedJobIds((prev) => prev.filter((id) => id !== jobId));
-        setShowUnsaveNotification(true);
-        setTimeout(() => setShowUnsaveNotification(false), POPUP_TIMEOUT);
-      } else {
-        setSavedJobIds((prev) => [...prev, jobId]);
-        setShowSaveNotification(true);
-        setTimeout(() => setShowSaveNotification(false), POPUP_TIMEOUT);
-      }
-    } catch (e) {
-      console.error('Save/Unsave failed', e);
+      setSavedJobIds((prev) => [...prev, jobId]);
+
+      setShowSaveNotification(true);
+
+      setTimeout(() => {
+        setShowSaveNotification(false);
+      }, POPUP_TIMEOUT);
+
+    } catch (err) {
+      console.error(err);
+
       setShowErrorNotification(true);
-      setTimeout(() => setShowErrorNotification(false), POPUP_TIMEOUT);
+
+      setTimeout(() => {
+        setShowErrorNotification(false);
+      }, POPUP_TIMEOUT);
+    }
+  };
+
+  const handleUnsaveJob = async (jobId) => {
+    try {
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('auth_token')
+          : null;
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(
+        `${UNSAVE_JOB_API}/${jobId}`,
+        {
+          method: 'DELETE',
+          headers
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.detail || 'Failed to unsave job'
+        );
+      }
+
+      setSavedJobIds((prev) =>
+        prev.filter((id) => id !== jobId)
+      );
+
+      setShowUnsaveNotification(true);
+
+      setTimeout(() => {
+        setShowUnsaveNotification(false);
+      }, POPUP_TIMEOUT);
+
+    } catch (err) {
+      console.error(err);
+
+      setShowErrorNotification(true);
+
+      setTimeout(() => {
+        setShowErrorNotification(false);
+      }, POPUP_TIMEOUT);
     }
   };
 
@@ -324,11 +414,30 @@ export default function JobRecommendationsPage() {
                           <div className="flex items-center justify-between mb-0.5">
                             <span className="text-xs text-gray-400">Job Posted: {job.postedDate || '-'}</span>
                             <button
-                              onClick={() => handleSaveJob(job.id)}
-                              className={`p-2 rounded-lg transition-all ${savedJobIds.includes(job.id) ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'}`}
-                              title={savedJobIds.includes(job.id) ? 'Remove from saved' : 'Save for later'}
+                              onClick={() => {
+                                if (savedJobIds.includes(job.id)) {
+                                  setSelectedJobToUnsave(job.id);
+                                  setShowConfirmModal(true);
+                                } else {
+                                  handleSaveJob(job.id);
+                                }
+                              }}
+                              className={`p-2 rounded-lg transition-all ${savedJobIds.includes(job.id)
+                                ? 'bg-blue-50 text-blue-600'
+                                : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'
+                                }`}
+                              title={
+                                savedJobIds.includes(job.id)
+                                  ? 'Remove from saved'
+                                  : 'Save for later'
+                              }
                             >
-                              <Bookmark className={`w-6 h-6 ${savedJobIds.includes(job.id) ? 'fill-blue-600' : ''}`} />
+                              <Bookmark
+                                className={`w-6 h-6 ${savedJobIds.includes(job.id)
+                                  ? 'fill-blue-600'
+                                  : ''
+                                  }`}
+                              />
                             </button>
                           </div>
                           <div className="w-full flex justify-center -mt-1.5">
@@ -349,6 +458,61 @@ export default function JobRecommendationsPage() {
           </section>
         </main>
       </div>
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+
+            <div className="flex justify-between items-start mb-4">
+
+              <h3 className="text-xl font-bold text-gray-900">
+                Confirm Action
+              </h3>
+
+              <button
+                onClick={() => {
+                  setShowConfirmModal(false);
+                  setSelectedJobToUnsave(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to unsave this job?
+            </p>
+
+            <div className="flex gap-3">
+
+              <button
+                onClick={async () => {
+                  await handleUnsaveJob(selectedJobToUnsave);
+
+                  setShowConfirmModal(false);
+                  setSelectedJobToUnsave(null);
+                }}
+                className="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+              >
+                Yes
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowConfirmModal(false);
+                  setSelectedJobToUnsave(null);
+                }}
+                className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors"
+              >
+                No
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
