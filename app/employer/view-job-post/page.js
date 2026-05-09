@@ -683,17 +683,17 @@ export default function ViewJobPostPage() {
                   <div className="grid grid-cols-3 gap-3">
                     <button
                       onClick={() => handleActionClick('close')}
-                      className="py-3 bg-red-50 hover:bg-red-100 text-red-700 border-red-200 font-semibold rounded-xl transition-colors border">
+                      className="py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-colors shadow-sm hover:shadow-md active:bg-amber-800">
                       Close Job Post
                     </button>
                     <button
                       onClick={() => router.push(`/employer/edit-job-post?jobId=${job.id}`)}
-                      className="py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">
+                      className="py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors shadow-sm hover:shadow-md active:bg-blue-800">
                       Edit Job Post
                     </button>
                     <button
                       onClick={() => handleActionClick('delete')}
-                      className="py-3 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-xl transition-colors border border-red-400">
+                      className="py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors shadow-sm hover:shadow-md active:bg-red-800">
                       Delete Job Post
                     </button>
                   </div>
@@ -701,12 +701,12 @@ export default function ViewJobPostPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => handleActionClick('reopen')}
-                      className="py-3 bg-green-50 hover:bg-green-100 text-green-700 border-green-300 font-semibold rounded-xl transition-colors border">
+                      className="py-3 bg-green-50 hover:bg-green-100 text-green-700 border-green-300 font-semibold rounded-xl transition-colors border shadow-sm hover:shadow-md active:bg-green-200">
                       Reopen Job Post
                     </button>
                     <button
                       onClick={() => handleActionClick('delete')}
-                      className="py-3 bg-red-100 hover:bg-red-200 text-red-700 font-semibold rounded-xl transition-colors border border-red-400">
+                      className="py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors shadow-sm hover:shadow-md active:bg-red-800">
                       Delete Job Post
                     </button>
                   </div>

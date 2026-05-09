@@ -54,22 +54,22 @@ const formatDate = (dateString) => {
 };
 
 const mapApiJobToCard = (job) => ({
-  id:              job.id ?? job.job_id,
-  title:           job.title ?? job.jobTitle,
-  company:         job.company ?? job.companyName,
-  location:        job.location ?? job.jobLocation,
-  jobType:         job.jobType ?? job.job_type,
-  workMode:        job.workMode ?? job.work_mode,
-  salary:          job.salary ?? job.salaryRange ?? "",
-  experience:      job.experience ?? job.requiredExperience ?? "",
-  level:           job.level ?? job.experience ?? "Mid-Level",
-  tags:            ensureTagsArray(job.tags ?? job.skills),
-  time:            job.time ?? job.posted_at ?? job.created_at ?? "",
-  postedDate:      formatDate(job.postedDate ?? job.posted_at ?? job.created_at ?? ""),
-  description:     job.description ?? job.jobDescription ?? "",
+  id:               job.id ?? job.job_id,
+  title:            job.title ?? job.jobTitle,
+  company:          job.company ?? job.companyName,
+  location:         job.location ?? job.jobLocation,
+  jobType:          job.jobType ?? job.job_type,
+  workMode:         job.workMode ?? job.work_mode,
+  salary:           job.salary ?? job.salaryRange ?? "",
+  experience:       job.experience ?? job.requiredExperience ?? "",
+  level:            job.level ?? job.experience ?? "Mid-Level",
+  tags:             ensureTagsArray(job.tags ?? job.skills),
+  time:             job.time ?? job.posted_at ?? job.created_at ?? "",
+  postedDate:       formatDate(job.postedDate ?? job.posted_at ?? job.created_at ?? ""),
+  description:      job.description ?? job.jobDescription ?? "",
   responsibilities: ensureArray(job.responsibilities ?? job.keyResponsibilities),
-  requirements:    ensureArray(job.requirements),
-  benefits:        ensureArray(job.benefits),
+  requirements:     ensureArray(job.requirements),
+  benefits:         ensureArray(job.benefits),
 });
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -93,7 +93,12 @@ export default function CandidateViewJobPostPage() {
   const [isSubmittingApplication,     setIsSubmittingApplication]     = useState(false);
   const [modalError,                  setModalError]                  = useState("");
 
-  // Keep a ref to the file so it's never lost to stale-closure issues
+  // ── FIX: dynamic key forces the <input type="file"> to fully remount
+  // whenever the modal opens or the user goes back to the upload step,
+  // preventing the browser from serving a stale cached file reference.
+  const [fileInputKey, setFileInputKey] = useState(0);
+
+  // Ref stores the File object — immune to stale-closure issues in async handlers
   const uploadedResumeRef = useRef(null);
 
   // ── Fetch job ──────────────────────────────────────────────────────────────
@@ -119,9 +124,9 @@ export default function CandidateViewJobPostPage() {
         }
 
         let jobs = [];
-        if (Array.isArray(data))                          jobs = data;
-        else if (data.jobs  && Array.isArray(data.jobs))  jobs = data.jobs;
-        else if (data.data  && Array.isArray(data.data))  jobs = data.data;
+        if (Array.isArray(data))                         jobs = data;
+        else if (data.jobs && Array.isArray(data.jobs))  jobs = data.jobs;
+        else if (data.data && Array.isArray(data.data))  jobs = data.data;
 
         const jobData = jobs.find((j) => j.id === jobId || j.job_id === jobId);
         if (jobData) {
@@ -156,6 +161,8 @@ export default function CandidateViewJobPostPage() {
     setUseCustomResume(false);
     setUploadedResume(null);
     uploadedResumeRef.current = null;
+    // Bump key so the file input remounts fresh every time the modal opens
+    setFileInputKey((k) => k + 1);
   };
 
   const closeModal = () => {
@@ -171,9 +178,10 @@ export default function CandidateViewJobPostPage() {
     setUseCustomResume(useCustom);
     setModalError("");
     if (useCustom) {
-      // Reset any previously selected file when entering upload step
+      // Clear any previously picked file and bump the input key so it remounts
       setUploadedResume(null);
       uploadedResumeRef.current = null;
+      setFileInputKey((k) => k + 1);
       setApplicationStep("upload");
     } else {
       setUploadedResume(null);
@@ -199,9 +207,12 @@ export default function CandidateViewJobPostPage() {
     }
 
     setModalError("");
-    // Store in BOTH state and ref to avoid any stale-closure issue
+    // Store in BOTH state and ref
     setUploadedResume(file);
     uploadedResumeRef.current = file;
+
+    console.log("DEBUG handleFileUpload: file selected →", file.name, file.size, file.type);
+
     setApplicationStep("confirm");
   };
 
@@ -209,11 +220,15 @@ export default function CandidateViewJobPostPage() {
   const handleSubmitApplication = async () => {
     setModalError("");
 
-    // Read from ref — guaranteed to be the latest value regardless of
-    // React's batched state updates or stale closures
+    // Always read from ref — not from state — to avoid stale closures
     const fileToUpload = uploadedResumeRef.current;
 
-    // Safety check: if user chose custom resume but ref is empty, block submit
+    console.log("DEBUG handleSubmitApplication:", {
+      useCustomResume,
+      fileToUpload: fileToUpload ? `${fileToUpload.name} (${fileToUpload.size} bytes)` : null,
+    });
+
+    // Guard: custom chosen but no file present
     if (useCustomResume && !fileToUpload) {
       setModalError("Please select a resume file before submitting.");
       setApplicationStep("upload");
@@ -225,18 +240,22 @@ export default function CandidateViewJobPostPage() {
 
       const token = typeof window !== "undefined"
         ? localStorage.getItem("auth_token") : null;
-      // Do NOT set Content-Type — browser sets it with the multipart boundary
+      // Do NOT set Content-Type manually — the browser sets it with the
+      // correct multipart boundary when you pass FormData as the body.
       const headers = {};
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
       const formData = new FormData();
 
       if (useCustomResume && fileToUpload) {
-        // Append the actual File object under the key FastAPI expects: "resume"
         formData.append("resume", fileToUpload, fileToUpload.name);
+        console.log("DEBUG: appended custom resume to FormData →", fileToUpload.name);
       }
-      // If default resume: send empty FormData so FastAPI receives
-      // File(None) → backend falls back to candidate's profile resume
+      // Default resume path: send empty FormData so FastAPI gets File(None)
+      // and falls back to the candidate's profile resume on the backend.
+
+      // Verify FormData contents before sending
+      console.log("DEBUG FormData 'resume' entry:", formData.get("resume"));
 
       const res = await fetch(APPLY_JOB_API(job.id), {
         method: "POST",
@@ -247,7 +266,11 @@ export default function CandidateViewJobPostPage() {
       let respData = {};
       try { respData = await res.json(); } catch (_) { /* non-JSON response */ }
 
+      console.log("DEBUG apply response:", res.status, respData);
+
       if (res.ok) {
+        console.log("DEBUG: Application submitted. resume_used =", respData.resume_used,
+                    "resume_filename =", respData.resume_filename);
         closeModal();
         setShowApplicationNotification(true);
         setTimeout(() => setShowApplicationNotification(false), POPUP_TIMEOUT);
@@ -540,12 +563,14 @@ export default function CandidateViewJobPostPage() {
 
                   <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 transition-colors">
                     {/*
-                      KEY FIX: use a unique key so React remounts the input
-                      every time the upload step is shown, preventing the
-                      browser from caching the previously selected file.
+                      FIX: fileInputKey is a number that increments every time
+                      the modal opens or the user re-enters the upload step.
+                      React sees a new key → unmounts the old input → mounts a
+                      brand-new one with no cached file, so onChange always fires
+                      even if the user picks the same filename again.
                     */}
                     <input
-                      key="resume-file-input"
+                      key={fileInputKey}
                       type="file"
                       id="resume-upload"
                       accept=".pdf,.doc,.docx"
@@ -558,13 +583,23 @@ export default function CandidateViewJobPostPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
                       </div>
-                      <p className="text-gray-700 font-medium mb-1">Click to upload or drag and drop</p>
+                      {/* Show selected filename once a file is picked */}
+                      {uploadedResume ? (
+                        <p className="text-blue-700 font-semibold mb-1">{uploadedResume.name}</p>
+                      ) : (
+                        <p className="text-gray-700 font-medium mb-1">Click to upload or drag and drop</p>
+                      )}
                       <p className="text-sm text-gray-500">PDF, DOC, or DOCX (max. 5MB)</p>
                     </label>
                   </div>
 
                   <button
-                    onClick={() => setApplicationStep("choice")}
+                    onClick={() => {
+                      // Bump the key when going back so the input is fresh
+                      // if the user comes back and picks again
+                      setFileInputKey((k) => k + 1);
+                      setApplicationStep("choice");
+                    }}
                     className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
                   >
                     <ArrowLeft className="w-4 h-4" />
@@ -595,7 +630,15 @@ export default function CandidateViewJobPostPage() {
 
                   <div className="flex gap-3 pt-4">
                     <button
-                      onClick={() => setApplicationStep(useCustomResume ? "upload" : "choice")}
+                      onClick={() => {
+                        if (useCustomResume) {
+                          // Bump the key so the input remounts when going back to upload
+                          setFileInputKey((k) => k + 1);
+                          setApplicationStep("upload");
+                        } else {
+                          setApplicationStep("choice");
+                        }
+                      }}
                       disabled={isSubmittingApplication}
                       className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors disabled:opacity-50"
                     >
@@ -619,4 +662,3 @@ export default function CandidateViewJobPostPage() {
     </div>
   );
 }
-

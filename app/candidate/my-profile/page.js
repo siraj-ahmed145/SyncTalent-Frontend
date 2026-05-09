@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
 import MessagePopup, { POPUP_TIMEOUT } from "../../components/MessagePopup";
-import { Phone, Mail, MapPin, Github, User, FileText } from "lucide-react";
+import { Phone, Mail, MapPin, Github, User, FileText, CheckCircle, Upload } from "lucide-react";
 import { isUserLoggedIn } from "../../../utils/session";
 import Loader from "../../../utils/loader";
 import InputPopup from "../../components/InputPopup";
@@ -695,32 +695,59 @@ export default function CandidateDashboard() {
             <div className="bg-white rounded-2xl shadow p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Resume</h3>
               <input ref={resumeInputRef} type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} className="hidden" />
-              <div className="bg-[#E6F0FF] border border-blue-200 rounded-xl p-8 text-center">
-                {profile.resume ? (
-                  <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-                      <FileText className="w-8 h-8 text-white" />
+              {profile.resume ? (
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 flex items-center justify-between gap-4">
+                  {/* Left: icon + file info */}
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                      <FileText className="w-6 h-6 text-blue-600" />
                     </div>
-                    <p className="text-gray-900 font-medium mb-2">Current Resume</p>
-                    <button onClick={downloadResume} className="text-blue-600 hover:text-blue-700 hover:underline mb-4 text-sm font-medium cursor-pointer">
-                      {getCleanResumeFileName()}
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-blue-600 mb-0.5">Current Resume</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">
+                        {getCleanResumeFileName()}
+                      </p>
+                      <div className="flex items-center gap-1 mt-1">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        <span className="text-xs text-green-600 font-medium">PDF document</span>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Right: action buttons */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={downloadResume}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+                    >
+                      <FileText className="w-4 h-4" />
+                      View Resume
                     </button>
-                    <button onClick={() => resumeInputRef.current?.click()} disabled={isUploadingResume} className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button
+                      onClick={() => resumeInputRef.current?.click()}
+                      disabled={isUploadingResume}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-blue-300 text-blue-700 text-sm font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Upload className="w-4 h-4" />
                       {isUploadingResume ? 'Uploading...' : 'Replace Resume'}
                     </button>
                   </div>
-                ) : (
-                  <div className="flex flex-col items-center">
-                    <div className="w-16 h-16 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
-                      <FileText className="w-8 h-8 text-white" />
-                    </div>
-                    <p className="text-gray-900 font-medium mb-4">No resume uploaded yet</p>
-                    <button onClick={() => resumeInputRef.current?.click()} disabled={isUploadingResume} className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-                      {isUploadingResume ? 'Uploading...' : 'Upload Resume'}
-                    </button>
+                </div>
+              ) : (
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-8 text-center">
+                  <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <FileText className="w-8 h-8 text-blue-600" />
                   </div>
-                )}
-              </div>
+                  <p className="text-gray-900 font-medium mb-4">No resume uploaded yet</p>
+                  <button
+                    onClick={() => resumeInputRef.current?.click()}
+                    disabled={isUploadingResume}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <FileText className="w-4 h-4" />
+                    {isUploadingResume ? 'Uploading...' : 'Upload Resume'}
+                  </button>
+                </div>
+              )}
             </div>
 
           </main>

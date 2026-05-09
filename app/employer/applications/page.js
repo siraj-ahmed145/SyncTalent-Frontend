@@ -21,37 +21,35 @@ const LinkedinIcon = ({ className }) => (
 );
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/**
- * Build a fully-qualified resume URL.
- *
- * Backend returns a bare filename:  "ahmed_resume.pdf"
- * Backend serves files at:          BASE_URL/uploads/ahmed_resume.pdf
- *
- * Also handles edge cases:
- *   • already-absolute URL  → returned as-is
- *   • relative path with dirs → strip dirs, use filename only
- */
 const resolveResumeUrl = (raw) => {
   if (!raw) return null;
-  if (/^https?:\/\//i.test(raw)) return raw;  // already absolute, use as-is
-
+  if (/^https?:\/\//i.test(raw)) return raw;
   const base = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
-
-  // Backend saves only the bare filename into ApplyJobs.resume
-  // e.g. "3f2a1b4c-uuid.pdf"
-  // Files are written to disk at:    uploads/resumes/<filename>
-  // FastAPI static mount serves at:  BASE_URL/uploads/resumes/<filename>
   const filename = raw.split("/").filter(Boolean).pop();
-
   return `${base}/uploads/resumes/${filename}`;
 };
 
 /**
- * Map the backend application object to the shape the UI needs.
- * Backend fields:  application_id, applied_at, resume, status,
- *                  similarity_score, candidate { … }
+ * Handles both UUID-prefix and UUID-suffix formats:
+ * e.g. "01e64599-..._05_Hassan_Backend_Dev.pdf" → "05_Hassan_Backend_Dev.pdf"
+ * e.g. "fatima_ai_engineer_<uuid>.pdf"          → "fatima_ai_engineer.pdf"
  */
+const getDisplayFilename = (resumeDisplayName, resumeUrl) => {
+  if (resumeDisplayName) return resumeDisplayName;
+  if (!resumeUrl) return "Resume";
+  const raw = resumeUrl.split("/").pop().split("?")[0];
+  // Strip UUID prefix
+  const noPrefix = raw.replace(
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_/i,
+    ""
+  );
+  // Strip UUID suffix
+  return noPrefix.replace(
+    /_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\.[^.]+$|$)/i,
+    ""
+  );
+};
+
 const mapApplication = (app) => {
   const c = app.candidate ?? {};
 
@@ -71,19 +69,17 @@ const mapApplication = (app) => {
     ? `${experience.length} position${experience.length > 1 ? "s" : ""}`
     : null;
 
-  // Prefer candidate's stored resume; fall back to the file attached to this application
-  const rawResume = c.resume || app.resume || null;
+  const resumeUrl = resolveResumeUrl(app.resume);
 
   return {
-    applicationId:     app.application_id,
-    appliedAt:         app.applied_at,
-    applicationResume: resolveResumeUrl(app.resume),
-    status:            (app.status ?? "pending").toLowerCase(),
-    // multiply by 100 only when stored as 0-1 float; adjust if already 0-100
-    matchingScore:     app.similarity_score != null
-                         ? Math.round(app.similarity_score * 100)
-                         : null,
-
+    applicationId:      app.application_id,
+    appliedAt:          app.applied_at,
+    applicationResume:  resumeUrl,
+    resumeDisplayName:  getDisplayFilename(app.resume_display_name, resumeUrl),
+    status:             (app.status ?? "pending").toLowerCase(),
+    matchingScore:      app.similarity_score != null
+                          ? Math.round(app.similarity_score * 100)
+                          : null,
     id:         c.id,
     name:       c.full_name ?? "Unknown",
     email:      c.email ?? "",
@@ -91,7 +87,6 @@ const mapApplication = (app) => {
     location:   c.location ?? "",
     linkedin:   c.linkedin ?? "",
     github:     c.github ?? "",
-    resume:     resolveResumeUrl(rawResume),
     experience: expYears ?? "",
     about:      c.about ?? c.bio ?? "",
     skills,
@@ -101,9 +96,6 @@ const mapApplication = (app) => {
     languages,
   };
 };
-
-// ─── Score colour helpers ─────────────────────────────────────────────────────
-// Using centralized utility functions from matchScoreUtils for consistency
 
 // ─── Reusable profile section ─────────────────────────────────────────────────
 const ProfileSection = ({ title, items, renderItem }) =>
@@ -120,11 +112,9 @@ const ProfileSection = ({ title, items, renderItem }) =>
     </div>
   ) : null;
 
-
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function ViewApplicationsPage() {
-  const router      = useRouter();
+  const router       = useRouter();
   const searchParams = useSearchParams();
   const jobId    = searchParams.get("jobId");
   const jobTitle = searchParams.get("jobTitle");
@@ -182,9 +172,9 @@ export default function ViewApplicationsPage() {
     filterStatus === "pending"     ? pendingCandidates     :
     candidates;
 
-  // ── Status toggle ──────────────────────────────────────────────────────────
-  const handleStatusToggle = async (candidate) => {
-    const newStatus = candidate.status === "shortlisted" ? "rejected" : "shortlisted";
+  // ── Status update ──────────────────────────────────────────────────────────
+  const handleStatusUpdate = async (candidate, targetStatus) => {
+    if (!candidate) return;
     setStatusUpdating(true);
     try {
       const token = typeof window !== "undefined"
@@ -192,20 +182,24 @@ export default function ViewApplicationsPage() {
       const headers = { "Content-Type": "application/json" };
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
-      const res  = await fetch(getUpdateApplicationStatusUrl(candidate.applicationId), {
-        method: "PATCH", headers,
-        body: JSON.stringify({ status: newStatus }),
+      const res = await fetch(getUpdateApplicationStatusUrl(candidate.applicationId), {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({ status: targetStatus }),
       });
       const data = await res.json();
 
-      if (!res.ok) { alert(data?.detail || data?.message || "Failed to update status."); return; }
+      if (!res.ok) {
+        alert(data?.detail || data?.message || "Failed to update status.");
+        return;
+      }
 
       setCandidates((prev) =>
         prev.map((c) =>
-          c.applicationId === candidate.applicationId ? { ...c, status: newStatus } : c
+          c.applicationId === candidate.applicationId ? { ...c, status: targetStatus } : c
         )
       );
-      setSelectedCandidate((prev) => prev ? { ...prev, status: newStatus } : prev);
+      setSelectedCandidate((prev) => prev ? { ...prev, status: targetStatus } : prev);
     } catch (err) {
       alert(err.message || "Something went wrong.");
     } finally {
@@ -260,7 +254,6 @@ export default function ViewApplicationsPage() {
               {error && (
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-6">
                   <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-                    <AlertCircle className="w-5 h-5 shrink-0" />
                     {error}
                   </div>
                 </div>
@@ -270,10 +263,10 @@ export default function ViewApplicationsPage() {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   {[
-                    { label: "Total Applications", value: candidates.length,            color: "text-gray-900",  bg: "bg-purple-100", icon: <Users       className="w-6 h-6 text-purple-600" /> },
-                    { label: "Pending",              value: pendingCandidates.length,     color: "text-amber-700",  bg: "bg-amber-100", icon: <Clock3 className="w-6 h-6 text-amber-600" /> },
-                    { label: "Shortlisted",         value: shortlistedCandidates.length, color: "text-green-600", bg: "bg-green-100",  icon: <CheckCircle className="w-6 h-6 text-green-600" /> },
-                    { label: "Rejected",            value: rejectedCandidates.length,    color: "text-red-600",   bg: "bg-red-100",    icon: <XCircle     className="w-6 h-6 text-red-600"   /> },
+                    { label: "Total Applications", value: candidates.length,            color: "text-gray-900",   bg: "bg-purple-100", icon: <Users       className="w-6 h-6 text-purple-600" /> },
+                    { label: "Pending",             value: pendingCandidates.length,     color: "text-amber-700",  bg: "bg-amber-100",  icon: <Clock3      className="w-6 h-6 text-amber-600"  /> },
+                    { label: "Shortlisted",         value: shortlistedCandidates.length, color: "text-green-600",  bg: "bg-green-100",  icon: <CheckCircle className="w-6 h-6 text-green-600" /> },
+                    { label: "Rejected",            value: rejectedCandidates.length,    color: "text-red-600",    bg: "bg-red-100",    icon: <XCircle     className="w-6 h-6 text-red-600"   /> },
                   ].map(({ label, value, color, bg, icon }) => (
                     <div key={label} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-shadow">
                       <div className="flex items-center justify-between">
@@ -292,10 +285,10 @@ export default function ViewApplicationsPage() {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-8">
                 <div className="flex items-center gap-3 flex-wrap">
                   {[
-                    { key: "all",         label: "All",         active: "bg-blue-600  text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-blue-500 hover:text-blue-600" },
+                    { key: "all",         label: "All",         active: "bg-blue-600  text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-blue-500 hover:text-blue-600"   },
                     { key: "pending",     label: "Pending",     active: "bg-amber-600 text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-amber-500 hover:text-amber-600" },
                     { key: "shortlisted", label: "Shortlisted", active: "bg-green-600 text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-green-500 hover:text-green-600" },
-                    { key: "rejected",    label: "Rejected",    active: "bg-red-600   text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-red-500 hover:text-red-600" },
+                    { key: "rejected",    label: "Rejected",    active: "bg-red-600   text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-red-500 hover:text-red-600"     },
                   ].map(({ key, label, active, inactive }) => (
                     <button
                       key={key}
@@ -340,7 +333,7 @@ export default function ViewApplicationsPage() {
                               key={candidate.applicationId}
                               className={`rounded-2xl border p-5 shadow-sm hover:shadow-lg transition-all duration-300 flex items-center justify-between ${
                                 isShortlisted ? "bg-green-50 border-green-100 hover:border-green-200" :
-                                isRejected    ? "bg-red-50   border-red-100 hover:border-red-200"   :
+                                isRejected    ? "bg-red-50   border-red-100   hover:border-red-200"   :
                                 isPending     ? "bg-amber-50 border-amber-100 hover:border-amber-200" :
                                                "bg-gray-50  border-gray-200"
                               }`}
@@ -432,12 +425,12 @@ export default function ViewApplicationsPage() {
                   <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
                   <div className="grid md:grid-cols-2 gap-4">
                     {[
-                      { show: selectedCandidate.email,      icon: <Mail        className="w-5 h-5 text-blue-600"            />, label: "Email",      val: selectedCandidate.email },
-                      { show: selectedCandidate.phone,      icon: <Phone       className="w-5 h-5 text-green-500"           />, label: "Phone",      val: selectedCandidate.phone },
-                      { show: selectedCandidate.location,   icon: <MapPin      className="w-5 h-5 text-red-600"             />, label: "Location",   val: selectedCandidate.location },
-                      { show: selectedCandidate.experience, icon: <Clock       className="w-5 h-5 text-purple-600"          />, label: "Experience", val: selectedCandidate.experience },
-                      { show: selectedCandidate.linkedin,   icon: <LinkedinIcon className="w-5 h-5 text-[#0A66C2]"         />, label: "LinkedIn",   val: selectedCandidate.linkedin },
-                      { show: selectedCandidate.github,     icon: <Github      className="w-5 h-5 text-gray-900"           />, label: "GitHub",     val: selectedCandidate.github },
+                      { show: selectedCandidate.email,      icon: <Mail         className="w-5 h-5 text-blue-600"   />, label: "Email",      val: selectedCandidate.email      },
+                      { show: selectedCandidate.phone,      icon: <Phone        className="w-5 h-5 text-green-500"  />, label: "Phone",      val: selectedCandidate.phone      },
+                      { show: selectedCandidate.location,   icon: <MapPin       className="w-5 h-5 text-red-600"    />, label: "Location",   val: selectedCandidate.location   },
+                      { show: selectedCandidate.experience, icon: <Clock        className="w-5 h-5 text-purple-600" />, label: "Experience", val: selectedCandidate.experience },
+                      { show: selectedCandidate.linkedin,   icon: <LinkedinIcon className="w-5 h-5 text-[#0A66C2]"  />, label: "LinkedIn",   val: selectedCandidate.linkedin   },
+                      { show: selectedCandidate.github,     icon: <Github       className="w-5 h-5 text-gray-900"   />, label: "GitHub",     val: selectedCandidate.github     },
                     ].filter((i) => i.show).map(({ icon, label, val }) => (
                       <div key={label} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
                         {icon}
@@ -525,53 +518,84 @@ export default function ViewApplicationsPage() {
                 />
 
                 {/* ── Resume section ──────────────────────────────────────── */}
-                {selectedCandidate.resume && (
+                {selectedCandidate.applicationResume && (
                   <div className="mb-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-3">Resume</h2>
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-8">
-                      <div className="flex flex-col items-center justify-center">
-                        <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                          <FileText className="w-8 h-8 text-blue-600" />
+                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 flex items-center justify-between gap-4">
+
+                      {/* Left: icon + file info */}
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                          <FileText className="w-6 h-6 text-blue-600" />
                         </div>
-                        <p className="text-gray-700 font-medium mb-2">Submitted Resume</p>
-                        <p className="text-blue-600 font-semibold mb-6 break-all text-center max-w-xs text-sm">
-                          {selectedCandidate.resume.split("/").pop().split("?")[0]}
-                        </p>
-                        <a
-                          href={selectedCandidate.resume}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 bg-blue-600 text-white px-8 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-                        >
-                          <FileText className="w-4 h-4" />
-                          View Resume
-                        </a>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-blue-600 mb-0.5">Submitted resume</p>
+                          <p className="text-sm font-semibold text-gray-900 truncate">
+                            {selectedCandidate.resumeDisplayName}
+                          </p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <CheckCircle className="w-3 h-3 text-green-500" />
+                            <span className="text-xs text-green-600 font-medium">PDF document</span>
+                          </div>
+                        </div>
                       </div>
+
+                      {/* Right: view button */}
+                      <a
+                        href={selectedCandidate.applicationResume}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors shrink-0"
+                      >
+                        <FileText className="w-4 h-4" />
+                        View Resume
+                      </a>
+
                     </div>
                   </div>
                 )}
 
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-3 pt-6 border-t border-gray-200">
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      onClick={() => handleStatusToggle(selectedCandidate)}
-                      disabled={statusUpdating}
-                      className={`py-3 px-5 font-semibold rounded-xl transition-colors border disabled:opacity-60 disabled:cursor-not-allowed ${
-                        selectedCandidate.status === "shortlisted"
-                          ? "bg-red-100 hover:bg-red-200 text-red-700 border-red-400"
-                          : "bg-green-50 hover:bg-green-100 text-green-700 border-green-300"
-                      }`}
-                    >
-                      {statusUpdating
-                        ? "Updating…"
-                        : selectedCandidate.status === "shortlisted"
-                        ? "Move to Rejected"
-                        : "Move to Shortlist"}
-                    </button>
-                    <button className="py-3 px-5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">
-                      Send Message
-                    </button>
+                  <div className={`grid ${selectedCandidate.status === "pending" ? "grid-cols-2" : "grid-cols-1"} gap-3`}>
+                    {selectedCandidate.status === "pending" && (
+                      <>
+                        <button
+                          onClick={() => handleStatusUpdate(selectedCandidate, "shortlisted")}
+                          disabled={statusUpdating}
+                          className="py-3 px-5 bg-green-50 hover:bg-green-100 text-green-700 border border-green-300 font-semibold rounded-xl transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {statusUpdating ? "Updating…" : "Shortlist Candidate"}
+                        </button>
+                        <button
+                          onClick={() => handleStatusUpdate(selectedCandidate, "rejected")}
+                          disabled={statusUpdating}
+                          className="py-3 px-5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-300 font-semibold rounded-xl transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {statusUpdating ? "Updating…" : "Reject Candidate"}
+                        </button>
+                      </>
+                    )}
+
+                    {selectedCandidate.status === "shortlisted" && (
+                      <button
+                        onClick={() => handleStatusUpdate(selectedCandidate, "rejected")}
+                        disabled={statusUpdating}
+                        className="py-3 px-5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-300 font-semibold rounded-xl transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {statusUpdating ? "Updating…" : "Reject Candidate"}
+                      </button>
+                    )}
+
+                    {selectedCandidate.status === "rejected" && (
+                      <button
+                        onClick={() => handleStatusUpdate(selectedCandidate, "shortlisted")}
+                        disabled={statusUpdating}
+                        className="py-3 px-5 bg-green-50 hover:bg-green-100 text-green-700 border border-green-300 font-semibold rounded-xl transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {statusUpdating ? "Updating…" : "Shortlist Candidate"}
+                      </button>
+                    )}
                   </div>
                 </div>
 
