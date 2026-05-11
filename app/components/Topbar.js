@@ -1,18 +1,21 @@
 "use client";
-import { Bell, MessageCircleMore, Search, Settings, User, LogOut, Users } from "lucide-react";
-import Image from "next/image";
+import { Settings, User, LogOut, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
-import { clearSession } from "../../utils/session";
-import { clearEmployerSession } from "../../utils/employerSession";
+import { clearSession, isUserLoggedIn } from "../../utils/session";
+import { clearEmployerSession, isEmployerLoggedIn } from "../../utils/employerSession";
 import Loader from "../../utils/loader";
+import { GET_CANDIDATE_PROFILE_API } from "../../routes/candidate/getCandidateProfile";
+import { GET_EMPLOYER_PROFILE_API } from "../../routes/employer/employerProfile";
 
 export default function Topbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [signOutLoading, setSignOutLoading] = useState(false);
+  const [profileHeaderName, setProfileHeaderName] = useState("");
+  const [profileHeaderEmail, setProfileHeaderEmail] = useState("");
   const dropdownRef = useRef(null);
   const profileButtonRef = useRef(null);
 
@@ -30,36 +33,73 @@ export default function Topbar() {
       clearEmployerSession();
       router.push("/");
     }
-    // Loader stays visible until navigation completes - component unmounts on new page
   };
 
-  // Function to get page name from pathname
-  const getPageName = (path) => {
-    // Remove leading slash and split by /
-    const segments = path.split("/").filter(Boolean);
-
-    // If no segments (root path), return Dashboard
-    if (segments.length === 0) return "Dashboard";
-
-    // Get the last segment (actual page)
-    const lastSegment = segments[segments.length - 1];
-
-    // Convert kebab-case or snake_case to Title Case
-    const pageName = lastSegment
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-
-    return pageName;
-  };
-
-  const currentPage = getPageName(pathname);
-
-  // Determine if user is candidate or employer based on pathname
   const isCandidate = pathname.startsWith("/candidate");
   const isEmployer = pathname.startsWith("/employer");
 
-  // Close dropdown when clicking outside
+  useEffect(() => {
+    setProfileHeaderName("");
+    setProfileHeaderEmail("");
+  }, [isCandidate, isEmployer]);
+
+  useEffect(() => {
+    if (!isDropdownOpen || typeof window === "undefined") return;
+
+    const canFetchCandidate = isCandidate && isUserLoggedIn();
+    const canFetchEmployer = isEmployer && isEmployerLoggedIn();
+    if (!canFetchCandidate && !canFetchEmployer) {
+      setProfileHeaderName("");
+      setProfileHeaderEmail("");
+      return;
+    }
+
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      setProfileHeaderName("");
+      setProfileHeaderEmail("");
+      return;
+    }
+
+    const url = canFetchCandidate ? GET_CANDIDATE_PROFILE_API : GET_EMPLOYER_PROFILE_API;
+    if (!url || String(url).includes("undefined")) {
+      setProfileHeaderName("");
+      setProfileHeaderEmail("");
+      return;
+    }
+
+    const controller = new AbortController();
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+
+    (async () => {
+      try {
+        const res = await fetch(url, { headers, signal: controller.signal });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data) {
+          setProfileHeaderName("");
+          setProfileHeaderEmail("");
+          return;
+        }
+        const rawName = canFetchCandidate
+          ? data.full_name ?? ""
+          : data.company_name ?? "";
+        const rawEmail = data.email ?? "";
+        setProfileHeaderName(String(rawName).trim());
+        setProfileHeaderEmail(String(rawEmail).trim());
+      } catch (e) {
+        if (e?.name !== "AbortError") {
+          setProfileHeaderName("");
+          setProfileHeaderEmail("");
+        }
+      }
+    })();
+
+    return () => controller.abort();
+  }, [isDropdownOpen, isCandidate, isEmployer]);
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -71,17 +111,14 @@ export default function Topbar() {
         setIsDropdownOpen(false);
       }
     }
-
     if (isDropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isDropdownOpen]);
 
-  // Toggle dropdown
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
@@ -89,40 +126,7 @@ export default function Topbar() {
   return (
     <>
       {signOutLoading && <Loader text="Signing out..." />}
-      <header className="w-full flex items-center justify-between py-4 px-4 md:px-8 bg-white/80 backdrop-blur z-30 shadow-sm sticky top-0">
-        {/* Left side - Empty for spacing */}
-        <div className="flex items-center gap-3"></div>
-
-        {/* Center - Search bar */}
-        <div className="flex-1 max-w-md mx-4 md:mx-8 relative">
-          <input
-            type="text"
-            placeholder="Search something here..."
-            className="w-full rounded-full border border-gray-200 px-5 py-2.5 pr-12 focus:outline-none focus:border-blue-400 text-sm bg-gray-50 text-gray-600 placeholder:text-gray-400"
-          />
-          <button className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-            <Search size={20} />
-          </button>
-        </div>
-
-        {/* Center - Notification Icons */}
-        <div className="flex items-center gap-3 md:gap-4 mx-4 md:mx-6">
-          {/* Message Icon with Badge */}
-          <button className="relative p-2.5 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
-            <MessageCircleMore size={20} className="text-gray-700" />
-            <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
-              4
-            </span>
-          </button>
-
-          {/* Notification Icon with Badge */}
-          <button className="relative p-2.5 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
-            <Bell size={20} className="text-gray-700" />
-            <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
-              2
-            </span>
-          </button>
-        </div>
+      <header className="w-full flex items-center justify-end px-4 md:px-8 bg-white dark:bg-[#0f1729] z-30 sticky top-0 border-b border-gray-200 dark:border-gray-700/60 shadow-[0_4px_20px_0_rgba(99,102,241,0.15)] dark:shadow-[0_4px_24px_0_rgba(0,0,0,0.6)]" style={{ height: "73px" }}>
 
         {/* Right side - Profile */}
         <div className="relative">
@@ -156,33 +160,30 @@ export default function Topbar() {
                       <ellipse cx="32" cy="58" rx="22" ry="18" fill="#5B6673" />
                     </svg>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-white font-semibold text-base">Antoine</h3>
+                  <div className="flex-1 flex items-center">
+                    <div>
+                      {profileHeaderName ? (
+                        <h3 className="text-white font-semibold text-base">{profileHeaderName}</h3>
+                      ) : null}
+                      {profileHeaderEmail ? (
+                        <p className="text-blue-200 text-sm mt-0.5">{profileHeaderEmail}</p>
+                      ) : null}
                     </div>
-                    <p className="text-blue-200 text-sm mt-0.5">antoine@domain.com</p>
                   </div>
                 </div>
               </div>
 
               {/* Menu Items */}
               <div className="py-2">
-                {/* My Profile / Company Profile */}
                 {isCandidate ? (
-                  <Link
-                    href="/candidate/my-profile"
-                    className="w-full px-5 py-2.5 flex items-center gap-3 text-white hover:bg-white/10 transition-colors"
-                  >
+                  <Link href="/candidate/my-profile" className="w-full px-5 py-2.5 flex items-center gap-3 text-white hover:bg-white/10 transition-colors">
                     <div className="w-9 h-9 flex items-center justify-center">
                       <User className="w-6 h-6" />
                     </div>
                     <span className="text-base font-semibold">My Profile</span>
                   </Link>
                 ) : isEmployer ? (
-                  <Link
-                    href="/employer/my-profile"
-                    className="w-full px-5 py-2.5 flex items-center gap-3 text-white hover:bg-white/10 transition-colors"
-                  >
+                  <Link href="/employer/my-profile" className="w-full px-5 py-2.5 flex items-center gap-3 text-white hover:bg-white/10 transition-colors">
                     <div className="w-9 h-9 flex items-center justify-center">
                       <Users className="w-6 h-6" />
                     </div>
@@ -197,18 +198,31 @@ export default function Topbar() {
                   </button>
                 )}
 
-                {/* Account Settings */}
-                <button className="w-full px-5 py-2.5 flex items-center gap-3 text-white hover:bg-white/10 transition-colors">
-                  <div className="w-9 h-9 flex items-center justify-center">
-                    <Settings className="w-6 h-6" />
-                  </div>
-                  <span className="text-base font-semibold">Settings</span>
-                </button>
+                {isCandidate ? (
+                  <Link href="/candidate/settings" className="w-full px-5 py-2.5 flex items-center gap-3 text-white hover:bg-white/10 transition-colors">
+                    <div className="w-9 h-9 flex items-center justify-center">
+                      <Settings className="w-6 h-6" />
+                    </div>
+                    <span className="text-base font-semibold">Settings</span>
+                  </Link>
+                ) : isEmployer ? (
+                  <Link href="/employer/settings" className="w-full px-5 py-2.5 flex items-center gap-3 text-white hover:bg-white/10 transition-colors">
+                    <div className="w-9 h-9 flex items-center justify-center">
+                      <Settings className="w-6 h-6" />
+                    </div>
+                    <span className="text-base font-semibold">Settings</span>
+                  </Link>
+                ) : (
+                  <button className="w-full px-5 py-2.5 flex items-center gap-3 text-white hover:bg-white/10 transition-colors">
+                    <div className="w-9 h-9 flex items-center justify-center">
+                      <Settings className="w-6 h-6" />
+                    </div>
+                    <span className="text-base font-semibold">Settings</span>
+                  </button>
+                )}
 
-                {/* Divider */}
                 <div className="my-2 mx-5 border-t border-white/10"></div>
 
-                {/* Logout */}
                 <button
                   type="button"
                   onClick={handleSignOut}

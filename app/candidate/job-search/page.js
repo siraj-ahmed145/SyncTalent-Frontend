@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { MapPin, Briefcase, Clock, Search, Bookmark, Building2, DollarSign, X } from 'lucide-react';
+import { MapPin, Briefcase, Clock, Search, Bookmark, Building2, DollarSign, X, ChevronDown } from 'lucide-react';
 import MessagePopup, { POPUP_TIMEOUT } from '../../components/MessagePopup';
 import Sidebar from '../../components/Sidebar';
 import Topbar from '../../components/Topbar';
 import Loader from '../../../utils/loader';
 import { normalizeExperienceText } from '../../../utils/experience';
 import { GET_JOBS_API } from '../../../routes/candidate/getJobs';
+import { GET_APPLICATIONS_API } from '../../../routes/candidate/applyJob';
 import { SAVE_JOB_API, UNSAVE_JOB_API, GET_SAVED_JOBS_API } from '../../../routes/candidate/savedJobs';
 
 const MODES = ["All Work Modes", "Remote", "On-site", "Hybrid"];
@@ -157,6 +158,7 @@ export default function CandidateJobSearchPage() {
 
   // Saved jobs state
   const [savedJobIds, setSavedJobIds] = useState([]);
+  const [appliedJobIds, setAppliedJobIds] = useState([]);
   const [showSaveNotification, setShowSaveNotification] = useState(false);
   const [showUnsaveNotification, setShowUnsaveNotification] = useState(false);
   const [showErrorNotification, setShowErrorNotification] = useState(false);
@@ -209,8 +211,39 @@ export default function CandidateJobSearchPage() {
     fetchSaved();
   }, []);
 
+  useEffect(() => {
+    const fetchAppliedJobs = async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (!token) return;
+
+        const res = await fetch(GET_APPLICATIONS_API, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json().catch(() => null);
+        const applications = Array.isArray(data.applications) ? data.applications : [];
+        const ids = applications
+          .map((app) => app.job_id ?? app.jobId ?? app.job?.job_id ?? app.job?.id)
+          .filter(Boolean);
+        setAppliedJobIds(ids);
+      } catch (err) {
+        console.error('Failed to load applied jobs', err);
+      }
+    };
+
+    fetchAppliedJobs();
+  }, []);
+
   // Client-side filtering
   const filteredJobs = jobs
+    .filter((job) => !appliedJobIds.includes(job.id))
     .filter((job) => {
       const matchesSearch =
         !search.trim() ||
@@ -471,7 +504,7 @@ export default function CandidateJobSearchPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
       {loading && <Loader text="Loading jobs..." />}
       <Sidebar active="Search Job" type="candidate" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20 relative">
@@ -491,9 +524,9 @@ export default function CandidateJobSearchPage() {
                   <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                     <Search className="w-5 h-5 text-white" />
                   </div>
-                  <h1 className="text-3xl font-semibold text-gray-900 leading-none -mt-1">Find Your Next Opportunity</h1>
+                  <h1 className="text-3xl font-semibold text-gray-900 dark:text-gray-100 leading-none -mt-1">Find Your Next Opportunity</h1>
                 </div>
-                <p className="text-base text-gray-500 ml-[52px] -mt-1">
+                <p className="text-base text-gray-500 dark:text-gray-400 ml-[52px] -mt-1">
                   Search through thousands of job opportunities
                 </p>
               </div>
@@ -506,7 +539,7 @@ export default function CandidateJobSearchPage() {
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Search by Job Title, Company, or Skills"
-                    className="w-full max-w-md h-10 rounded-xl bg-zinc-100 border border-zinc-100 px-3 text-base placeholder:text-gray-400 text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm flex items-center"
+                    className="w-full max-w-md h-10 rounded-xl bg-zinc-100 dark:bg-[#1a2332] border border-zinc-100 dark:border-gray-700 px-3 text-base placeholder:text-gray-400 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors shadow-sm flex items-center"
                     style={{ backgroundClip: 'padding-box' }}
                   />
                   <button type="button" className="h-10 ml-2 md:ml-3 mr-4 md:mr-6 flex items-center gap-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-sm">
@@ -515,51 +548,86 @@ export default function CandidateJobSearchPage() {
                   </button>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto md:gap-3 mt-2 md:mt-0">
-                  {/* Dropdowns with bg color and no border or matching border */}
-                  <select
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm"
-                  >
-                    {dynamicLocations.map((opt) => (
-                      <option value={opt} key={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                  <select value={mode} onChange={e => setMode(e.target.value)} className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm">
-                    {MODES.map(opt => <option value={opt} key={opt}>{opt}</option>)}
-                  </select>
-                  <select value={type} onChange={e => setType(e.target.value)} className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm">
-                    {TYPES.map(opt => <option value={opt} key={opt}>{opt}</option>)}
-                  </select>
+                  <div className="relative w-full sm:w-auto shrink-0">
+                    <select
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      className="w-full sm:w-auto min-w-0 rounded-xl appearance-none bg-zinc-100 dark:bg-[#1a2332] border border-zinc-100 dark:border-gray-700 pl-3 pr-9 h-10 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-0 focus:border-blue-500 transition-colors shadow-sm cursor-pointer"
+                    >
+                      {dynamicLocations.map((opt) => (
+                        <option className="bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100" value={opt} key={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600 dark:text-gray-300" aria-hidden />
+                  </div>
+                  <div className="relative w-full sm:w-auto shrink-0">
+                    <select
+                      value={mode}
+                      onChange={e => setMode(e.target.value)}
+                      className="w-full sm:w-auto min-w-0 rounded-xl appearance-none bg-zinc-100 dark:bg-[#1a2332] border border-zinc-100 dark:border-gray-700 pl-3 pr-9 h-10 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-0 focus:border-blue-500 transition-colors shadow-sm cursor-pointer"
+                    >
+                      {MODES.map(opt => (
+                        <option className="bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100" value={opt} key={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600 dark:text-gray-300" aria-hidden />
+                  </div>
+                  <div className="relative w-full sm:w-auto shrink-0">
+                    <select
+                      value={type}
+                      onChange={e => setType(e.target.value)}
+                      className="w-full sm:w-auto min-w-0 rounded-xl appearance-none bg-zinc-100 dark:bg-[#1a2332] border border-zinc-100 dark:border-gray-700 pl-3 pr-9 h-10 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-0 focus:border-blue-500 transition-colors shadow-sm cursor-pointer"
+                    >
+                      {TYPES.map(opt => (
+                        <option className="bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100" value={opt} key={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600 dark:text-gray-300" aria-hidden />
+                  </div>
                 </div>
               </div>
 
               {error && (
-                <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+                <div className="mb-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
                   {error}
                 </div>
               )}
 
-              <div className="flex items-center justify-between mt-6 mb-3">
-                <p className="text-sm text-gray-600">Showing {filteredJobs.length} jobs</p>
-                <select value={sort} onChange={e => setSort(e.target.value)} className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 py-2 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm w-44">
-                  {SORTS.map(opt => <option value={opt} key={opt}>{opt}</option>)}
-                </select>
+              <div className="flex items-center justify-between mt-6 mb-3 gap-3 flex-wrap">
+                <p className="text-sm text-gray-600 dark:text-gray-300">Showing {filteredJobs.length} jobs</p>
+                <div className="relative w-44 max-w-full shrink-0">
+                  <select
+                    value={sort}
+                    onChange={e => setSort(e.target.value)}
+                    className="w-full rounded-xl appearance-none bg-zinc-100 dark:bg-[#1a2332] border border-zinc-100 dark:border-gray-700 pl-3 pr-9 py-2 h-10 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-0 focus:border-blue-500 transition-colors shadow-sm cursor-pointer"
+                  >
+                    {SORTS.map(opt => (
+                      <option className="bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100" value={opt} key={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-600 dark:text-gray-300" aria-hidden />
+                </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-5 mb-6">
                 {filteredJobs.length === 0 ? (
-                  <div className="col-span-2 text-gray-500 text-center py-12">No jobs found.</div>
+                  <div className="col-span-2 text-gray-500 dark:text-gray-400 text-center py-12">No jobs found.</div>
                 ) : (
                   filteredJobs.map((job) => (
                     <div
                       key={job.id}
-                      className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex flex-col h-full transition-all duration-300 hover:shadow-lg hover:border-blue-200"
+                      className="bg-white dark:bg-[#1a2332] rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm dark:shadow-gray-900/30 flex flex-col h-full transition-all duration-300 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-600"
                     >
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg md:text-xl font-semibold text-gray-900">
+                        <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
                           {job.title}
                         </h3>
                         {job.experience && (
@@ -570,7 +638,7 @@ export default function CandidateJobSearchPage() {
                       </div>
 
                       <p className="text-sm font-medium mb-2 text-blue-600">{job.company}</p>
-                      <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-3">
+                      <div className="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300 mb-3">
                         {job.location && job.workMode !== 'Remote' && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {job.location}</span>}
                         <span className="flex items-center gap-1"><Building2 className="w-4 h-4" /> {job.workMode}</span>
                         <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" /> {job.jobType}</span>
@@ -578,15 +646,15 @@ export default function CandidateJobSearchPage() {
                       </div>
 
                       {job.description && (
-                        <div className="border-t border-gray-200 pt-3 mb-3">
-                          <p className="text-xs md:text-sm text-gray-700 line-clamp-2">{job.description}</p>
+                        <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mb-3">
+                          <p className="text-xs md:text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{job.description}</p>
                         </div>
                       )}
 
                       {Array.isArray(job.tags) && job.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 pb-3 mb-2 border-b border-gray-200">
+                        <div className="flex flex-wrap gap-2 pb-3 mb-2 border-b border-gray-200 dark:border-gray-700">
                           {job.tags.map((tag) => (
-                            <span key={tag} className="px-4 py-2 bg-blue-50 text-blue-600 text-xs font-medium rounded-full">
+                            <span key={tag} className="px-4 py-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-full">
                               {tag}
                             </span>
                           ))}
@@ -605,10 +673,7 @@ export default function CandidateJobSearchPage() {
                                 handleSaveJob(job.id);
                               }
                             }}
-                            className={`p-2 rounded-lg transition-all ${savedJobIds.includes(job.id)
-                              ? 'bg-blue-50 text-blue-600'
-                              : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'
-                              }`}
+                            className="p-2 rounded-lg transition-all text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-950/40"
                             title={
                               savedJobIds.includes(job.id)
                                 ? 'Remove from saved'
@@ -618,7 +683,7 @@ export default function CandidateJobSearchPage() {
                             <Bookmark
                               className={`w-6 h-6 ${savedJobIds.includes(job.id)
                                 ? 'fill-blue-600'
-                                : ''
+                                : 'fill-none'
                                 }`}
                             />
                           </button>
@@ -645,11 +710,11 @@ export default function CandidateJobSearchPage() {
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
 
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+          <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-md w-full p-6 animate-scale-in">
 
             <div className="flex justify-between items-start mb-4">
 
-              <h3 className="text-xl font-bold text-gray-900">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 Confirm Action
               </h3>
 
@@ -658,13 +723,13 @@ export default function CandidateJobSearchPage() {
                   setShowConfirmModal(false);
                   setSelectedJobToUnsave(null);
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 dark:text-gray-300 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <p className="text-gray-700 mb-6">
+            <p className="text-gray-700 dark:text-gray-300 mb-6">
               Are you sure you want to unsave this job?
             </p>
 
@@ -687,7 +752,7 @@ export default function CandidateJobSearchPage() {
                   setShowConfirmModal(false);
                   setSelectedJobToUnsave(null);
                 }}
-                className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors"
+                className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white border border-gray-200 dark:border-gray-500 font-semibold rounded-lg transition-colors"
               >
                 No
               </button>
@@ -700,13 +765,13 @@ export default function CandidateJobSearchPage() {
       {/* Application Modal */}
       {isApplicationModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-xl font-bold text-gray-900">Apply for Position</h2>
+            <div className="sticky top-0 bg-white dark:bg-[#1a2332] border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Apply for Position</h2>
               <button
                 onClick={closeModal}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 dark:text-gray-300 transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -719,9 +784,9 @@ export default function CandidateJobSearchPage() {
               {/* Job Details Summary */}
               {selectedJob && (
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-                  <h3 className="font-bold text-lg text-gray-900 mb-1">{selectedJob.title}</h3>
-                  <p className="text-sm text-gray-600 mb-2">{selectedJob.company}</p>
-                  <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+                  <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 mb-1">{selectedJob.title}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{selectedJob.company}</p>
+                  <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
                     <span className="flex items-center gap-1">
                       <MapPin className="w-3 h-3" /> {selectedJob.location}
                     </span>
@@ -737,7 +802,7 @@ export default function CandidateJobSearchPage() {
               {applicationStep === 'choice' && (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Choose Resume Option</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Choose Resume Option</h3>
                   </div>
 
                   <div className="space-y-3">
@@ -753,8 +818,8 @@ export default function CandidateJobSearchPage() {
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 mb-1">Use Default Resume</h4>
-                          <p className="text-sm text-gray-600">Apply with your profile resume (Quick Apply)</p>
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Use Default Resume</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">Apply with your profile resume (Quick Apply)</p>
                         </div>
                       </div>
                     </button>
@@ -771,8 +836,8 @@ export default function CandidateJobSearchPage() {
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 mb-1">Upload Custom Resume</h4>
-                          <p className="text-sm text-gray-600">Upload a tailored resume for this position</p>
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Upload Custom Resume</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">Upload a tailored resume for this position</p>
                         </div>
                       </div>
                     </button>
@@ -784,8 +849,8 @@ export default function CandidateJobSearchPage() {
               {applicationStep === 'upload' && (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Your Resume</h3>
-                    <p className="text-sm text-gray-600 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Upload Your Resume</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
                       Upload a PDF or Word document (Max 5MB)
                     </p>
                   </div>
@@ -807,14 +872,14 @@ export default function CandidateJobSearchPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
                       </div>
-                      <p className="text-base font-medium text-gray-900 mb-1">Click to upload resume</p>
-                      <p className="text-sm text-gray-500">PDF, DOC, DOCX up to 5MB</p>
+                      <p className="text-base font-medium text-gray-900 dark:text-gray-100 mb-1">Click to upload resume</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">PDF, DOC, DOCX up to 5MB</p>
                     </label>
                   </div>
 
                   <button
                     onClick={() => setApplicationStep('choice')}
-                    className="w-full py-2 text-sm text-gray-600 hover:text-gray-900 font-medium flex items-center justify-center gap-2"
+                    className="w-full py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-gray-100 font-medium flex items-center justify-center gap-2"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -829,18 +894,18 @@ export default function CandidateJobSearchPage() {
                 <div className="space-y-4">
                   <div className="bg-gray-50 rounded-xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Resume:</span>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">Resume:</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {useCustomResume ? (uploadedResume?.name || 'Custom Resume') : 'Default Resume'}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Position:</span>
-                      <span className="text-sm font-medium text-gray-900">{selectedJob?.title}</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-300">Position:</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{selectedJob?.title}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Company:</span>
-                      <span className="text-sm font-medium text-gray-900">{selectedJob?.company}</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-300">Company:</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{selectedJob?.company}</span>
                     </div>
                   </div>
 
@@ -853,7 +918,7 @@ export default function CandidateJobSearchPage() {
                   <div className="flex gap-3 pt-2">
                     <button
                       onClick={() => setApplicationStep(useCustomResume ? 'upload' : 'choice')}
-                      className="flex-1 py-3 px-4 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 py-3 px-4 border border-gray-300 rounded-lg text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />

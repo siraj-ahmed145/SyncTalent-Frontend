@@ -291,7 +291,7 @@ export default function CandidateViewJobPostPage() {
   // ── Loading / error ────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen flex bg-gray-50">
+      <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
         <Sidebar active={getActivePage()} type="candidate" />
         <div className="flex-1 flex flex-col md:ml-64 ml-20">
           <Topbar />
@@ -305,12 +305,12 @@ export default function CandidateViewJobPostPage() {
 
   if (!job) {
     return (
-      <div className="min-h-screen flex bg-gray-50">
+      <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
         <Sidebar active={getActivePage()} type="candidate" />
         <div className="flex-1 flex flex-col md:ml-64 ml-20">
           <Topbar />
           <main className="p-6 md:p-10 flex-1">
-            <div className="text-center text-gray-500">{error || "Job not found"}</div>
+            <div className="text-center text-gray-500 dark:text-gray-400">{error || "Job not found"}</div>
           </main>
         </div>
       </div>
@@ -319,7 +319,7 @@ export default function CandidateViewJobPostPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
       <Sidebar active={getActivePage()} type="candidate" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
@@ -349,13 +349,13 @@ export default function CandidateViewJobPostPage() {
             </button>
 
             {/* Job Details */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow-sm dark:shadow-gray-900/25 border border-gray-200 dark:border-gray-700 p-8">
 
               {/* Header */}
-              <div className="mb-6 pb-6 border-b border-gray-200">
+              <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between gap-6">
                   <div className="flex-1">
-                    <h1 className="text-3xl font-bold text-gray-900">{job.title}</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{job.title}</h1>
                     <p className="text-lg font-semibold text-blue-600 mb-3 mt-2">{job.company}</p>
                   </div>
                   {matchScore && (
@@ -363,11 +363,11 @@ export default function CandidateViewJobPostPage() {
                       <p className={`text-3xl font-bold ${getMatchScoreColor(parseInt(matchScore))}`}>
                         {matchScore}%
                       </p>
-                      <p className="text-sm text-gray-600 mt-1">Job Match Score</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Job Match Score</p>
                     </div>
                   )}
                 </div>
-                <div className="flex flex-wrap gap-3 text-base text-gray-600">
+                <div className="flex flex-wrap gap-3 text-base text-gray-600 dark:text-gray-300">
                   {job.workMode !== "Remote" && <span className="flex items-center gap-1"><MapPin className="w-5 h-5" />{job.location}</span>}
                   <span className="flex items-center gap-1"><Building2 className="w-5 h-5" />{job.workMode}</span>
                   <span className="flex items-center gap-1"><Briefcase className="w-5 h-5" />{job.jobType}</span>
@@ -377,24 +377,24 @@ export default function CandidateViewJobPostPage() {
 
               {/* Key Details */}
               <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-[#1a2332] rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
                     <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
                       <Calendar className="w-7 h-7 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 font-medium mb-1">Posted Date</p>
-                      <p className="text-2xl font-bold text-gray-900">{job.postedDate}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Posted Date</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{job.postedDate}</p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-[#1a2332] rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
                     <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center shrink-0">
                       <Clock className="w-7 h-7 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 font-medium mb-1">Experience Required</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Experience Required</p>
                       <p className="text-2xl font-bold text-purple-600">{job.experience}</p>
                     </div>
                   </div>
@@ -403,16 +403,16 @@ export default function CandidateViewJobPostPage() {
 
               {/* Description */}
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Job Description</h2>
-                <p className="text-gray-700 leading-relaxed">{job.description}</p>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Job Description</h2>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{job.description}</p>
               </div>
 
               {/* Skills */}
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Required Skills</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Required Skills</h2>
                 <div className="flex flex-wrap gap-3">
                   {Array.isArray(job.tags) && job.tags.map((skill) => (
-                    <span key={skill} className="px-4 py-2 bg-blue-50 text-blue-600 text-base font-medium rounded-full">
+                    <span key={skill} className="px-4 py-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-base font-medium rounded-full">
                       {skill}
                     </span>
                   ))}
@@ -422,10 +422,10 @@ export default function CandidateViewJobPostPage() {
               {/* Responsibilities */}
               {Array.isArray(job.responsibilities) && job.responsibilities.length > 0 && (
                 <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3">Key Responsibilities</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Key Responsibilities</h2>
                   <ul className="space-y-2">
                     {job.responsibilities.map((resp, i) => (
-                      <li key={i} className="flex items-center gap-3 text-gray-700">
+                      <li key={i} className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                         <span className="text-blue-600 text-lg shrink-0">•</span><span>{resp}</span>
                       </li>
                     ))}
@@ -436,10 +436,10 @@ export default function CandidateViewJobPostPage() {
               {/* Requirements */}
               {Array.isArray(job.requirements) && job.requirements.length > 0 && (
                 <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3">Requirements</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Requirements</h2>
                   <ul className="space-y-2">
                     {job.requirements.map((req, i) => (
-                      <li key={i} className="flex items-center gap-3 text-gray-700">
+                      <li key={i} className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                         <span className="text-blue-600 text-lg shrink-0">•</span><span>{req}</span>
                       </li>
                     ))}
@@ -450,10 +450,10 @@ export default function CandidateViewJobPostPage() {
               {/* Benefits */}
               {Array.isArray(job.benefits) && job.benefits.length > 0 && (
                 <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3">Benefits</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Benefits</h2>
                   <ul className="space-y-2">
                     {job.benefits.map((benefit, i) => (
-                      <li key={i} className="flex items-center gap-3 text-gray-700">
+                      <li key={i} className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                         <span className="text-green-600 text-lg shrink-0">✓</span><span>{benefit}</span>
                       </li>
                     ))}
@@ -462,7 +462,7 @@ export default function CandidateViewJobPostPage() {
               )}
 
               {/* Apply Button */}
-              <div className="flex justify-end pt-6 border-t border-gray-200">
+              <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
                 <button
                   onClick={handleApplyClick}
                   className="px-6 py-2 text-blue-700 bg-blue-100 hover:bg-blue-200 hover:text-blue-800 active:bg-blue-200 active:text-blue-800 text-base font-semibold rounded-lg transition-all"
@@ -478,12 +478,12 @@ export default function CandidateViewJobPostPage() {
       {/* ── Application Modal ──────────────────────────────────────────────── */}
       {isApplicationModalOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-lg w-full max-h-[90vh] overflow-y-auto">
 
             {/* Modal Header */}
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
-              <h2 className="text-xl font-bold text-gray-900">Apply for Position</h2>
-              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <div className="sticky top-0 bg-white dark:bg-[#0f1729] border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Apply for Position</h2>
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 dark:text-gray-300 transition-colors">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -494,10 +494,10 @@ export default function CandidateViewJobPostPage() {
             <div className="px-6 py-6">
 
               {/* Job summary */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-                <h3 className="font-bold text-lg text-gray-900 mb-1">{job.title}</h3>
-                <p className="text-sm text-gray-600 mb-2">{job.company}</p>
-                <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+              <div className="bg-blue-50 dark:bg-[#102a44] border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
+                <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100 mb-1">{job.title}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{job.company}</p>
+                <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
                   <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{job.location}</span>
                   <span>•</span><span>{job.workMode}</span>
                   <span>•</span><span>{job.salary}</span>
@@ -514,11 +514,11 @@ export default function CandidateViewJobPostPage() {
               {/* ── Step 1: Choice ─────────────────────────────────────── */}
               {applicationStep === "choice" && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Choose Resume Option</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Choose Resume Option</h3>
                   <div className="space-y-3">
                     <button
                       onClick={() => handleResumeChoice(false)}
-                      className="w-full text-left p-4 border-2 border-gray-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all group"
+                      className="w-full text-left p-4 border-2 border-gray-300 rounded-xl bg-white dark:bg-[#142337] dark:border-gray-600 hover:border-blue-500 hover:bg-blue-50 dark:hover:border-blue-400 dark:hover:bg-blue-900 transition-all group"
                     >
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
@@ -527,15 +527,15 @@ export default function CandidateViewJobPostPage() {
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 mb-1">Use Default Resume</h4>
-                          <p className="text-sm text-gray-600">Apply with your profile resume (Quick Apply)</p>
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Use Default Resume</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">Apply with your profile resume (Quick Apply)</p>
                         </div>
                       </div>
                     </button>
 
                     <button
                       onClick={() => handleResumeChoice(true)}
-                      className="w-full text-left p-4 border-2 border-gray-300 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all group"
+                      className="w-full text-left p-4 border-2 border-gray-300 rounded-xl bg-white dark:bg-[#142337] dark:border-gray-600 hover:border-blue-500 hover:bg-blue-50 dark:hover:border-blue-400 dark:hover:bg-blue-900 transition-all group"
                     >
                       <div className="flex items-start gap-3">
                         <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
@@ -544,8 +544,8 @@ export default function CandidateViewJobPostPage() {
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-gray-900 mb-1">Upload Custom Resume</h4>
-                          <p className="text-sm text-gray-600">Upload a tailored resume for this position</p>
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Upload Custom Resume</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">Upload a tailored resume for this position</p>
                         </div>
                       </div>
                     </button>
@@ -557,8 +557,8 @@ export default function CandidateViewJobPostPage() {
               {applicationStep === "upload" && (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload Your Resume</h3>
-                    <p className="text-sm text-gray-600 mb-4">Upload a PDF or Word document (Max 5MB)</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Upload Your Resume</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Upload a PDF or Word document (Max 5MB)</p>
                   </div>
 
                   <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 transition-colors">
@@ -587,9 +587,9 @@ export default function CandidateViewJobPostPage() {
                       {uploadedResume ? (
                         <p className="text-blue-700 font-semibold mb-1">{uploadedResume.name}</p>
                       ) : (
-                        <p className="text-gray-700 font-medium mb-1">Click to upload or drag and drop</p>
+                        <p className="text-gray-700 dark:text-gray-300 font-medium mb-1">Click to upload or drag and drop</p>
                       )}
-                      <p className="text-sm text-gray-500">PDF, DOC, or DOCX (max. 5MB)</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">PDF, DOC, or DOCX (max. 5MB)</p>
                     </label>
                   </div>
 
@@ -600,7 +600,7 @@ export default function CandidateViewJobPostPage() {
                       setFileInputKey((k) => k + 1);
                       setApplicationStep("choice");
                     }}
-                    className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
+                    className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-gray-100 flex items-center gap-1"
                   >
                     <ArrowLeft className="w-4 h-4" />
                     Back to options
@@ -611,16 +611,16 @@ export default function CandidateViewJobPostPage() {
               {/* ── Step 3: Confirm ────────────────────────────────────── */}
               {applicationStep === "confirm" && (
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Confirm Application</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Confirm Application</h3>
 
-                  <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                  <div className="bg-white/80 dark:bg-slate-900 border border-gray-200/70 dark:border-gray-700 rounded-xl p-4 space-y-3">
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Applying for</p>
-                      <p className="font-medium text-gray-900">{job.title}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Applying for</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">{job.title}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 mb-1">Resume</p>
-                      <p className="font-medium text-gray-900">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Resume</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">
                         {useCustomResume && uploadedResumeRef.current
                           ? `Custom: ${uploadedResumeRef.current.name}`
                           : "Default Profile Resume"}
@@ -640,7 +640,7 @@ export default function CandidateViewJobPostPage() {
                         }
                       }}
                       disabled={isSubmittingApplication}
-                      className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors disabled:opacity-50"
+                      className="flex-1 py-2.5 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-100 font-semibold rounded-lg transition-colors disabled:opacity-50"
                     >
                       Back
                     </button>
@@ -662,3 +662,10 @@ export default function CandidateViewJobPostPage() {
     </div>
   );
 }
+
+
+
+
+
+
+

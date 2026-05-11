@@ -121,10 +121,10 @@ const downloadResume = async () => {
 };
 
 const ADD_PILL_BTN =
-  "inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200 hover:border-blue-300 hover:text-blue-800 active:bg-blue-300 transition-all shadow-sm";
+  "inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/50 hover:border-blue-300 hover:text-blue-800 active:bg-blue-300 transition-all shadow-sm";
 
 const SECTION_ACTION_BTN =
-  "text-sm font-bold text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded-lg transition-colors shrink-0";
+  "text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 px-2 py-1 rounded-lg transition-colors shrink-0";
 
 const defaultModalForm = (type) => {
   switch (type) {
@@ -452,7 +452,7 @@ export default function CandidateDashboard() {
     <>
       <MessagePopup show={showLoginSuccess} message="Sign in successful" type="success" />
       <MessagePopup show={showProfileUpdated} message="Profile updated" type="success" />
-      <div className="min-h-screen flex bg-gray-50">
+      <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
         <Sidebar active="" type="candidate" />
         <div className="flex-1 flex flex-col md:ml-64 ml-20">
           <Topbar />
@@ -464,15 +464,15 @@ export default function CandidateDashboard() {
                 <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                   <User className="w-5 h-5 text-white" />
                 </div>
-                <h1 className="text-3xl font-semibold text-gray-900 leading-none">My Profile</h1>
+                <h1 className="text-3xl font-semibold text-gray-900 dark:text-gray-100 leading-none">My Profile</h1>
               </div>
-              <p className="text-base text-gray-500 ml-[52px] -mt-1">
+              <p className="text-base text-gray-500 dark:text-gray-400 ml-[52px] -mt-1">
                 Manage your profile information and professional details
               </p>
             </div>
 
             {/* Profile Header */}
-            <div className="bg-white rounded-2xl shadow p-6 mb-6">
+            <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6 mb-6">
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-6">
                   <div className="w-24 h-24 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-4xl font-bold text-white">
@@ -481,21 +481,21 @@ export default function CandidateDashboard() {
                   <div>
                     {isEditing.profile ? (
                       <div className="space-y-2">
-                        <input type="text" value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} className="w-full p-2 border rounded-lg" placeholder="Full name" />
-                        <input type="email" value={profile.email} onChange={e => setProfile({ ...profile, email: e.target.value })} className="w-full p-2 border rounded-lg" placeholder="Email address" />
-                        <input type="text" value={profile.phone} onChange={e => setProfile({ ...profile, phone: e.target.value })} className="w-full p-2 border rounded-lg" placeholder="Phone number" />
-                        <input type="text" value={profile.linkedin} onChange={e => setProfile({ ...profile, linkedin: e.target.value })} className="w-full p-2 border rounded-lg" placeholder="LinkedIn URL" />
-                        <input type="text" value={profile.github} onChange={e => setProfile({ ...profile, github: e.target.value })} className="w-full p-2 border rounded-lg" placeholder="GitHub URL" />
-                        <input type="text" value={profile.location} onChange={e => setProfile({ ...profile, location: e.target.value })} className="w-full p-2 border rounded-lg" placeholder="Location" />
+                        <input type="text" value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500" placeholder="Full name" />
+                        <input type="email" value={profile.email} onChange={e => setProfile({ ...profile, email: e.target.value })} className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500" placeholder="Email address" />
+                        <input type="text" value={profile.phone} onChange={e => setProfile({ ...profile, phone: e.target.value })} className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500" placeholder="Phone number" />
+                        <input type="text" value={profile.linkedin} onChange={e => setProfile({ ...profile, linkedin: e.target.value })} className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500" placeholder="LinkedIn URL" />
+                        <input type="text" value={profile.github} onChange={e => setProfile({ ...profile, github: e.target.value })} className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500" placeholder="GitHub URL" />
+                        <input type="text" value={profile.location} onChange={e => setProfile({ ...profile, location: e.target.value })} className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500" placeholder="Location" />
                       </div>
                     ) : (
                       <>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-3">{profile.name || "Not specified"}</h2>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">{profile.name || "Not specified"}</h2>
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
                           {profile.email && <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-blue-600" /><span>{profile.email}</span></div>}
                           {profile.phone && <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-green-500" /><span>{profile.phone}</span></div>}
                           {profile.linkedin && <div className="flex items-center gap-2"><LinkedinIcon className="w-4 h-4" /><span>{profile.linkedin}</span></div>}
-                          {profile.github && <div className="flex items-center gap-2"><Github className="w-4 h-4 text-gray-700" /><span>{profile.github}</span></div>}
+                          {profile.github && <div className="flex items-center gap-2"><Github className="w-4 h-4 text-gray-700 dark:text-gray-300" /><span>{profile.github}</span></div>}
                           {profile.location && <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-red-600" /><span>{profile.location}</span></div>}
                         </div>
                       </>
@@ -509,24 +509,24 @@ export default function CandidateDashboard() {
             </div>
 
             {/* About Section */}
-            <div className="bg-white rounded-2xl shadow p-6 mb-6">
+            <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6 mb-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold">About</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">About</h3>
                 <button type="button" onClick={() => toggleEdit('about')} className={SECTION_ACTION_BTN}>
                   {isEditing.about ? 'Save' : 'Edit'}
                 </button>
               </div>
               {isEditing.about ? (
-                <textarea value={profile.about} onChange={(e) => setProfile({ ...profile, about: e.target.value })} className="w-full p-3 border rounded-lg" rows="4" placeholder="Add a description about yourself" />
+                <textarea value={profile.about} onChange={(e) => setProfile({ ...profile, about: e.target.value })} className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500" rows="4" placeholder="Add a description about yourself" />
               ) : (
-                <p className="text-gray-700">{profile.about || <span className="text-gray-400 italic">No description added yet</span>}</p>
+                <p className="text-gray-700 dark:text-gray-300">{profile.about || <span className="text-gray-400 italic">No description added yet</span>}</p>
               )}
             </div>
 
             {/* Skills Section */}
-            <div className="bg-white rounded-2xl shadow p-6 mb-6">
+            <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6 mb-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold">Skills</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Skills</h3>
                 <button type="button" onClick={() => toggleEdit('skills')} className={SECTION_ACTION_BTN}>
                   {isEditing.skills ? 'Save' : 'Edit'}
                 </button>
@@ -534,7 +534,7 @@ export default function CandidateDashboard() {
               <div className="flex flex-wrap gap-2">
                 {profile.skills && profile.skills.length > 0 ? (
                   profile.skills.map((skill, idx) => (
-                    <span key={idx} className="bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+                    <span key={idx} className="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 border border-blue-100 dark:border-blue-800">
                       {skill}
                       {isEditing.skills && (
                         <button onClick={() => handleRemoveItem('skills', idx)} className="text-red-500 hover:text-red-700">×</button>
@@ -553,9 +553,9 @@ export default function CandidateDashboard() {
             </div>
 
             {/* Work Experience Section */}
-            <div className="bg-white rounded-2xl shadow p-6 mb-6">
+            <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6 mb-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Work Experience</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Work Experience</h3>
                 <button type="button" onClick={() => toggleEdit('workExperience')} className={SECTION_ACTION_BTN}>
                   {isEditing.workExperience ? 'Save' : 'Edit'}
                 </button>
@@ -566,10 +566,10 @@ export default function CandidateDashboard() {
                     <div key={idx} className="border-l-4 border-blue-500 pl-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h4 className="font-bold text-gray-900">{exp.title}</h4>
+                          <h4 className="font-bold text-gray-900 dark:text-gray-100">{exp.title}</h4>
                           <p className="text-blue-600 font-medium">{exp.company}</p>
-                          <p className="text-sm text-gray-500 mb-2">{exp.duration}</p>
-                          <p className="text-gray-700 text-sm">{exp.description}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{exp.duration}</p>
+                          <p className="text-gray-700 dark:text-gray-300 text-sm">{exp.description}</p>
                         </div>
                         {isEditing.workExperience && (
                           <button onClick={() => handleRemoveItem('workExperience', idx)} className="text-red-500 hover:text-red-700">Remove</button>
@@ -589,9 +589,9 @@ export default function CandidateDashboard() {
             </div>
 
             {/* Education Section */}
-            <div className="bg-white rounded-2xl shadow p-6 mb-6">
+            <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6 mb-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Education</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Education</h3>
                 <button type="button" onClick={() => toggleEdit('education')} className={SECTION_ACTION_BTN}>
                   {isEditing.education ? 'Save' : 'Edit'}
                 </button>
@@ -602,9 +602,9 @@ export default function CandidateDashboard() {
                     <div key={idx} className="border-l-4 border-blue-500 pl-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h4 className="font-bold text-gray-900">{edu.degree}</h4>
+                          <h4 className="font-bold text-gray-900 dark:text-gray-100">{edu.degree}</h4>
                           <p className="text-blue-600 font-medium">{edu.institution}</p>
-                          <p className="text-sm text-gray-500">{edu.year}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{edu.year}</p>
                         </div>
                         {isEditing.education && (
                           <button onClick={() => handleRemoveItem('education', idx)} className="text-red-500 hover:text-red-700">Remove</button>
@@ -624,9 +624,9 @@ export default function CandidateDashboard() {
             </div>
 
             {/* Certifications Section */}
-            <div className="bg-white rounded-2xl shadow p-6 mb-6">
+            <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6 mb-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Certifications</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Certifications</h3>
                 <button type="button" onClick={() => toggleEdit('certifications')} className={SECTION_ACTION_BTN}>
                   {isEditing.certifications ? 'Save' : 'Edit'}
                 </button>
@@ -637,7 +637,7 @@ export default function CandidateDashboard() {
                     <div key={idx} className="border-l-4 border-blue-500 pl-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h4 className="font-bold text-gray-900">{cert.name}</h4>
+                          <h4 className="font-bold text-gray-900 dark:text-gray-100">{cert.name}</h4>
                           <p className="text-blue-600 font-medium">{cert.issuer} • {cert.year}</p>
                         </div>
                         {isEditing.certifications && (
@@ -658,9 +658,9 @@ export default function CandidateDashboard() {
             </div>
 
             {/* Languages Section */}
-            <div className="bg-white rounded-2xl shadow p-6 mb-6">
+            <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6 mb-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Languages</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Languages</h3>
                 <button type="button" onClick={() => toggleEdit('languages')} className={SECTION_ACTION_BTN}>
                   {isEditing.languages ? 'Save' : 'Edit'}
                 </button>
@@ -671,7 +671,7 @@ export default function CandidateDashboard() {
                     <div key={idx} className="border-l-4 border-blue-500 pl-4">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h4 className="font-bold text-gray-900">{lang.name}</h4>
+                          <h4 className="font-bold text-gray-900 dark:text-gray-100">{lang.name}</h4>
                           <p className="text-blue-600 font-medium">{lang.proficiency}</p>
                         </div>
                         {isEditing.languages && (
@@ -692,19 +692,19 @@ export default function CandidateDashboard() {
             </div>
 
             {/* Resume Section */}
-            <div className="bg-white rounded-2xl shadow p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Resume</h3>
+            <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Resume</h3>
               <input ref={resumeInputRef} type="file" accept=".pdf,.doc,.docx" onChange={handleResumeUpload} className="hidden" />
               {profile.resume ? (
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 flex items-center justify-between gap-4">
+                <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800 rounded-xl p-5 flex items-center justify-between gap-4">
                   {/* Left: icon + file info */}
                   <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                      <FileText className="w-6 h-6 text-blue-600" />
+                    <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
+                      <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-blue-600 mb-0.5">Current Resume</p>
-                      <p className="text-sm font-semibold text-gray-900 truncate">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                         {getCleanResumeFileName()}
                       </p>
                       <div className="flex items-center gap-1 mt-1">
@@ -725,7 +725,7 @@ export default function CandidateDashboard() {
                     <button
                       onClick={() => resumeInputRef.current?.click()}
                       disabled={isUploadingResume}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-blue-300 text-blue-700 text-sm font-semibold hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white dark:bg-[#1a2332] border border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300 text-sm font-semibold hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Upload className="w-4 h-4" />
                       {isUploadingResume ? 'Uploading...' : 'Replace Resume'}
@@ -733,11 +733,11 @@ export default function CandidateDashboard() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-8 text-center">
-                  <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <FileText className="w-8 h-8 text-blue-600" />
+                <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800 rounded-xl p-8 text-center">
+                  <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <FileText className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <p className="text-gray-900 font-medium mb-4">No resume uploaded yet</p>
+                  <p className="text-gray-900 dark:text-gray-100 font-medium mb-4">No resume uploaded yet</p>
                   <button
                     onClick={() => resumeInputRef.current?.click()}
                     disabled={isUploadingResume}
@@ -778,7 +778,7 @@ export default function CandidateDashboard() {
 
               {addModalType === "skill" && (
                 <div>
-                  <label htmlFor="add-skill" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="add-skill" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Skill
                   </label>
                   <input
@@ -786,18 +786,18 @@ export default function CandidateDashboard() {
                     type="text"
                     value={addModalForm.skill ?? ""}
                     onChange={(e) => setAddModalForm((prev) => ({ ...prev, skill: e.target.value }))}
-                    className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                     placeholder="e.g. React, TypeScript"
                     autoFocus
                   />
-                  <p className="text-xs text-gray-500 mt-1">Separate multiple skills with a comma or |</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Separate multiple skills with a comma or |</p>
                 </div>
               )}
 
               {addModalType === "experience" && (
                 <>
                   <div>
-                    <label htmlFor="add-exp-title" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="add-exp-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Job title <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -805,13 +805,13 @@ export default function CandidateDashboard() {
                       type="text"
                       value={addModalForm.title ?? ""}
                       onChange={(e) => setAddModalForm((prev) => ({ ...prev, title: e.target.value }))}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="e.g. Software Engineer"
                       autoFocus
                     />
                   </div>
                   <div>
-                    <label htmlFor="add-exp-company" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="add-exp-company" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Company
                     </label>
                     <input
@@ -819,12 +819,12 @@ export default function CandidateDashboard() {
                       type="text"
                       value={addModalForm.company ?? ""}
                       onChange={(e) => setAddModalForm((prev) => ({ ...prev, company: e.target.value }))}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="e.g. Acme Corp"
                     />
                   </div>
                   <div>
-                    <label htmlFor="add-exp-duration" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="add-exp-duration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Duration
                     </label>
                     <input
@@ -832,12 +832,12 @@ export default function CandidateDashboard() {
                       type="text"
                       value={addModalForm.duration ?? ""}
                       onChange={(e) => setAddModalForm((prev) => ({ ...prev, duration: e.target.value }))}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="e.g. Jan 2022 – Present"
                     />
                   </div>
                   <div>
-                    <label htmlFor="add-exp-desc" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="add-exp-desc" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Description
                     </label>
                     <textarea
@@ -845,7 +845,7 @@ export default function CandidateDashboard() {
                       rows={4}
                       value={addModalForm.description ?? ""}
                       onChange={(e) => setAddModalForm((prev) => ({ ...prev, description: e.target.value }))}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y min-h-[100px]"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y min-h-[100px] placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="Briefly describe your role and achievements"
                     />
                   </div>
@@ -855,7 +855,7 @@ export default function CandidateDashboard() {
               {addModalType === "education" && (
                 <>
                   <div>
-                    <label htmlFor="add-edu-degree" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="add-edu-degree" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Degree <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -863,13 +863,13 @@ export default function CandidateDashboard() {
                       type="text"
                       value={addModalForm.degree ?? ""}
                       onChange={(e) => setAddModalForm((prev) => ({ ...prev, degree: e.target.value }))}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="e.g. BSc Computer Science"
                       autoFocus
                     />
                   </div>
                   <div>
-                    <label htmlFor="add-edu-inst" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="add-edu-inst" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Institution
                     </label>
                     <input
@@ -877,12 +877,12 @@ export default function CandidateDashboard() {
                       type="text"
                       value={addModalForm.institution ?? ""}
                       onChange={(e) => setAddModalForm((prev) => ({ ...prev, institution: e.target.value }))}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="e.g. University name"
                     />
                   </div>
                   <div>
-                    <label htmlFor="add-edu-year" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="add-edu-year" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Year
                     </label>
                     <input
@@ -890,7 +890,7 @@ export default function CandidateDashboard() {
                       type="text"
                       value={addModalForm.year ?? ""}
                       onChange={(e) => setAddModalForm((prev) => ({ ...prev, year: e.target.value }))}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="e.g. 2024"
                     />
                   </div>
@@ -900,7 +900,7 @@ export default function CandidateDashboard() {
               {addModalType === "certification" && (
                 <>
                   <div>
-                    <label htmlFor="add-cert-name" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="add-cert-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Certification name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -908,13 +908,13 @@ export default function CandidateDashboard() {
                       type="text"
                       value={addModalForm.name ?? ""}
                       onChange={(e) => setAddModalForm((prev) => ({ ...prev, name: e.target.value }))}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="e.g. AWS Solutions Architect"
                       autoFocus
                     />
                   </div>
                   <div>
-                    <label htmlFor="add-cert-issuer" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="add-cert-issuer" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Issuer
                     </label>
                     <input
@@ -922,12 +922,12 @@ export default function CandidateDashboard() {
                       type="text"
                       value={addModalForm.issuer ?? ""}
                       onChange={(e) => setAddModalForm((prev) => ({ ...prev, issuer: e.target.value }))}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="e.g. Amazon Web Services"
                     />
                   </div>
                   <div>
-                    <label htmlFor="add-cert-year" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="add-cert-year" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Year
                     </label>
                     <input
@@ -935,7 +935,7 @@ export default function CandidateDashboard() {
                       type="text"
                       value={addModalForm.year ?? ""}
                       onChange={(e) => setAddModalForm((prev) => ({ ...prev, year: e.target.value }))}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="e.g. 2025"
                     />
                   </div>
@@ -945,7 +945,7 @@ export default function CandidateDashboard() {
               {addModalType === "language" && (
                 <>
                   <div>
-                    <label htmlFor="add-lang-name" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="add-lang-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Language <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -953,13 +953,13 @@ export default function CandidateDashboard() {
                       type="text"
                       value={addModalForm.name ?? ""}
                       onChange={(e) => setAddModalForm((prev) => ({ ...prev, name: e.target.value }))}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="e.g. English"
                       autoFocus
                     />
                   </div>
                   <div>
-                    <label htmlFor="add-lang-prof" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="add-lang-prof" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       Proficiency
                     </label>
                     <input
@@ -967,7 +967,7 @@ export default function CandidateDashboard() {
                       type="text"
                       value={addModalForm.proficiency ?? ""}
                       onChange={(e) => setAddModalForm((prev) => ({ ...prev, proficiency: e.target.value }))}
-                      className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
                       placeholder="e.g. Native, Professional, Basic"
                     />
                   </div>

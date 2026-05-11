@@ -80,6 +80,9 @@ const mapApplication = (app) => {
     matchingScore:      app.similarity_score != null
                           ? Math.round(app.similarity_score * 100)
                           : null,
+    matchingScoreExact: app.similarity_score != null
+                          ? Number((app.similarity_score * 100).toFixed(1))
+                          : null,
     id:         c.id,
     name:       c.full_name ?? "Unknown",
     email:      c.email ?? "",
@@ -101,7 +104,7 @@ const mapApplication = (app) => {
 const ProfileSection = ({ title, items, renderItem }) =>
   items && items.length > 0 ? (
     <div className="mb-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-3">{title}</h2>
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">{title}</h2>
       <div className="space-y-4">
         {items.map((item, idx) => (
           <div key={idx} className="border-l-4 border-blue-500 pl-4">
@@ -210,7 +213,7 @@ export default function ViewApplicationsPage() {
   // ── Loading state ──────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen flex bg-gray-50">
+      <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
         <Sidebar active="Dashboard" type="employer" />
         <div className="flex-1 flex flex-col md:ml-64 ml-20">
           <Topbar />
@@ -224,7 +227,7 @@ export default function ViewApplicationsPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
       <Sidebar active="Dashboard" type="employer" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
@@ -237,15 +240,15 @@ export default function ViewApplicationsPage() {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-8">
                 <button
                   onClick={() => router.push(`/employer/view-job-post?jobId=${jobId}`)}
-                  className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium mb-6 transition-colors px-3 py-2 rounded-lg"
+                  className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 font-medium mb-6 transition-colors px-3 py-2 rounded-lg"
                 >
                   <ArrowLeft className="w-5 h-5" />
                   <span>Back to View Job Post</span>
                 </button>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                   {jobTitle || "Job"} – Applications
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-300">
                   Review applications and see how candidates match your job requirements
                 </p>
               </div>
@@ -253,7 +256,7 @@ export default function ViewApplicationsPage() {
               {/* Error banner */}
               {error && (
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-6">
-                  <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                  <div className="flex items-center gap-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl text-sm">
                     {error}
                   </div>
                 </div>
@@ -263,15 +266,15 @@ export default function ViewApplicationsPage() {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   {[
-                    { label: "Total Applications", value: candidates.length,            color: "text-gray-900",   bg: "bg-purple-100", icon: <Users       className="w-6 h-6 text-purple-600" /> },
-                    { label: "Pending",             value: pendingCandidates.length,     color: "text-amber-700",  bg: "bg-amber-100",  icon: <Clock3      className="w-6 h-6 text-amber-600"  /> },
-                    { label: "Shortlisted",         value: shortlistedCandidates.length, color: "text-green-600",  bg: "bg-green-100",  icon: <CheckCircle className="w-6 h-6 text-green-600" /> },
-                    { label: "Rejected",            value: rejectedCandidates.length,    color: "text-red-600",    bg: "bg-red-100",    icon: <XCircle     className="w-6 h-6 text-red-600"   /> },
+                    { label: "Total Applications", value: candidates.length,            color: "text-gray-900 dark:text-gray-100",   bg: "bg-purple-100 dark:bg-purple-900/40", icon: <Users       className="w-6 h-6 text-purple-600 dark:text-purple-400" /> },
+                    { label: "Pending",             value: pendingCandidates.length,     color: "text-amber-700 dark:text-amber-400",  bg: "bg-amber-100 dark:bg-amber-900/40",  icon: <Clock3      className="w-6 h-6 text-amber-600 dark:text-amber-400"  /> },
+                    { label: "Shortlisted",         value: shortlistedCandidates.length, color: "text-green-600 dark:text-green-400",  bg: "bg-green-100 dark:bg-green-900/40",  icon: <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" /> },
+                    { label: "Rejected",            value: rejectedCandidates.length,    color: "text-red-600 dark:text-red-400",    bg: "bg-red-100 dark:bg-red-900/40",    icon: <XCircle     className="w-6 h-6 text-red-600 dark:text-red-400"   /> },
                   ].map(({ label, value, color, bg, icon }) => (
-                    <div key={label} className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-shadow">
+                    <div key={label} className="bg-white dark:bg-[#1a2332] rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-lg transition-shadow">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-gray-500 font-medium mb-1">{label}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">{label}</p>
                           <p className={`text-3xl font-bold ${color}`}>{value}</p>
                         </div>
                         <div className={`w-12 h-12 ${bg} rounded-xl flex items-center justify-center`}>{icon}</div>
@@ -285,10 +288,10 @@ export default function ViewApplicationsPage() {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-8">
                 <div className="flex items-center gap-3 flex-wrap">
                   {[
-                    { key: "all",         label: "All",         active: "bg-blue-600  text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-blue-500 hover:text-blue-600"   },
-                    { key: "pending",     label: "Pending",     active: "bg-amber-600 text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-amber-500 hover:text-amber-600" },
-                    { key: "shortlisted", label: "Shortlisted", active: "bg-green-600 text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-green-500 hover:text-green-600" },
-                    { key: "rejected",    label: "Rejected",    active: "bg-red-600   text-white shadow-md", inactive: "bg-white text-gray-700 border border-gray-200 hover:border-red-500 hover:text-red-600"     },
+                    { key: "all",         label: "All",         active: "bg-blue-600 dark:bg-blue-500 text-white shadow-md", inactive: "bg-white text-gray-700 dark:bg-[#102135] dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-300"   },
+                    { key: "pending",     label: "Pending",     active: "bg-amber-600 dark:bg-amber-500 text-white shadow-md", inactive: "bg-white text-gray-700 dark:bg-[#102135] dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-amber-500 hover:text-amber-600 dark:hover:text-amber-300" },
+                    { key: "shortlisted", label: "Shortlisted", active: "bg-green-600 dark:bg-green-500 text-white shadow-md", inactive: "bg-white text-gray-700 dark:bg-[#102135] dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-green-500 hover:text-green-600 dark:hover:text-green-300" },
+                    { key: "rejected",    label: "Rejected",    active: "bg-red-600 dark:bg-red-500 text-white shadow-md", inactive: "bg-white text-gray-700 dark:bg-[#102135] dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-red-500 hover:text-red-600 dark:hover:text-red-300"     },
                   ].map(({ key, label, active, inactive }) => (
                     <button
                       key={key}
@@ -305,8 +308,8 @@ export default function ViewApplicationsPage() {
 
               {/* Candidates grid */}
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-8">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-7">
-                  <h2 className="text-xl font-bold text-gray-900 mb-6">
+                <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow-sm dark:shadow-gray-900/25 border border-gray-200 dark:border-gray-700 p-7">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
                     {filterStatus === "all"         ? "All Candidates"         :
                      filterStatus === "pending"     ? "Pending Candidates"     :
                      filterStatus === "shortlisted" ? "Shortlisted Candidates" :
@@ -316,7 +319,7 @@ export default function ViewApplicationsPage() {
                   {filteredCandidates.length === 0 ? (
                     <div className="text-center py-12">
                       <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500 text-lg">
+                      <p className="text-gray-500 dark:text-gray-400 text-lg">
                         {error ? "Could not load candidates." : "No candidates found in this filter."}
                       </p>
                     </div>
@@ -331,24 +334,24 @@ export default function ViewApplicationsPage() {
                           return (
                             <div
                               key={candidate.applicationId}
-                              className={`rounded-2xl border p-5 shadow-sm hover:shadow-lg transition-all duration-300 flex items-center justify-between ${
-                                isShortlisted ? "bg-green-50 border-green-100 hover:border-green-200" :
-                                isRejected    ? "bg-red-50   border-red-100   hover:border-red-200"   :
-                                isPending     ? "bg-amber-50 border-amber-100 hover:border-amber-200" :
-                                               "bg-gray-50  border-gray-200"
+                              className={`rounded-2xl border p-5 shadow-sm dark:shadow-gray-900/30 hover:shadow-lg transition-all duration-300 flex items-center justify-between ${
+                                isShortlisted ? "bg-green-50 dark:bg-green-950/25 border-green-100 dark:border-green-800 hover:border-green-200 dark:hover:border-green-600" :
+                                isRejected    ? "bg-red-50 dark:bg-red-950/25 border-red-100 dark:border-red-800 hover:border-red-200 dark:hover:border-red-600"   :
+                                isPending     ? "bg-amber-50 dark:bg-amber-950/25 border-amber-100 dark:border-amber-800 hover:border-amber-200 dark:hover:border-amber-600" :
+                                               "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-600"
                               }`}
                             >
                               <div className="flex items-center gap-4 flex-1">
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-base font-bold shrink-0 ${
-                                  isShortlisted ? "bg-green-100 text-green-600" :
-                                  isRejected    ? "bg-red-100   text-red-600"   :
-                                  isPending     ? "bg-amber-100 text-amber-700" :
-                                                 "bg-gray-200  text-gray-600"
+                                  isShortlisted ? "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400" :
+                                  isRejected    ? "bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400"   :
+                                  isPending     ? "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400" :
+                                                 "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
                                 }`}>
                                   {candidate.name.charAt(0).toUpperCase()}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="text-base font-semibold text-gray-900 truncate">{candidate.name}</h3>
+                                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">{candidate.name}</h3>
                                   {candidate.status === "pending" && (
                                     <span className="text-xs text-gray-400 font-medium">Pending review</span>
                                   )}
@@ -357,9 +360,9 @@ export default function ViewApplicationsPage() {
 
                               <div className="flex items-center gap-4 shrink-0 ml-4">
                                 <div className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 ${getMatchScoreBgColor(candidate.matchingScore)} ${getMatchScoreBorder(candidate.matchingScore)}`}>
-                                  <p className="text-xs text-gray-600 font-medium">Match</p>
+                                  <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">Match</p>
                                   <p className={`text-2xl font-bold ${getMatchScoreColor(candidate.matchingScore)}`}>
-                                    {candidate.matchingScore != null ? `${candidate.matchingScore}%` : "N/A"}
+                                    {candidate.matchingScore != null ? `${candidate.matchingScoreExact !== null ? candidate.matchingScoreExact : candidate.matchingScore}%` : "N/A"}
                                   </p>
                                 </div>
                                 <button
@@ -384,28 +387,28 @@ export default function ViewApplicationsPage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
               <button
                 onClick={() => setSelectedCandidate(null)}
-                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium mb-6 transition-colors px-3 py-2 rounded-lg"
+                className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 font-medium mb-6 transition-colors px-3 py-2 rounded-lg"
               >
                 <ArrowLeft className="w-5 h-5" />
                 <span>Back to Applications</span>
               </button>
 
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+              <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow-sm dark:shadow-gray-900/25 border border-gray-200 dark:border-gray-700 p-8">
 
                 {/* Header */}
-                <div className="mb-6 pb-6 border-b border-gray-200">
+                <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-4">
                       <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-3xl font-bold text-blue-600">
                         {selectedCandidate.name.charAt(0).toUpperCase()}
                       </div>
-                      <h1 className="text-3xl font-bold text-gray-900">{selectedCandidate.name}</h1>
+                      <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{selectedCandidate.name}</h1>
                     </div>
                     <div className={`flex flex-col items-center justify-center p-6 rounded-xl border-2 ${getMatchScoreBgColor(selectedCandidate.matchingScore)} ${getMatchScoreBorder(selectedCandidate.matchingScore)}`}>
                       <p className={`text-3xl font-bold ${getMatchScoreColor(selectedCandidate.matchingScore)}`}>
-                        {selectedCandidate.matchingScore != null ? `${selectedCandidate.matchingScore}%` : "N/A"}
+                        {selectedCandidate.matchingScore != null ? `${selectedCandidate.matchingScoreExact !== null ? selectedCandidate.matchingScoreExact : selectedCandidate.matchingScore}%` : "N/A"}
                       </p>
-                      <p className="text-sm text-gray-600 mt-1">Job Match Score</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Job Match Score</p>
                     </div>
                   </div>
 
@@ -422,7 +425,7 @@ export default function ViewApplicationsPage() {
 
                 {/* Contact */}
                 <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Contact Information</h2>
                   <div className="grid md:grid-cols-2 gap-4">
                     {[
                       { show: selectedCandidate.email,      icon: <Mail         className="w-5 h-5 text-blue-600"   />, label: "Email",      val: selectedCandidate.email      },
@@ -430,13 +433,13 @@ export default function ViewApplicationsPage() {
                       { show: selectedCandidate.location,   icon: <MapPin       className="w-5 h-5 text-red-600"    />, label: "Location",   val: selectedCandidate.location   },
                       { show: selectedCandidate.experience, icon: <Clock        className="w-5 h-5 text-purple-600" />, label: "Experience", val: selectedCandidate.experience },
                       { show: selectedCandidate.linkedin,   icon: <LinkedinIcon className="w-5 h-5 text-[#0A66C2]"  />, label: "LinkedIn",   val: selectedCandidate.linkedin   },
-                      { show: selectedCandidate.github,     icon: <Github       className="w-5 h-5 text-gray-900"   />, label: "GitHub",     val: selectedCandidate.github     },
+                      { show: selectedCandidate.github,     icon: <Github       className="w-5 h-5 text-gray-900 dark:text-gray-100"   />, label: "GitHub",     val: selectedCandidate.github     },
                     ].filter((i) => i.show).map(({ icon, label, val }) => (
-                      <div key={label} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                      <div key={label} className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900/70 border border-gray-200 dark:border-gray-700 rounded-lg">
                         {icon}
                         <div>
-                          <p className="text-sm text-gray-500">{label}</p>
-                          <p className="text-base font-medium text-gray-900">{val}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{label}</p>
+                          <p className="text-base font-medium text-gray-900 dark:text-gray-100">{val}</p>
                         </div>
                       </div>
                     ))}
@@ -446,18 +449,18 @@ export default function ViewApplicationsPage() {
                 {/* About */}
                 {selectedCandidate.about && (
                   <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-3">About</h2>
-                    <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">{selectedCandidate.about}</p>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">About</h2>
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-800/60 p-4 rounded-lg border border-transparent dark:border-gray-700">{selectedCandidate.about}</p>
                   </div>
                 )}
 
                 {/* Skills */}
                 {selectedCandidate.skills.length > 0 && (
                   <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-3">Skills</h2>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Skills</h2>
                     <div className="flex flex-wrap gap-2">
                       {selectedCandidate.skills.map((skill, i) => (
-                        <span key={i} className="px-4 py-2 bg-blue-50 text-blue-600 text-base font-medium rounded-full border border-blue-200">
+                        <span key={i} className="px-4 py-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-base font-medium rounded-full border border-blue-200 dark:border-blue-800">
                           {typeof skill === "string" ? skill : skill.name ?? JSON.stringify(skill)}
                         </span>
                       ))}
@@ -471,10 +474,10 @@ export default function ViewApplicationsPage() {
                   items={selectedCandidate.workExperience}
                   renderItem={(exp) => (
                     <>
-                      <h4 className="font-bold text-gray-900">{exp.title ?? exp.jobTitle ?? exp.position ?? ""}</h4>
+                      <h4 className="font-bold text-gray-900 dark:text-gray-100">{exp.title ?? exp.jobTitle ?? exp.position ?? ""}</h4>
                       <p className="text-blue-600 font-medium">{exp.company ?? exp.companyName ?? ""}</p>
-                      <p className="text-sm text-gray-500 mb-1">{exp.duration ?? exp.period ?? ""}</p>
-                      {exp.description && <p className="text-gray-700 text-sm">{exp.description}</p>}
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{exp.duration ?? exp.period ?? ""}</p>
+                      {exp.description && <p className="text-gray-700 dark:text-gray-300 text-sm">{exp.description}</p>}
                     </>
                   )}
                 />
@@ -485,9 +488,9 @@ export default function ViewApplicationsPage() {
                   items={selectedCandidate.education}
                   renderItem={(edu) => (
                     <>
-                      <h4 className="font-bold text-gray-900">{edu.degree ?? edu.title ?? ""}</h4>
+                      <h4 className="font-bold text-gray-900 dark:text-gray-100">{edu.degree ?? edu.title ?? ""}</h4>
                       <p className="text-blue-600 font-medium">{edu.institution ?? edu.school ?? edu.university ?? ""}</p>
-                      <p className="text-sm text-gray-500">{edu.year ?? edu.graduationYear ?? ""}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{edu.year ?? edu.graduationYear ?? ""}</p>
                     </>
                   )}
                 />
@@ -498,9 +501,9 @@ export default function ViewApplicationsPage() {
                   items={selectedCandidate.certifications}
                   renderItem={(cert) => (
                     <>
-                      <h4 className="font-bold text-gray-900">{cert.name ?? cert.title ?? ""}</h4>
+                      <h4 className="font-bold text-gray-900 dark:text-gray-100">{cert.name ?? cert.title ?? ""}</h4>
                       <p className="text-blue-600 font-medium">{cert.issuer ?? cert.issuingOrganization ?? ""}</p>
-                      <p className="text-sm text-gray-500">{cert.year ?? cert.date ?? ""}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{cert.year ?? cert.date ?? ""}</p>
                     </>
                   )}
                 />
@@ -511,7 +514,7 @@ export default function ViewApplicationsPage() {
                   items={selectedCandidate.languages}
                   renderItem={(lang) => (
                     <>
-                      <h4 className="font-bold text-gray-900">{typeof lang === "string" ? lang : lang.name ?? ""}</h4>
+                      <h4 className="font-bold text-gray-900 dark:text-gray-100">{typeof lang === "string" ? lang : lang.name ?? ""}</h4>
                       {lang.proficiency && <p className="text-blue-600 font-medium">{lang.proficiency}</p>}
                     </>
                   )}
@@ -520,17 +523,17 @@ export default function ViewApplicationsPage() {
                 {/* ── Resume section ──────────────────────────────────────── */}
                 {selectedCandidate.applicationResume && (
                   <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-3">Resume</h2>
-                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 flex items-center justify-between gap-4">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Resume</h2>
+                    <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800 rounded-xl p-5 flex items-center justify-between gap-4">
 
                       {/* Left: icon + file info */}
                       <div className="flex items-center gap-4 flex-1 min-w-0">
-                        <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-                          <FileText className="w-6 h-6 text-blue-600" />
+                        <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
+                          <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-blue-600 mb-0.5">Submitted resume</p>
-                          <p className="text-sm font-semibold text-gray-900 truncate">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                             {selectedCandidate.resumeDisplayName}
                           </p>
                           <div className="flex items-center gap-1 mt-1">
@@ -556,7 +559,7 @@ export default function ViewApplicationsPage() {
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex flex-col gap-3 pt-6 border-t border-gray-200">
+                <div className="flex flex-col gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                   <div className={`grid ${selectedCandidate.status === "pending" ? "grid-cols-2" : "grid-cols-1"} gap-3`}>
                     {selectedCandidate.status === "pending" && (
                       <>

@@ -8,6 +8,10 @@ import { useRouter } from 'next/navigation';
 import { SIGNUP_API } from '../../../routes/candidate/signup';
 import Loader from '../../../utils/loader';
 import MessagePopup, { POPUP_TIMEOUT } from '../../components/MessagePopup';
+import {
+  sanitizeLettersAndSpacesInput,
+  isValidFullName,
+} from '../../../utils/signupNameValidation';
 
 export default function CandidateSignup() {
   const router = useRouter();
@@ -20,8 +24,7 @@ export default function CandidateSignup() {
     fullName: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    agreeToTerms: false
+    confirmPassword: ''
   });
   const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
 
@@ -58,7 +61,6 @@ export default function CandidateSignup() {
     e.preventDefault();
     setError('');
 
-    // Validation: Check if passwords match
     if (formData.password !== formData.confirmPassword) {
       const msg = 'Passwords do not match';
       setError(msg);
@@ -66,17 +68,16 @@ export default function CandidateSignup() {
       return;
     }
 
-    // Validation: Check if terms are agreed
-    if (!formData.agreeToTerms) {
-      const msg = 'Please agree to the Terms and Conditions';
+    if (!formData.fullName || !formData.email || !formData.password) {
+      const msg = 'Please fill in all fields';
       setError(msg);
       showPopup(msg, 'error');
       return;
     }
 
-    // Validation: Check if all fields are filled
-    if (!formData.fullName || !formData.email || !formData.password) {
-      const msg = 'Please fill in all fields';
+    const trimmedName = formData.fullName.trim();
+    if (!isValidFullName(trimmedName)) {
+      const msg = 'Name may only contain letters and spaces (at least 2 characters).';
       setError(msg);
       showPopup(msg, 'error');
       return;
@@ -89,7 +90,7 @@ export default function CandidateSignup() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          fullName: formData.fullName,
+          fullName: trimmedName,
           email: formData.email,
           password: formData.password
         })
@@ -120,6 +121,7 @@ export default function CandidateSignup() {
     <div className="min-h-screen flex flex-col lg:flex-row relative">
       <MessagePopup show={popup.show} message={popup.message} type={popup.type} />
       {loading && <Loader text="Creating account..." />}
+
       {/* Left Side - Signup Form */}
       <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12 transition-colors duration-300">
         <div className="w-full max-w-md">
@@ -135,30 +137,6 @@ export default function CandidateSignup() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
 
-            {/* Google Sign Up Button */}
-            <button
-              type="button"
-              className="w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 py-3 px-4 rounded-xl font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M19.8 10.2273C19.8 9.51819 19.7364 8.83637 19.6182 8.18182H10.2V12.05H15.5818C15.35 13.3 14.6182 14.3591 13.5227 15.0682V17.5773H16.8091C18.7091 15.8364 19.8 13.2727 19.8 10.2273Z" fill="#4285F4"/>
-                <path d="M10.2 20C12.9 20 15.1727 19.1045 16.8091 17.5773L13.5227 15.0682C12.6136 15.6682 11.4818 16.0227 10.2 16.0227C7.59545 16.0227 5.38182 14.2682 4.58636 11.9H1.18182V14.4909C2.80909 17.7591 6.20909 20 10.2 20Z" fill="#34A853"/>
-                <path d="M4.58636 11.9C4.38636 11.3 4.27273 10.6591 4.27273 10C4.27273 9.34091 4.38636 8.7 4.58636 8.1V5.50909H1.18182C0.509091 6.85909 0.136364 8.38636 0.136364 10C0.136364 11.6136 0.509091 13.1409 1.18182 14.4909L4.58636 11.9Z" fill="#FBBC05"/>
-                <path d="M10.2 3.97727C11.6091 3.97727 12.8636 4.48182 13.8545 5.43636L16.7636 2.52727C15.1682 0.886364 12.8955 0 10.2 0C6.20909 0 2.80909 2.24091 1.18182 5.50909L4.58636 8.1C5.38182 5.73182 7.59545 3.97727 10.2 3.97727Z" fill="#EA4335"/>
-              </svg>
-              Sign up with Google
-            </button>
-
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white dark:bg-[#0f1729] text-gray-500 dark:text-gray-400">Or</span>
-              </div>
-            </div>
-
             {/* Full Name Field */}
             <div>
               <label htmlFor="fullName" className="block text-gray-900 dark:text-white text-sm font-medium mb-2">
@@ -168,7 +146,12 @@ export default function CandidateSignup() {
                 type="text"
                 id="fullName"
                 value={formData.fullName}
-                onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    fullName: sanitizeLettersAndSpacesInput(e.target.value),
+                  })
+                }
                 placeholder="John Doe"
                 className="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a2332] border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
                 required
@@ -214,11 +197,7 @@ export default function CandidateSignup() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -244,36 +223,9 @@ export default function CandidateSignup() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-            </div>
-
-            {/* Terms and Conditions */}
-            <div className="flex items-start">
-              <input
-                type="checkbox"
-                id="agreeToTerms"
-                checked={formData.agreeToTerms}
-                onChange={(e) => setFormData({...formData, agreeToTerms: e.target.checked})}
-                className="w-4 h-4 mt-1 rounded border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-[#1a2332] text-blue-600 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
-                required
-                disabled={loading}
-              />
-              <label htmlFor="agreeToTerms" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                I agree to the{' '}
-                <Link href="/terms" className="text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400">
-                  Terms and Conditions
-                </Link>
-                {' '}and{' '}
-                <Link href="/privacy" className="text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400">
-                  Privacy Policy
-                </Link>
-              </label>
             </div>
 
             {/* Sign Up Button */}
@@ -299,18 +251,15 @@ export default function CandidateSignup() {
       {/* Right Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 items-center justify-center p-12">
         <div className="text-center text-white max-w-md">
-          {/* Logo */}
           <div className="w-20 h-20 mx-auto mb-6">
             <Image
-              src="/Icon.png"
+              src="/icon.png"
               alt="SyncTalent Logo"
               width={80}
               height={80}
               className="w-full h-full object-contain"
             />
           </div>
-
-          {/* Text Content */}
           <h2 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
             SyncTalent
           </h2>

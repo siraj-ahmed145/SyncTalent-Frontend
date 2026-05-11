@@ -31,10 +31,10 @@ const EmailIcon = ({ className }) => (
 );
 
 const SECTION_ACTION_BTN =
-  "text-sm font-bold text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded-lg transition-colors shrink-0";
+  "text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-950/40 px-2 py-1 rounded-lg transition-colors shrink-0";
 
 const ADD_PILL_BTN =
-  "inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-200 hover:border-blue-300 hover:text-blue-800 active:bg-blue-300 transition-all shadow-sm";
+  "inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-200 dark:hover:bg-blue-900/50 hover:border-blue-300 hover:text-blue-800 active:bg-blue-300 transition-all shadow-sm";
 
 export default function EmployerProfile() {
   const router = useRouter();
@@ -57,13 +57,9 @@ export default function EmployerProfile() {
 
     // HR Contact Information
     hrContactName: "",
-    hrJobTitle: "",
-    hrPhone: "",
     hrEmail: "",
-    hrLinkedIn: "",
 
     // Company Details
-    industry: "",
     companySize: "",
     foundedYear: "",
     headquarters: "",
@@ -91,13 +87,9 @@ export default function EmployerProfile() {
 
       // HR Contact
       hrContactName: backendData.hr_contact_name || "",
-      hrJobTitle: backendData.hr_job_title || "",
-      hrPhone: backendData.hr_phone || "",
       hrEmail: backendData.hr_email || "",
-      hrLinkedIn: backendData.hr_linkedin || "",
 
       // Company Details
-      industry: backendData.industry || "",
       companySize: backendData.company_size || "",
       foundedYear:
         backendData.founded_year !== null &&
@@ -122,7 +114,8 @@ export default function EmployerProfile() {
     const foundedYearNum =
       frontendProfile.foundedYear === "" ||
         frontendProfile.foundedYear === null ||
-        frontendProfile.foundedYear === undefined
+        frontendProfile.foundedYear === undefined ||
+        !frontendProfile.foundedYear.toString().trim()
         ? null
         : Number(frontendProfile.foundedYear);
 
@@ -138,17 +131,14 @@ export default function EmployerProfile() {
 
       // HR Contact
       hr_contact_name: frontendProfile.hrContactName?.trim() || undefined,
-      hr_job_title: frontendProfile.hrJobTitle?.trim() || undefined,
-      hr_phone: frontendProfile.hrPhone?.trim() || undefined,
       hr_email: frontendProfile.hrEmail?.trim() || undefined,
-      hr_linkedin: frontendProfile.hrLinkedIn?.trim() || undefined,
 
       // Company Details
-      industry: frontendProfile.industry?.trim() || undefined,
       company_size: frontendProfile.companySize?.trim() || undefined,
-      founded_year: Number.isFinite(foundedYearNum)
-        ? foundedYearNum
+      founded_year: foundedYearNum !== null
+        ? foundedYearNum.toString()
         : undefined,
+
       headquarters: frontendProfile.headquarters?.trim() || undefined,
 
       // Social Links
@@ -157,13 +147,13 @@ export default function EmployerProfile() {
       instagram: frontendProfile.instagram?.trim() || undefined,
 
       // Certifications
-      certifications: Array.isArray(frontendProfile.certifications)
+      certifications: Array.isArray(frontendProfile.certifications) && frontendProfile.certifications.length > 0
         ? frontendProfile.certifications
-        : [],
+        : undefined,
     };
 
     Object.keys(payload).forEach((key) => {
-      if (payload[key] === undefined) {
+      if (payload[key] === undefined || payload[key] === null || payload[key] === "") {
         delete payload[key];
       }
     });
@@ -336,7 +326,7 @@ export default function EmployerProfile() {
     <>
       <MessagePopup show={showLoginSuccess} message="Sign in successful" type="success" />
       <MessagePopup show={showProfileUpdated} message="Profile updated" type="success" />
-      <div className="min-h-screen flex bg-gray-50">
+      <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
         <Sidebar active="" type="employer" />
         <div className="flex-1 flex flex-col md:ml-64 ml-20">
           <Topbar />
@@ -349,15 +339,15 @@ export default function EmployerProfile() {
                     <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                       <Users className="w-5 h-5 text-white" />
                     </div>
-                    <h1 className="text-3xl font-semibold text-gray-900 leading-none -mt-1">Company Profile</h1>
+                    <h1 className="text-3xl font-semibold text-gray-900 dark:text-gray-100 leading-none -mt-1">Company Profile</h1>
                   </div>
-                  <p className="text-base text-gray-500 ml-[52px] -mt-1">
+                  <p className="text-base text-gray-500 dark:text-gray-400 ml-[52px] -mt-1">
                     Manage your company information and professional details
                   </p>
                 </div>
 
                 {/* Profile Sections */}
-                <div className="bg-white rounded-2xl shadow p-6 mb-6">
+                <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6 mb-6">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-6">
                       <div className="w-24 h-24 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-4xl font-bold text-white">
@@ -370,44 +360,44 @@ export default function EmployerProfile() {
                               type="text"
                               value={profile.companyName}
                               onChange={(e) => setProfile({ ...profile, companyName: e.target.value })}
-                              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               placeholder="Company name"
                             />
                             <input
                               type="text"
                               value={profile.website}
                               onChange={(e) => setProfile({ ...profile, website: e.target.value })}
-                              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               placeholder="Website"
                             />
                             <input
                               type="email"
                               value={profile.email}
                               onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               placeholder="Email"
                             />
                             <input
                               type="text"
                               value={profile.phone}
                               onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               placeholder="Phone number"
                             />
                             <input
                               type="text"
                               value={profile.location}
                               onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                              className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               placeholder="Location"
                             />
                           </div>
                         ) : (
                           <>
-                            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
                               {profile.companyName || "Not specified"}
                             </h2>
-                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
                               {profile.website && (
                                 <div className="flex items-center gap-2">
                                   <Globe className="w-4 h-4 text-blue-600" />
@@ -447,7 +437,7 @@ export default function EmployerProfile() {
                 </div>
 
                 {/* Company Description */}
-                <div className="bg-white rounded-2xl shadow p-6 mb-6">
+                <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6 mb-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-bold">About Company</h3>
                     <button
@@ -461,11 +451,11 @@ export default function EmployerProfile() {
                     <textarea
                       value={profile.description}
                       onChange={(e) => setProfile({ ...profile, description: e.target.value })}
-                      className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       rows="4"
                     />
                   ) : (
-                    <p className="text-gray-700 leading-relaxed">
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                       {profile.description || "No company description added yet."}
                     </p>
                   )}
@@ -474,7 +464,7 @@ export default function EmployerProfile() {
                 {/* Company Details Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   {/* Company Information */}
-                  <div className="bg-white rounded-2xl shadow p-6">
+                  <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-bold">Company Details</h3>
                       <button
@@ -486,16 +476,16 @@ export default function EmployerProfile() {
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <p className="text-gray-600 text-sm font-medium">Company Size</p>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">Company Size</p>
                         {isEditing.details ? (
                           <input
                             type="text"
                             value={profile.companySize}
                             onChange={(e) => setProfile({ ...profile, companySize: e.target.value })}
-                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         ) : (
-                          <p className="text-gray-900 font-medium">
+                          <p className="text-gray-900 dark:text-gray-100 font-medium">
                             {profile.companySize
                               ? `${profile.companySize} employees`
                               : "Not specified"}
@@ -503,36 +493,40 @@ export default function EmployerProfile() {
                         )}
                       </div>
                       <div>
-                        <p className="text-gray-600 text-sm font-medium">Founded</p>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">Founded</p>
                         {isEditing.details ? (
                           <input
                             type="text"
                             value={profile.foundedYear}
                             onChange={(e) => setProfile({ ...profile, foundedYear: e.target.value })}
-                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         ) : (
-                          <p className="text-gray-900 font-medium">{profile.foundedYear}</p>
+                          <p className="text-gray-900 dark:text-gray-100 font-medium">
+                            {profile.foundedYear || "Not specified"}
+                          </p>
                         )}
                       </div>
                       <div>
-                        <p className="text-gray-600 text-sm font-medium">Headquarters</p>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">Headquarters</p>
                         {isEditing.details ? (
                           <input
                             type="text"
                             value={profile.headquarters}
                             onChange={(e) => setProfile({ ...profile, headquarters: e.target.value })}
-                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         ) : (
-                          <p className="text-gray-900 font-medium">{profile.headquarters}</p>
+                          <p className="text-gray-900 dark:text-gray-100 font-medium">
+                            {profile.headquarters || "Not specified"}
+                          </p>
                         )}
                       </div>
                     </div>
                   </div>
 
                   {/* HR Contact Information */}
-                  <div className="bg-white rounded-2xl shadow p-6">
+                  <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-bold">HR Contact</h3>
                       <button
@@ -544,29 +538,33 @@ export default function EmployerProfile() {
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <p className="text-gray-600 text-sm font-medium">Contact Name</p>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">Contact Name</p>
                         {isEditing.hrContact ? (
                           <input
                             type="text"
                             value={profile.hrContactName}
                             onChange={(e) => setProfile({ ...profile, hrContactName: e.target.value })}
-                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         ) : (
-                          <p className="text-gray-900 font-medium">{profile.hrContactName}</p>
+                          <p className="text-gray-900 dark:text-gray-100 font-medium">
+                            {profile.hrContactName || "Not specified"}
+                          </p>
                         )}
                       </div>
                       <div>
-                        <p className="text-gray-600 text-sm font-medium">Email</p>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">Email</p>
                         {isEditing.hrContact ? (
                           <input
                             type="email"
                             value={profile.hrEmail}
                             onChange={(e) => setProfile({ ...profile, hrEmail: e.target.value })}
-                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         ) : (
-                          <p className="text-gray-900 font-medium">{profile.hrEmail}</p>
+                          <p className="text-gray-900 dark:text-gray-100 font-medium">
+                            {profile.hrEmail || "Not specified"}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -574,7 +572,7 @@ export default function EmployerProfile() {
                 </div>
 
                 {/* Certifications & Awards */}
-                <div className="bg-white rounded-2xl shadow p-6 mb-6">
+                <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6 mb-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-bold">Certifications & Awards</h3>
                     <button
@@ -589,7 +587,7 @@ export default function EmployerProfile() {
                       <div key={idx} className="border-l-4 border-blue-500 pl-4">
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="font-bold text-gray-900">{cert?.name}</h4>
+                            <h4 className="font-bold text-gray-900 dark:text-gray-100">{cert?.name}</h4>
                             {"year" in (cert || {}) && (
                               <p className="text-blue-600 font-medium">Awarded in {cert?.year}</p>
                             )}
@@ -617,7 +615,7 @@ export default function EmployerProfile() {
                 </div>
 
                 {/* Social Links */}
-                <div className="bg-white rounded-2xl shadow p-6 mb-6">
+                <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow dark:shadow-gray-900/25 p-6 mb-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-bold">Social Presence</h3>
                     <button
@@ -629,51 +627,51 @@ export default function EmployerProfile() {
                   </div>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-gray-600 text-sm font-medium mb-2">LinkedIn</label>
+                      <label className="block text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">LinkedIn</label>
                       {isEditing.social ? (
                         <input
                           type="text"
                           value={profile.linkedin}
                           onChange={(e) => setProfile({ ...profile, linkedin: e.target.value })}
-                          className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           placeholder="linkedin.com/company/..."
                         />
                       ) : (
-                        <p className="text-gray-900 font-medium flex items-center gap-2">
+                        <p className="text-gray-900 dark:text-gray-100 font-medium flex items-center gap-2">
                           <LinkedinIcon className="w-4 h-4" />
                           {profile.linkedin || "Not added"}
                         </p>
                       )}
                     </div>
                     <div>
-                      <label className="block text-gray-600 text-sm font-medium mb-2">Facebook</label>
+                      <label className="block text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Facebook</label>
                       {isEditing.social ? (
                         <input
                           type="text"
                           value={profile.facebook}
                           onChange={(e) => setProfile({ ...profile, facebook: e.target.value })}
-                          className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           placeholder="facebook.com/..."
                         />
                       ) : (
-                        <p className="text-gray-900 font-medium flex items-center gap-2">
+                        <p className="text-gray-900 dark:text-gray-100 font-medium flex items-center gap-2">
                           <Facebook className="w-4 h-4 text-blue-600" />
                           {profile.facebook || "Not added"}
                         </p>
                       )}
                     </div>
                     <div>
-                      <label className="block text-gray-600 text-sm font-medium mb-2">Instagram</label>
+                      <label className="block text-gray-600 dark:text-gray-300 text-sm font-medium mb-2">Instagram</label>
                       {isEditing.social ? (
                         <input
                           type="text"
                           value={profile.instagram}
                           onChange={(e) => setProfile({ ...profile, instagram: e.target.value })}
-                          className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           placeholder="instagram.com/..."
                         />
                       ) : (
-                        <p className="text-gray-900 font-medium flex items-center gap-2">
+                        <p className="text-gray-900 dark:text-gray-100 font-medium flex items-center gap-2">
                           <Instagram className="w-4 h-4 text-pink-500" />
                           {profile.instagram || "Not added"}
                         </p>
@@ -695,7 +693,7 @@ export default function EmployerProfile() {
         submitLabel="Add"
       >
         <div>
-          <label htmlFor="add-cert-name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="add-cert-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Certification name <span className="text-red-500">*</span>
           </label>
           <input
@@ -703,13 +701,13 @@ export default function EmployerProfile() {
             type="text"
             value={addCertForm.name}
             onChange={(e) => setAddCertForm((prev) => ({ ...prev, name: e.target.value }))}
-            className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
             placeholder="e.g. ISO 27001"
             autoFocus
           />
         </div>
         <div>
-          <label htmlFor="add-cert-year" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="add-cert-year" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Year
           </label>
           <input
@@ -717,7 +715,7 @@ export default function EmployerProfile() {
             type="text"
             value={addCertForm.year}
             onChange={(e) => setAddCertForm((prev) => ({ ...prev, year: e.target.value }))}
-            className="w-full p-3 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-[#1a2332] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400 dark:placeholder:text-gray-500"
             placeholder="e.g. 2026"
           />
         </div>

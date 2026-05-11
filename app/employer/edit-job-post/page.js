@@ -30,8 +30,6 @@ export default function EditJobPage() {
     responsibilities: [],
     requirements: [],
     benefits: [],
-    // use same field name as create-job-post for consistency
-    shortlistedCandidates: '',
   });
 
   const [job, setJob] = useState(null);
@@ -70,15 +68,6 @@ export default function EditJobPage() {
 
         const found = jobs.find(j => j.id === jobId || j.job_id === jobId);
         if (found) {
-          // compute the shortlist value once
-          const loadedShortlist = (
-            found.candidateshortlist ??
-            found.candidiateshortlist ??
-            found.shortlistedCandidates ??
-            found.applications ??
-            found.applications_count ??
-            ''
-          ).toString();
           setJob(found);
           // populate form using same key fallbacks as view-job-post
           setFormData({
@@ -94,10 +83,7 @@ export default function EditJobPage() {
             responsibilities: found.responsibilities ?? found.keyResponsibilities ?? [],
             requirements: found.requirements ?? [],
             benefits: found.benefits ?? [],
-            // use same field name as create-job-post for consistency
-            shortlistedCandidates: loadedShortlist,
           });
-          setOriginalShortlist(loadedShortlist);
         } else {
           setError('Job not found');
           setJob(null);
@@ -115,13 +101,12 @@ export default function EditJobPage() {
   const [responsibilityInput, setResponsibilityInput] = useState('');
   const [requirementInput, setRequirementInput] = useState('');
   const [benefitInput, setBenefitInput] = useState('');
-  const [originalShortlist, setOriginalShortlist] = useState('');
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   // show loading or error states if necessary
   if (loading) {
     return (
-      <div className="min-h-screen flex bg-gray-50">
+      <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
         <Sidebar active="Dashboard" type="employer" />
         <div className="flex-1 flex flex-col md:ml-64 ml-20">
           <Topbar />
@@ -135,7 +120,7 @@ export default function EditJobPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex bg-gray-50">
+      <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
         <Sidebar active="Dashboard" type="employer" />
         <div className="flex-1 flex flex-col md:ml-64 ml-20">
           <Topbar />
@@ -233,13 +218,10 @@ export default function EditJobPage() {
       const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      // backend expects the field name `candidateshortlist`
-      // create a clean body mirroring create-job-post logic
       const jobTypeMap = { 'full-time': 'Full-time', 'part-time': 'Part-time', 'contract': 'Contract' };
       const workModeMap = { 'on-site': 'On-site', 'remote': 'Remote', 'hybrid': 'Hybrid' };
 
       const {
-        shortlistedCandidates,
         jobTitle,
         jobDescription,
         responsibilities,
@@ -256,7 +238,6 @@ export default function EditJobPage() {
       const apiBody = {
         jobTitle,
         jobDescription,
-        // backend uses the field name `candidiateshortlist` (with typo)
         keyResponsibilities: responsibilities,
         requirements,
         benefits,
@@ -267,11 +248,6 @@ export default function EditJobPage() {
         jobLocation,
         skills,
       };
-
-      // only include shortlist value if it has changed from the original
-      if (shortlistedCandidates !== originalShortlist) {
-        apiBody.candidiateshortlist = parseInt(shortlistedCandidates, 10);
-      }
 
       const resp = await fetch(`${UPDATE_JOB_API}/${jobId}`, {
         method: 'PUT',
@@ -324,7 +300,7 @@ export default function EditJobPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
       <Sidebar active="Dashboard" type="employer" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
@@ -348,9 +324,9 @@ export default function EditJobPage() {
                 <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                   <FileText className="w-5 h-5 text-white" />
                 </div>
-                <h1 className="text-3xl font-semibold text-gray-900 leading-none -mt-1">Edit Job Post</h1>
+                <h1 className="text-3xl font-semibold text-gray-900 dark:text-gray-100 leading-none -mt-1">Edit Job Post</h1>
               </div>
-              <p className="text-base text-gray-500 ml-[52px] -mt-1">
+              <p className="text-base text-gray-500 dark:text-gray-400 ml-[52px] -mt-1">
                 Update the details of your job post
               </p>
             </div>
@@ -358,10 +334,10 @@ export default function EditJobPage() {
             {/* Form */}
             <form onSubmit={handleSubmit}>
               {/* Single Section */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8">
+              <div className="bg-white dark:bg-[#1a2332] rounded-xl shadow-sm dark:shadow-gray-900/25 border border-gray-200 dark:border-gray-700 p-8 mb-8">
                 {/* Job Title */}
                 <div className="mb-6">
-                  <label htmlFor="jobTitle" className="block text-base font-medium text-gray-900 mb-2">
+                  <label htmlFor="jobTitle" className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-2">
                     Job Title <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -371,13 +347,13 @@ export default function EditJobPage() {
                     value={formData.jobTitle}
                     onChange={handleInputChange}
                     placeholder="e.g. Senior Software Engineer"
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2 bg-gray-50 dark:bg-[#141d2e] border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   />
                 </div>
 
                 {/* Job Description */}
                 <div className="mb-6">
-                  <label htmlFor="jobDescription" className="block text-base font-medium text-gray-900 mb-2">
+                  <label htmlFor="jobDescription" className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-2">
                     Job Description <span className="text-red-500">*</span>
                   </label>
                   <textarea
@@ -387,13 +363,13 @@ export default function EditJobPage() {
                     onChange={handleInputChange}
                     rows={5}
                     placeholder="Describe the role, responsibilities, and what you're looking for in a candidate..."
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                    className="w-full px-4 py-2.5 bg-gray-50 dark:bg-[#141d2e] border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
                   />
                 </div>
 
                 {/* Key Responsibilities */}
                 <div className="mb-6">
-                  <label htmlFor="responsibilityInput" className="block text-base font-medium text-gray-900 mb-2">
+                  <label htmlFor="responsibilityInput" className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-2">
                     Key Responsibilities <span className="text-red-500">*</span>
                   </label>
                   <div className="flex gap-3">
@@ -404,7 +380,7 @@ export default function EditJobPage() {
                       onChange={(e) => setResponsibilityInput(e.target.value)}
                       onKeyDown={handleResponsibilityKeyDown}
                       placeholder="e.g. Develop and maintain user-facing features"
-                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="flex-1 px-4 py-2 bg-gray-50 dark:bg-[#141d2e] border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                     <button
                       type="button"
@@ -441,7 +417,7 @@ export default function EditJobPage() {
 
                 {/* Requirements */}
                 <div className="mb-6">
-                  <label htmlFor="requirementInput" className="block text-base font-medium text-gray-900 mb-2">
+                  <label htmlFor="requirementInput" className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-2">
                     Requirements <span className="text-red-500">*</span>
                   </label>
                   <div className="flex gap-3">
@@ -452,7 +428,7 @@ export default function EditJobPage() {
                       onChange={(e) => setRequirementInput(e.target.value)}
                       onKeyDown={handleRequirementKeyDown}
                       placeholder="e.g. 5+ years of experience with React"
-                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="flex-1 px-4 py-2 bg-gray-50 dark:bg-[#141d2e] border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                     <button
                       type="button"
@@ -489,7 +465,7 @@ export default function EditJobPage() {
 
                 {/* Add Skills */}
                 <div className="mb-6">
-                  <label htmlFor="skillInput" className="block text-base font-medium text-gray-900 mb-2">
+                  <label htmlFor="skillInput" className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-2">
                     Add Skills <span className="text-red-500">*</span>
                   </label>
                   <div className="flex gap-3">
@@ -500,7 +476,7 @@ export default function EditJobPage() {
                       onChange={(e) => setSkillInput(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder="e.g. React, Node.js, Python"
-                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="flex-1 px-4 py-2 bg-gray-50 dark:bg-[#141d2e] border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                     <button
                       type="button"
@@ -536,7 +512,7 @@ export default function EditJobPage() {
 
                 {/* Benefits */}
                 <div className="mb-6">
-                  <label htmlFor="benefitInput" className="block text-base font-medium text-gray-900 mb-2">
+                  <label htmlFor="benefitInput" className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-2">
                     Benefits <span className="text-red-500">*</span>
                   </label>
                   <div className="flex gap-3">
@@ -547,7 +523,7 @@ export default function EditJobPage() {
                       onChange={(e) => setBenefitInput(e.target.value)}
                       onKeyDown={handleBenefitKeyDown}
                       placeholder="e.g. Health insurance coverage"
-                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="flex-1 px-4 py-2 bg-gray-50 dark:bg-[#141d2e] border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                     <button
                       type="button"
@@ -585,7 +561,7 @@ export default function EditJobPage() {
                 {/* Required Experience and Salary Range */}
                 <div className="grid grid-cols-2 gap-6 mb-6">
                   <div>
-                    <label htmlFor="requiredExperience" className="block text-base font-medium text-gray-900 mb-2">
+                    <label htmlFor="requiredExperience" className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-2">
                       Required Experience <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -595,11 +571,11 @@ export default function EditJobPage() {
                       value={formData.requiredExperience}
                       onChange={handleInputChange}
                       placeholder="e.g. 3-5 years"
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-2 bg-gray-50 dark:bg-[#141d2e] border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                   </div>
                   <div>
-                    <label htmlFor="salaryRange" className="block text-base font-medium text-gray-900 mb-2">
+                    <label htmlFor="salaryRange" className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-2">
                       Salary Range (Optional)
                     </label>
                     <input
@@ -609,7 +585,7 @@ export default function EditJobPage() {
                       value={formData.salaryRange}
                       onChange={handleInputChange}
                       placeholder="e.g. $100k - $140k"
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-2 bg-gray-50 dark:bg-[#141d2e] border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                   </div>
                 </div>
@@ -617,7 +593,7 @@ export default function EditJobPage() {
                 {/* Job Location, Job Type, Work Mode */}
                 <div className="grid grid-cols-3 gap-6 mb-6">
                   <div>
-                    <label htmlFor="jobLocation" className="block text-base font-medium text-gray-900 mb-2">
+                    <label htmlFor="jobLocation" className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-2">
                       Job Location <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
@@ -631,80 +607,62 @@ export default function EditJobPage() {
                         value={formData.jobLocation}
                         onChange={handleInputChange}
                         placeholder="e.g. San Francisco, USA"
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-[#141d2e] border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="jobType" className="block text-base font-medium text-gray-900 mb-2">
+                    <label htmlFor="jobType" className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-2">
                       Job Type <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      id="jobType"
-                      name="jobType"
-                      value={formData.jobType}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 0.75rem center',
-                        backgroundSize: '1.25rem',
-                      }}
-                    >
-                      <option value="" disabled>
-                        Select job type
-                      </option>
-                      <option value="full-time">Full time</option>
-                      <option value="part-time">Part time</option>
-                      <option value="contract">Contract</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        id="jobType"
+                        name="jobType"
+                        value={formData.jobType}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 pr-10 bg-gray-50 dark:bg-[#141d2e] border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="" disabled>
+                          Select job type
+                        </option>
+                        <option value="full-time">Full time</option>
+                        <option value="part-time">Part time</option>
+                        <option value="contract">Contract</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                        <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                   <div>
-                    <label htmlFor="workMode" className="block text-base font-medium text-gray-900 mb-2">
+                    <label htmlFor="workMode" className="block text-base font-medium text-gray-900 dark:text-gray-100 mb-2">
                       Work Mode <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      id="workMode"
-                      name="workMode"
-                      value={formData.workMode}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 0.75rem center',
-                        backgroundSize: '1.25rem',
-                      }}
-                    >
-                      <option value="" disabled>
-                        Select work mode
-                      </option>
-                      <option value="on-site">On-site</option>
-                      <option value="remote">Remote</option>
-                      <option value="hybrid">Hybrid</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        id="workMode"
+                        name="workMode"
+                        value={formData.workMode}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 pr-10 bg-gray-50 dark:bg-[#141d2e] border border-gray-300 dark:border-gray-600 rounded-lg text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="" disabled>
+                          Select work mode
+                        </option>
+                        <option value="on-site">On-site</option>
+                        <option value="remote">Remote</option>
+                        <option value="hybrid">Hybrid</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                        <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
-                </div>
-
-                {/* Shortlisted Candidates */}
-                <div className="mb-6">
-                  <label htmlFor="shortlistedCandidates" className="block text-base font-medium text-gray-900 mb-2">
-                    How many candidates to be shortlisted? <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    id="shortlistedCandidates"
-                    name="shortlistedCandidates"
-                    value={formData.shortlistedCandidates}
-                    onChange={handleInputChange}
-                    placeholder="e.g. 10"
-                    min="1"
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  />
-                  <p className="text-sm text-gray-500 mt-2">
-                    Top N candidates based on match scores will be shortlisted.
-                  </p>
                 </div>
               </div>
 

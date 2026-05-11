@@ -469,7 +469,7 @@ export default function ViewJobPostPage() {
   // show loader while fetching
   if (loading) {
     return (
-      <div className="min-h-screen flex bg-gray-50">
+      <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
         <Sidebar active="Dashboard" type="employer" />
 
         <div className="flex-1 flex flex-col md:ml-64 ml-20">
@@ -486,14 +486,14 @@ export default function ViewJobPostPage() {
   // show error if job not found
   if (!job) {
     return (
-      <div className="min-h-screen flex bg-gray-50">
+      <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
         <Sidebar active="Dashboard" type="employer" />
 
         <div className="flex-1 flex flex-col md:ml-64 ml-20">
           <Topbar />
 
           <main className="p-6 md:p-10 flex-1">
-            <div className="text-center text-gray-500">
+            <div className="text-center text-gray-500 dark:text-gray-400">
               {error || "Job not found"}
             </div>
           </main>
@@ -504,7 +504,7 @@ export default function ViewJobPostPage() {
 
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
       <Sidebar active="Dashboard" type="employer" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20">
         <Topbar />
@@ -517,17 +517,17 @@ export default function ViewJobPostPage() {
         {/* Confirmation Modal */}
         {showConfirmModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+            <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-md w-full p-6 animate-scale-in">
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-xl font-bold text-gray-900">Confirm Action</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Confirm Action</h3>
                 <button
                   onClick={() => setShowConfirmModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-400 hover:text-gray-600 dark:text-gray-300 transition-colors"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              <p className="text-gray-700 mb-6">{getConfirmMessage()}</p>
+              <p className="text-gray-700 dark:text-gray-300 mb-6">{getConfirmMessage()}</p>
               <div className="flex gap-3">
                 <button
                   onClick={handleConfirmAction}
@@ -537,7 +537,7 @@ export default function ViewJobPostPage() {
                 </button>
                 <button
                   onClick={() => setShowConfirmModal(false)}
-                  className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors"
+                  className="flex-1 py-2.5 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold rounded-lg transition-colors"
                 >
                   No
                 </button>
@@ -558,21 +558,25 @@ export default function ViewJobPostPage() {
             </button>
 
             {/* Job Details Content */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow-sm dark:shadow-gray-900/25 border border-gray-200 dark:border-gray-700 p-8">
               {/* Header */}
-              <div className="mb-6 pb-6 border-b border-gray-200">
+              <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3 flex-1">
-                    <h1 className="text-3xl font-bold text-gray-900">{job.title}</h1>
-                    <span className="px-3 py-1 text-sm rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap flex items-center justify-center">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{job.title}</h1>
+                    <span className="px-3 py-1 text-sm rounded-full font-semibold bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap flex items-center justify-center">
                       {normalizeExperienceText(job.experience || job.level)}
                     </span>
                   </div>
-                  <span className={`px-3 py-1 text-sm rounded-full font-medium ${job.status === 'Active' ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'} border ml-2 shrink-0 flex items-center justify-center`}>
+                  <span className={`px-3 py-1.5 text-sm rounded-full font-semibold border whitespace-nowrap flex items-center justify-center ${
+                    job.status === 'Active'
+                      ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-950/25 dark:text-green-300 dark:border-green-700'
+                      : 'bg-red-100 text-red-700 border-red-200 dark:bg-red-950/25 dark:text-red-300 dark:border-red-700'
+                  }`}>
                     {job.status}
                   </span>
                 </div>
-                <div className="flex flex-wrap gap-3 text-base text-gray-600">
+                <div className="flex flex-wrap gap-3 text-base text-gray-600 dark:text-gray-300">
                   {job.workMode !== 'Remote' && <span className="flex items-center gap-1"><MapPin className="w-5 h-5" />{job.location}</span>}
                   <span className="flex items-center gap-1"><Building2 className="w-5 h-5" />{job.workMode}</span>
                   <span className="flex items-center gap-1"><Briefcase className="w-5 h-5" />{job.jobType}</span>
@@ -582,24 +586,24 @@ export default function ViewJobPostPage() {
 
               {/* Key Details */}
               <div className="grid md:grid-cols-2 gap-6 mb-8">
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-[#1a2332] rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
                     <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
                       <Calendar className="w-7 h-7 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 font-medium mb-1">Posted Date</p>
-                      <p className="text-2xl font-bold text-gray-900">{job.postedDate}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Posted Date</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{job.postedDate}</p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-[#1a2332] rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-4">
                     <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center shrink-0">
                       <Users className="w-7 h-7 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500 font-medium mb-1">Total Applications</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Total Applications</p>
                       <p className="text-2xl font-bold text-purple-600">{job.applications}</p>
                     </div>
                   </div>
@@ -608,16 +612,16 @@ export default function ViewJobPostPage() {
 
               {/* Job Description */}
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Job Description</h2>
-                <p className="text-gray-700 leading-relaxed">{job.description}</p>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Job Description</h2>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{job.description}</p>
               </div>
 
               {/* Required Skills */}
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Required Skills</h2>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Required Skills</h2>
                 <div className="flex flex-wrap gap-3">
                   {job.skills.map((skill) => (
-                    <span key={skill} className="px-4 py-2 bg-blue-50 text-blue-600 text-base font-medium rounded-full">
+                    <span key={skill} className="px-4 py-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-base font-medium rounded-full">
                       {skill}
                     </span>
                   ))}
@@ -627,10 +631,10 @@ export default function ViewJobPostPage() {
               {/* Responsibilities */}
               {job.responsibilities && job.responsibilities.length > 0 && (
                 <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3">Key Responsibilities</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Key Responsibilities</h2>
                   <ul className="space-y-2">
                     {job.responsibilities.map((resp, index) => (
-                      <li key={index} className="flex items-center gap-3 text-gray-700">
+                      <li key={index} className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                         <span className="text-blue-600 text-lg shrink-0">•</span>
                         <span>{resp}</span>
                       </li>
@@ -642,10 +646,10 @@ export default function ViewJobPostPage() {
               {/* Requirements */}
               {job.requirements && job.requirements.length > 0 && (
                 <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3">Requirements</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Requirements</h2>
                   <ul className="space-y-2">
                     {job.requirements.map((req, index) => (
-                      <li key={index} className="flex items-center gap-3 text-gray-700">
+                      <li key={index} className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                         <span className="text-blue-600 text-lg shrink-0">•</span>
                         <span>{req}</span>
                       </li>
@@ -657,10 +661,10 @@ export default function ViewJobPostPage() {
               {/* Benefits */}
               {job.benefits && job.benefits.length > 0 && (
                 <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3">Benefits</h2>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Benefits</h2>
                   <ul className="space-y-2">
                     {job.benefits.map((benefit, index) => (
-                      <li key={index} className="flex items-center gap-3 text-gray-700">
+                      <li key={index} className="flex items-center gap-3 text-gray-700 dark:text-gray-300">
                         <span className="text-green-600 text-lg shrink-0">✓</span>
                         <span>{benefit}</span>
                       </li>
@@ -670,7 +674,7 @@ export default function ViewJobPostPage() {
               )}
 
               {/* Action Buttons */}
-              <div className="flex flex-col gap-3 pt-6 border-t border-gray-200">
+              <div className="flex flex-col gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <div className="flex justify-end mb-10">
                   <button
                     onClick={() => router.push(`/employer/applications?jobId=${job.id}&jobTitle=${encodeURIComponent(job.title)}`)}

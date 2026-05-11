@@ -283,7 +283,7 @@ export default function EmployerDashboard() {
     });
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
       <MessagePopup
         show={showJobCreatedSuccess}
         message="Job created successfully"
@@ -301,11 +301,11 @@ export default function EmployerDashboard() {
                 <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                   <LayoutGrid className="w-5 h-5 text-white" />
                 </div>
-                <h1 className="text-3xl font-semibold text-gray-900 leading-none -mt-1">
+                <h1 className="text-3xl font-semibold text-gray-900 dark:text-gray-100 leading-none -mt-1">
                   Dashboard
                 </h1>
               </div>
-              <p className="text-base text-gray-500 ml-[52px] -mt-1">
+              <p className="text-base text-gray-500 dark:text-gray-400 ml-[52px] -mt-1">
                 Monitor your job postings, applications, and manage your hiring
                 process
               </p>
@@ -314,13 +314,13 @@ export default function EmployerDashboard() {
             {/* Top stats */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 mb-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-shadow">
+                <div className="bg-white dark:bg-[#1a2332] rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-lg transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-500 font-medium mb-1">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">
                         Total Jobs Posted
                       </p>
-                      <p className="text-3xl font-bold text-gray-900">
+                      <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                         {jobs.length}
                       </p>
                     </div>
@@ -329,10 +329,10 @@ export default function EmployerDashboard() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm hover:shadow-lg transition-shadow">
+                <div className="bg-white dark:bg-[#1a2332] rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-lg transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-500 font-medium mb-1">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">
                         Total Applications
                       </p>
                       <p className="text-3xl font-bold text-purple-600">
@@ -362,7 +362,7 @@ export default function EmployerDashboard() {
                       e.key === "Enter" && setSearch(e.target.value)
                     }
                     placeholder="Search by Job Title or Skills"
-                    className="w-full max-w-md h-10 rounded-xl bg-zinc-100 border border-zinc-100 px-3 text-base placeholder:text-gray-400 text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm flex items-center"
+                    className="w-full max-w-md h-10 rounded-xl bg-zinc-100 dark:bg-[#1a2332] border border-zinc-100 dark:border-gray-700 px-3 text-base placeholder:text-gray-400 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors shadow-sm flex items-center"
                     style={{ backgroundClip: "padding-box" }}
                   />
                   <button
@@ -379,7 +379,7 @@ export default function EmployerDashboard() {
                   <select
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm"
+                    className="rounded-xl bg-zinc-100 dark:bg-[#1a2332] border border-zinc-100 dark:border-gray-700 px-3 h-10 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors shadow-sm"
                   >
                     <option value="All Locations">Locations</option>
                     {dynamicLocations.map((loc) => (
@@ -391,7 +391,7 @@ export default function EmployerDashboard() {
                   <select
                     value={mode}
                     onChange={(e) => setMode(e.target.value)}
-                    className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm"
+                    className="rounded-xl bg-zinc-100 dark:bg-[#1a2332] border border-zinc-100 dark:border-gray-700 px-3 h-10 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors shadow-sm"
                   >
                     <option value="All Work Modes">Work Modes</option>
                     {MODES.map((opt) => (
@@ -403,7 +403,7 @@ export default function EmployerDashboard() {
                   <select
                     value={type}
                     onChange={(e) => setType(e.target.value)}
-                    className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm"
+                    className="rounded-xl bg-zinc-100 dark:bg-[#1a2332] border border-zinc-100 dark:border-gray-700 px-3 h-10 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors shadow-sm"
                   >
                     <option value="All Types">Types</option>
                     {TYPES.map((opt) => (
@@ -416,14 +416,14 @@ export default function EmployerDashboard() {
               </div>
 
               <div className="flex items-center justify-between mt-2 mb-3">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   Showing {filteredJobs.length} jobs
                 </p>
                 <div className="flex items-center gap-3">
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 py-2 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm w-32"
+                    className="rounded-xl bg-zinc-100 dark:bg-[#1a2332] border border-zinc-100 dark:border-gray-700 px-3 py-2 h-10 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors shadow-sm w-32"
                   >
                     <option value="All Status">Status</option>
                     {STATUS.map((opt) => (
@@ -435,7 +435,7 @@ export default function EmployerDashboard() {
                   <select
                     value={sort}
                     onChange={(e) => setSort(e.target.value)}
-                    className="rounded-xl bg-zinc-100 border border-zinc-100 px-3 py-2 h-10 text-base text-gray-900 focus:outline-none focus:border-blue-500 transition-colors shadow-sm w-44"
+                    className="rounded-xl bg-zinc-100 dark:bg-[#1a2332] border border-zinc-100 dark:border-gray-700 px-3 py-2 h-10 text-base text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors shadow-sm w-44"
                   >
                     {SORTS.map((opt) => (
                       <option value={opt} key={opt}>
@@ -447,7 +447,7 @@ export default function EmployerDashboard() {
               </div>
 
               {/* Job List */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-7">
+              <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow-sm dark:shadow-gray-900/25 border border-gray-200 dark:border-gray-700 p-7">
                 <h2 className="text-xl font-bold mb-4 text-blue-700">
                   Your Job Posts
                 </h2>
@@ -457,7 +457,7 @@ export default function EmployerDashboard() {
                   </div>
                 )}
                 {filteredJobs.length === 0 && !loading ? (
-                  <div className="text-gray-500 text-center p-6">
+                  <div className="text-gray-500 dark:text-gray-400 text-center p-6">
                     No job posts found.
                   </div>
                 ) : (
@@ -465,25 +465,25 @@ export default function EmployerDashboard() {
                     {filteredJobs.map((job) => (
                       <div
                         key={job.id}
-                        className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col h-full transition-all duration-500 hover:shadow-2xl"
+                        className="bg-white dark:bg-[#1a2332] rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm flex flex-col h-full transition-all duration-500 hover:shadow-2xl"
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2 flex-1">
-                            <h3 className="text-lg md:text-xl font-semibold text-gray-900">
+                            <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">
                               {job.title}
                             </h3>
-                            <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap flex items-center justify-center">
+                            <span className="px-3 py-1 text-xs rounded-full font-semibold bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap flex items-center justify-center">
                               {normalizeExperienceText(job.level)}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 ml-2 shrink-0">
                             <span
-                              className={`px-2 py-0.5 text-xs rounded-full font-medium border whitespace-nowrap flex items-center justify-center ${
+                              className={`px-3 py-1 text-sm rounded-full font-semibold border whitespace-nowrap flex items-center justify-center ${
                                 job.status === "Active"
-                                  ? "bg-green-100 text-green-700 border-green-200"
+                                  ? "bg-green-100 text-green-700 border-green-200 dark:bg-green-950/25 dark:text-green-300 dark:border-green-700"
                                   : job.status === "Closed"
-                                  ? "bg-red-100 text-red-700 border-red-200"
-                                  : "bg-gray-100 text-gray-500 border-gray-200"
+                                  ? "bg-red-100 text-red-700 border-red-200 dark:bg-red-950/25 dark:text-red-300 dark:border-red-700"
+                                  : "bg-gray-100 text-gray-500 dark:text-gray-400 border-gray-200 dark:bg-gray-800 dark:border-gray-600"
                               }`}
                             >
                               {job.status ?? "—"}
@@ -491,7 +491,7 @@ export default function EmployerDashboard() {
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-3 items-center text-sm text-gray-500 mb-4 pb-4 border-b border-gray-100">
+                        <div className="flex flex-wrap gap-3 items-center text-sm text-gray-500 dark:text-gray-400 mb-4 pb-4 border-b border-gray-100 dark:border-gray-700">
                           {job.workMode !== "Remote" && job.location && (
                             <span className="flex items-center gap-1">
                               <MapPin className="w-4 h-4" />
@@ -515,7 +515,7 @@ export default function EmployerDashboard() {
                         </div>
 
                         {job.description && (
-                          <p className="text-sm text-gray-700 mb-3 line-clamp-2">
+                          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 line-clamp-2">
                             {job.description}
                           </p>
                         )}
@@ -525,14 +525,14 @@ export default function EmployerDashboard() {
                             job.skills.map((skill) => (
                               <span
                                 key={skill}
-                                className="px-4 py-2 bg-blue-50 text-blue-600 text-xs font-medium rounded-full"
+                                className="px-4 py-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-sm font-medium rounded-full"
                               >
                                 {skill}
                               </span>
                             ))}
                         </div>
 
-                        <div className="mt-auto flex items-end flex-row justify-between pt-4 border-t border-gray-100 text-sm gap-2">
+                        <div className="mt-auto flex items-end flex-row justify-between pt-4 border-t border-gray-100 dark:border-gray-700 text-sm gap-2">
                           <span className="text-gray-400">
                             Job Posted:{" "}
                             {formatDate(job.postedDate) || job.time || "-"}

@@ -14,7 +14,6 @@ export default function CandidateLogin() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -33,14 +32,6 @@ export default function CandidateLogin() {
     const t = setTimeout(() => setPopup(prev => ({ ...prev, show: false })), POPUP_TIMEOUT);
     return () => clearTimeout(t);
   }, [popup.show]);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && isUserLoggedIn()) {
@@ -64,17 +55,6 @@ export default function CandidateLogin() {
       setPopup({ show: true, message: 'Account created successfully. Please sign in.', type: 'success' });
     }
   }, []);
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    if (!darkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -122,7 +102,6 @@ export default function CandidateLogin() {
         setSession(data, token, 1440);
         if (typeof window !== 'undefined') localStorage.setItem('login_success_candidate', '1');
         router.push('/candidate/my-profile');
-        // Keep loader visible until navigation completes - do not set loading false
       } else {
         const msg = 'Invalid response from server.';
         setError(msg);
@@ -141,6 +120,7 @@ export default function CandidateLogin() {
     <div className="min-h-screen flex flex-col lg:flex-row relative">
       <MessagePopup show={popup.show} message={popup.message} type={popup.type} />
       {loading && <Loader text="Signing in..." />}
+
       {/* Left Side - Login Form */}
       <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12 transition-colors duration-300">
         <div className="w-full max-w-md">
@@ -155,30 +135,6 @@ export default function CandidateLogin() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-
-            {/* Google Sign In Button */}
-            <button
-              type="button"
-              className="w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 py-3 px-4 rounded-xl font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M19.8 10.2273C19.8 9.51819 19.7364 8.83637 19.6182 8.18182H10.2V12.05H15.5818C15.35 13.3 14.6182 14.3591 13.5227 15.0682V17.5773H16.8091C18.7091 15.8364 19.8 13.2727 19.8 10.2273Z" fill="#4285F4"/>
-                <path d="M10.2 20C12.9 20 15.1727 19.1045 16.8091 17.5773L13.5227 15.0682C12.6136 15.6682 11.4818 16.0227 10.2 16.0227C7.59545 16.0227 5.38182 14.2682 4.58636 11.9H1.18182V14.4909C2.80909 17.7591 6.20909 20 10.2 20Z" fill="#34A853"/>
-                <path d="M4.58636 11.9C4.38636 11.3 4.27273 10.6591 4.27273 10C4.27273 9.34091 4.38636 8.7 4.58636 8.1V5.50909H1.18182C0.509091 6.85909 0.136364 8.38636 0.136364 10C0.136364 11.6136 0.509091 13.1409 1.18182 14.4909L4.58636 11.9Z" fill="#FBBC05"/>
-                <path d="M10.2 3.97727C11.6091 3.97727 12.8636 4.48182 13.8545 5.43636L16.7636 2.52727C15.1682 0.886364 12.8955 0 10.2 0C6.20909 0 2.80909 2.24091 1.18182 5.50909L4.58636 8.1C5.38182 5.73182 7.59545 3.97727 10.2 3.97727Z" fill="#EA4335"/>
-              </svg>
-              Sign in with Google
-            </button>
-
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white dark:bg-[#0f1729] text-gray-500 dark:text-gray-400">Or</span>
-              </div>
-            </div>
 
             {/* Email Field */}
             <div>
@@ -218,11 +174,7 @@ export default function CandidateLogin() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -267,18 +219,15 @@ export default function CandidateLogin() {
       {/* Right Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 items-center justify-center p-12">
         <div className="text-center text-white max-w-md">
-          {/* Logo */}
           <div className="w-20 h-20 mx-auto mb-6">
             <Image
-              src="/Icon.png"
+              src="/icon.png"
               alt="SyncTalent Logo"
               width={80}
               height={80}
               className="w-full h-full object-contain"
             />
           </div>
-
-          {/* Text Content */}
           <h2 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
             SyncTalent
           </h2>

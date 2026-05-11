@@ -9,6 +9,7 @@ import Loader from '../../../utils/loader';
 import MessagePopup, { POPUP_TIMEOUT } from '../../components/MessagePopup';
 import { normalizeExperienceText } from '../../../utils/experience';
 import { GET_JOB_RECOMMENDATIONS_API } from '../../../routes/candidate/jobRecommendations';
+import { GET_APPLICATIONS_API } from '../../../routes/candidate/applyJob';
 import { SAVE_JOB_API, UNSAVE_JOB_API, GET_SAVED_JOBS_API } from '../../../routes/candidate/savedJobs';
 import { getMatchScoreColor, getMatchScoreBg } from '../../../utils/matchScoreUtils';
 import { X } from 'lucide-react';
@@ -125,12 +126,17 @@ const fetchWithFallbacks = async (urls, headers) => {
 export default function JobRecommendationsPage() {
   const router = useRouter();
   const [jobs, setJobs] = useState([]);
+  const [appliedJobIds, setAppliedJobIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [savedJobIds, setSavedJobIds] = useState([]);
   const [showSaveNotification, setShowSaveNotification] = useState(false);
   const [showUnsaveNotification, setShowUnsaveNotification] = useState(false);
   const [showErrorNotification, setShowErrorNotification] = useState(false);
+
+  const visibleJobs = jobs
+    .filter((job) => !appliedJobIds.includes(job.id))
+    .slice(0, 10);
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [selectedJobToUnsave, setSelectedJobToUnsave] = useState(null);
@@ -199,8 +205,35 @@ export default function JobRecommendationsPage() {
       }
     };
 
+    const fetchAppliedJobs = async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (!token) return;
+
+        const res = await fetch(GET_APPLICATIONS_API, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json().catch(() => null);
+        const applications = Array.isArray(data.applications) ? data.applications : [];
+        const ids = applications
+          .map((app) => app.job_id ?? app.jobId ?? app.job?.job_id ?? app.job?.id)
+          .filter(Boolean);
+        setAppliedJobIds(ids);
+      } catch (err) {
+        console.error('Failed to load applied jobs', err);
+      }
+    };
+
     loadRecommendations();
     fetchSaved();
+    fetchAppliedJobs();
   }, []);
 
   const handleSaveJob = async (jobId) => {
@@ -306,7 +339,7 @@ export default function JobRecommendationsPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
       {loading && <Loader text="Loading recommendations..." />}
       <Sidebar active="Job Recommendations" type="candidate" />
       <div className="flex-1 flex flex-col md:ml-64 ml-20 relative">
@@ -324,9 +357,9 @@ export default function JobRecommendationsPage() {
                   <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                     <Sparkles className="w-5 h-5 text-white" />
                   </div>
-                  <h1 className="text-3xl font-semibold text-gray-900 leading-none -mt-1">Job Recommendations</h1>
+                  <h1 className="text-3xl font-semibold text-gray-900 dark:text-gray-100 leading-none -mt-1">Job Recommendations</h1>
                 </div>
-                <p className="text-base text-gray-500 ml-[52px] -mt-1">
+                <p className="text-base text-gray-500 dark:text-gray-400 ml-[52px] -mt-1">
                   Personalized job matches based on your profile and resume
                 </p>
               </div>
@@ -339,24 +372,24 @@ export default function JobRecommendationsPage() {
 
               <div className="flex items-center gap-2 mb-6">
                 <Star className="w-5 h-5 text-yellow-500 fill-yellow-500" />
-                <p className="text-sm font-medium text-gray-700">{jobs.length} Jobs Recommended for You</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{visibleJobs.length} Jobs Recommended for You</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-5 mb-6">
-                {jobs.length === 0 && !loading ? (
-                  <div className="col-span-2 text-gray-500 text-center py-12">No recommendations available yet.</div>
+                {visibleJobs.length === 0 && !loading ? (
+                  <div className="col-span-2 text-gray-500 dark:text-gray-400 text-center py-12">No recommendations available yet.</div>
                 ) : (
-                  jobs.map((job) => {
+                  visibleJobs.map((job) => {
                     const matchScoreColor = getMatchScoreColor(job.matchScore);
                     return (
                       <div
                         key={job.id}
-                        className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm flex flex-col h-full transition-all hover:shadow-lg hover:border-blue-200"
+                        className="bg-white dark:bg-[#1a2332] rounded-2xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm flex flex-col h-full transition-all hover:shadow-lg hover:border-blue-200"
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-1">
-                              <h3 className="text-lg md:text-xl font-semibold text-gray-900">{job.title}</h3>
+                              <h3 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-gray-100">{job.title}</h3>
                               {job.experience && (
                                 <span className="px-3 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-600 border border-blue-200 whitespace-nowrap">
                                   {normalizeExperienceText(job.experience)}
@@ -366,12 +399,12 @@ export default function JobRecommendationsPage() {
                             <p className="text-sm font-medium text-blue-600">{job.company}</p>
                           </div>
                           <div className={`ml-3 text-center rounded-xl px-3 py-2 border shadow-sm shrink-0 ${getMatchScoreBg(job.matchScore)}`}>
-                            <div className="text-xs text-gray-500 font-medium mb-0.5">Match</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-0.5">Match</div>
                             <div className={`text-2xl font-bold ${matchScoreColor}`}>{job.matchScore}%</div>
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-3">
+                        <div className="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-300 mb-3">
                           {job.location && job.workMode !== 'Remote' && (
                             <span className="flex items-center gap-1">
                               <MapPin className="w-4 h-4" /> {job.location}
@@ -395,15 +428,15 @@ export default function JobRecommendationsPage() {
                         </div>
 
                         {job.description && (
-                          <div className="border-t border-gray-200 pt-3 mb-3">
-                            <p className="text-xs md:text-sm text-gray-700 line-clamp-2">{job.description}</p>
+                          <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mb-3">
+                            <p className="text-xs md:text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{job.description}</p>
                           </div>
                         )}
 
                         {Array.isArray(job.tags) && job.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-2 pb-3 mb-2 border-b border-gray-200">
+                          <div className="flex flex-wrap gap-2 pb-3 mb-2 border-b border-gray-200 dark:border-gray-700">
                             {job.tags.map((tag, idx) => (
-                              <span key={`${tag}-${idx}`} className="px-4 py-2 bg-blue-50 text-blue-600 text-xs font-medium rounded-full">
+                              <span key={`${tag}-${idx}`} className="px-4 py-2 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-full">
                                 {tag}
                               </span>
                             ))}
@@ -422,10 +455,7 @@ export default function JobRecommendationsPage() {
                                   handleSaveJob(job.id);
                                 }
                               }}
-                              className={`p-2 rounded-lg transition-all ${savedJobIds.includes(job.id)
-                                ? 'bg-blue-50 text-blue-600'
-                                : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'
-                                }`}
+                              className="p-2 rounded-lg transition-all text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-950/40"
                               title={
                                 savedJobIds.includes(job.id)
                                   ? 'Remove from saved'
@@ -435,14 +465,16 @@ export default function JobRecommendationsPage() {
                               <Bookmark
                                 className={`w-6 h-6 ${savedJobIds.includes(job.id)
                                   ? 'fill-blue-600'
-                                  : ''
+                                  : 'fill-none'
                                   }`}
                               />
                             </button>
                           </div>
                           <div className="w-full flex justify-center -mt-1.5">
                             <button
-                              onClick={() => router.push(`/candidate/view-job-post?jobId=${job.id}`)}
+                              onClick={() => router.push(
+                                `/candidate/view-job-post?jobId=${job.id}&from=recommendations&matchScore=${job.matchScore}`
+                              )}
                               className="px-5 py-2 rounded-full text-blue-700 bg-blue-100 hover:bg-blue-200 hover:text-blue-800 active:bg-blue-200 active:text-blue-800 text-sm font-semibold transition-all"
                             >
                               View Job Post
@@ -462,11 +494,11 @@ export default function JobRecommendationsPage() {
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
 
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-scale-in">
+          <div className="bg-white dark:bg-[#1a2332] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-md w-full p-6 animate-scale-in">
 
             <div className="flex justify-between items-start mb-4">
 
-              <h3 className="text-xl font-bold text-gray-900">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 Confirm Action
               </h3>
 
@@ -475,13 +507,13 @@ export default function JobRecommendationsPage() {
                   setShowConfirmModal(false);
                   setSelectedJobToUnsave(null);
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 dark:text-gray-300 transition-colors"
               >
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <p className="text-gray-700 mb-6">
+            <p className="text-gray-700 dark:text-gray-300 mb-6">
               Are you sure you want to unsave this job?
             </p>
 
@@ -504,7 +536,7 @@ export default function JobRecommendationsPage() {
                   setShowConfirmModal(false);
                   setSelectedJobToUnsave(null);
                 }}
-                className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors"
+                className="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 dark:text-gray-300 font-semibold rounded-lg transition-colors"
               >
                 No
               </button>
