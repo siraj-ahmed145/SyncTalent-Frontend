@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Sidebar from "../../components/Sidebar";
@@ -29,21 +30,14 @@ const resolveResumeUrl = (raw) => {
   return `${base}/uploads/resumes/${filename}`;
 };
 
-/**
- * Handles both UUID-prefix and UUID-suffix formats:
- * e.g. "01e64599-..._05_Hassan_Backend_Dev.pdf" → "05_Hassan_Backend_Dev.pdf"
- * e.g. "fatima_ai_engineer_<uuid>.pdf"          → "fatima_ai_engineer.pdf"
- */
 const getDisplayFilename = (resumeDisplayName, resumeUrl) => {
   if (resumeDisplayName) return resumeDisplayName;
   if (!resumeUrl) return "Resume";
   const raw = resumeUrl.split("/").pop().split("?")[0];
-  // Strip UUID prefix
   const noPrefix = raw.replace(
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_/i,
     ""
   );
-  // Strip UUID suffix
   return noPrefix.replace(
     /_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\.[^.]+$|$)/i,
     ""
@@ -115,8 +109,8 @@ const ProfileSection = ({ title, items, renderItem }) =>
     </div>
   ) : null;
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-export default function ViewApplicationsPage() {
+// ─── Inner component (uses useSearchParams) ───────────────────────────────────
+function ViewApplicationsContent() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const jobId    = searchParams.get("jobId");
@@ -520,13 +514,11 @@ export default function ViewApplicationsPage() {
                   )}
                 />
 
-                {/* ── Resume section ──────────────────────────────────────── */}
+                {/* Resume section */}
                 {selectedCandidate.applicationResume && (
                   <div className="mb-6">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">Resume</h2>
                     <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800 rounded-xl p-5 flex items-center justify-between gap-4">
-
-                      {/* Left: icon + file info */}
                       <div className="flex items-center gap-4 flex-1 min-w-0">
                         <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
                           <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -542,8 +534,6 @@ export default function ViewApplicationsPage() {
                           </div>
                         </div>
                       </div>
-
-                      {/* Right: view button */}
                       <a
                         href={selectedCandidate.applicationResume}
                         target="_blank"
@@ -553,7 +543,6 @@ export default function ViewApplicationsPage() {
                         <FileText className="w-4 h-4" />
                         View Resume
                       </a>
-
                     </div>
                   </div>
                 )}
@@ -609,5 +598,18 @@ export default function ViewApplicationsPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+// ─── Page export — useSearchParams is inside the Suspense boundary ────────────
+export default function ViewApplicationsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors items-center justify-center">
+        <Loader />
+      </div>
+    }>
+      <ViewApplicationsContent />
+    </Suspense>
   );
 }
