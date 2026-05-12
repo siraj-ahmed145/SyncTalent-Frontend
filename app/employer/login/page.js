@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -10,7 +10,7 @@ import { LOGIN_API } from '../../../routes/employer/login';
 import Loader from '../../../utils/loader';
 import MessagePopup, { POPUP_TIMEOUT } from '../../components/MessagePopup';
 
-export default function EmployerLogin() {
+function EmployerLogin() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
@@ -125,7 +125,6 @@ export default function EmployerLogin() {
       {/* Left Side - Login Form */}
       <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12 transition-colors duration-300">
         <div className="w-full max-w-md">
-          {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
               Sign In
@@ -238,5 +237,14 @@ export default function EmployerLogin() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ✅ Suspense wrapper required by Next.js for useSearchParams()
+export default function EmployerLoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0f1729]"><Loader /></div>}>
+      <EmployerLogin />
+    </Suspense>
   );
 }
