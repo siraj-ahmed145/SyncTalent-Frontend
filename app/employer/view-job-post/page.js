@@ -1,4 +1,5 @@
 "use client";
+import { Suspense, useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,7 +15,6 @@ import {
 } from "lucide-react";
 import MessagePopup, { POPUP_TIMEOUT } from "../../components/MessagePopup";
 import Loader from "../../../utils/loader";
-import { useState, useEffect } from "react";
 import { normalizeExperienceText } from "../../../utils/experience";
 import { GET_JOBS_API } from "../../../routes/employer/getJobs";
 import { getCloseJobUrl } from "../../../routes/employer/closeJob";
@@ -90,7 +90,7 @@ const mapApiJobToCard = (job) => ({
   benefits: job.benefits ?? [],
 });
 
-export default function ViewJobPostPage() {
+function ViewJobPostContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const jobId = parseInt(searchParams.get("jobId"));
@@ -466,23 +466,6 @@ export default function ViewJobPostPage() {
     }
   };
 
-  // show loader while fetching
-  if (loading) {
-    return (
-      <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors">
-        <Sidebar active="Dashboard" type="employer" />
-
-        <div className="flex-1 flex flex-col md:ml-64 ml-20">
-          <Topbar />
-
-          <main className="p-6 md:p-10 flex-1 flex items-center justify-center">
-            <Loader />
-          </main>
-        </div>
-      </div>
-    );
-  }
-
   // show error if job not found
   if (!job) {
     return (
@@ -721,5 +704,17 @@ export default function ViewJobPostPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function ViewJobPostPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0f1729]">
+        <Loader />
+      </div>
+    }>
+      <ViewJobPostContent />
+    </Suspense>
   );
 }
