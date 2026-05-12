@@ -1,239 +1,242 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { setSession, isUserLoggedIn } from '../../../utils/session';
-import { LOGIN_API } from '../../../routes/candidate/login';
-import Loader from '../../../utils/loader';
-import MessagePopup, { POPUP_TIMEOUT } from '../../components/MessagePopup';
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
+import { setSession, isUserLoggedIn } from "../../../utils/session";
+import { LOGIN_API } from "../../../routes/candidate/login";
+import Loader from "../../../utils/loader";
+import MessagePopup, { POPUP_TIMEOUT } from "../../components/MessagePopup";
 
 export default function CandidateLogin() {
-  const router = useRouter();  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    keepLoggedIn: false
-  });
-  const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
+  const router = useRouter();
 
-  const showPopup = (message, type = 'success') => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    keepLoggedIn: false,
+  });
+
+  const [popup, setPopup] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
+
+  // Show popup helper
+  const showPopup = (message, type = "success") => {
     setPopup({ show: true, message, type });
   };
 
+  // Auto hide popup
   useEffect(() => {
     if (!popup.show) return;
-    const t = setTimeout(() => setPopup(prev => ({ ...prev, show: false })), POPUP_TIMEOUT);
+    const t = setTimeout(
+      () => setPopup((prev) => ({ ...prev, show: false })),
+      POPUP_TIMEOUT
+    );
     return () => clearTimeout(t);
   }, [popup.show]);
 
+  // Redirect if already logged in
   useEffect(() => {
-    if (typeof window !== 'undefined' && isUserLoggedIn()) {
-      router.push('/candidate/my-profile');
+    if (typeof window !== "undefined" && isUserLoggedIn()) {
+      router.push("/candidate/my-profile");
     }
   }, [router]);
 
+  // ✅ FIXED: replaced useSearchParams with window API (Turbopack-safe)
   useEffect(() => {
-    if (!searchParams) return;
-    if (searchParams.get('loggedOut') === '1') {
-      showPopup('Signed out successfully', 'success');
-      router.replace('/candidate/login');
-    }
-  }, [searchParams, router]);
+    if (typeof window === "undefined") return;
 
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("loggedOut") === "1") {
+      showPopup("Signed out successfully", "success");
+      router.replace("/candidate/login");
+    }
+  }, [router]);
+
+  // Signup success message from localStorage
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const flag = localStorage.getItem('signup_success_candidate');
-    if (flag === '1') {
-      localStorage.removeItem('signup_success_candidate');
-      setPopup({ show: true, message: 'Account created successfully. Please sign in.', type: 'success' });
+    if (typeof window === "undefined") return;
+
+    const flag = localStorage.getItem("signup_success_candidate");
+    if (flag === "1") {
+      localStorage.removeItem("signup_success_candidate");
+      setPopup({
+        show: true,
+        message: "Account created successfully. Please sign in.",
+        type: "success",
+      });
     }
   }, []);
 
+  // Handle login submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       if (!formData.email || !formData.password) {
-        const msg = 'Please fill in all fields';
+        const msg = "Please fill in all fields";
         setError(msg);
-        showPopup(msg, 'error');
+        showPopup(msg, "error");
         setLoading(false);
         return;
       }
 
       if (isUserLoggedIn()) {
-        const msg = 'Another user is already logged in. Please logout first.';
+        const msg = "Another user is already logged in. Please logout first.";
         setError(msg);
-        showPopup(msg, 'error');
+        showPopup(msg, "error");
         setLoading(false);
         return;
       }
 
       const response = await fetch(LOGIN_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: formData.email,
-          password: formData.password
-        })
+          password: formData.password,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        const msg = data.message || 'Login failed. Please check your credentials.';
+        const msg =
+          data.message || "Login failed. Please check your credentials.";
         setError(msg);
-        showPopup(msg, 'error');
+        showPopup(msg, "error");
         setLoading(false);
         return;
       }
 
       const token = data?.access_token;
+
       if (token && data?.candidiate_id) {
         setSession(data, token, 1440);
-        if (typeof window !== 'undefined') localStorage.setItem('login_success_candidate', '1');
-        router.push('/candidate/my-profile');
+
+        if (typeof window !== "undefined") {
+          localStorage.setItem("login_success_candidate", "1");
+        }
+
+        router.push("/candidate/my-profile");
       } else {
-        const msg = 'Invalid response from server.';
+        const msg = "Invalid response from server.";
         setError(msg);
-        showPopup(msg, 'error');
+        showPopup(msg, "error");
         setLoading(false);
       }
     } catch (err) {
-      const msg = err.message || 'Login failed. Please check your credentials.';
+      const msg = err.message || "Login failed. Please check your credentials.";
       setError(msg);
-      showPopup(msg, 'error');
+      showPopup(msg, "error");
       setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row relative">
-      <MessagePopup show={popup.show} message={popup.message} type={popup.type} />
+      <MessagePopup
+        show={popup.show}
+        message={popup.message}
+        type={popup.type}
+      />
+
       {loading && <Loader text="Signing in..." />}
 
-      {/* Left Side - Login Form */}
-      <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12 transition-colors duration-300">
+      {/* Left Side */}
+      <div className="w-full lg:w-1/2 bg-white dark:bg-[#0f1729] flex items-center justify-center p-6 md:p-12">
         <div className="w-full max-w-md">
-          {/* Header */}
+
           <div className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               Sign In
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
-              Enter your email and password to sign in!
+            <p className="text-gray-600 dark:text-gray-400">
+              Enter your email and password
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
 
-            {/* Email Field */}
+            {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-gray-900 dark:text-white text-sm font-medium mb-2">
-                Email <span className="text-red-500">*</span>
-              </label>
+              <label className="block text-sm mb-2">Email</label>
               <input
                 type="email"
-                id="email"
                 value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                placeholder="info@gmail.com"
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a2332] border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
-                required
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                className="w-full px-4 py-3 border rounded-xl"
                 disabled={loading}
               />
             </div>
 
-            {/* Password Field */}
+            {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-gray-900 dark:text-white text-sm font-medium mb-2">
-                Password <span className="text-red-500">*</span>
-              </label>
+              <label className="block text-sm mb-2">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  id="password"
                   value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  placeholder="Enter your password"
-                  className="w-full px-4 py-3 bg-gray-50 dark:bg-[#1a2332] border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-purple-500 transition-colors pr-12"
-                  required
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  className="w-full px-4 py-3 border rounded-xl pr-12"
                   disabled={loading}
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  className="absolute right-3 top-3"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
             </div>
 
-            {/* Keep Logged In & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.keepLoggedIn}
-                  onChange={(e) => setFormData({...formData, keepLoggedIn: e.target.checked})}
-                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-[#1a2332] text-blue-600 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
-                  disabled={loading}
-                />
-                <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Keep me logged in</span>
-              </label>
-              <Link href="/candidate/forgot-password" className="text-sm text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
-                Forgot password?
-              </Link>
-            </div>
-
-            {/* Sign In Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 text-white py-3 rounded-xl"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? "Signing in..." : "Sign in"}
             </button>
 
-            {/* Sign Up Link */}
-            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{' '}
-              <Link href="/candidate/signup" className="text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 font-medium transition-colors">
-                Sign Up
-              </Link>
+            <p className="text-center text-sm">
+              Don't have an account?{" "}
+              <Link href="/candidate/signup">Sign Up</Link>
             </p>
           </form>
         </div>
       </div>
 
-      {/* Right Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 items-center justify-center p-12">
-        <div className="text-center text-white max-w-md">
-          <div className="w-20 h-20 mx-auto mb-6">
-            <Image
-              src="/icon.png"
-              alt="SyncTalent Logo"
-              width={80}
-              height={80}
-              className="w-full h-full object-contain"
-            />
-          </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-            SyncTalent
-          </h2>
-          <p className="text-base md:text-lg text-white/90 leading-relaxed">
-            Sync Your Skills with Opportunities
-          </p>
+      {/* Right Side */}
+      <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-gradient-to-br from-blue-900 to-purple-900 text-white">
+        <div className="text-center">
+          <Image
+            src="/icon.png"
+            alt="logo"
+            width={80}
+            height={80}
+          />
+          <h2 className="text-4xl font-bold mt-4">SyncTalent</h2>
+          <p>Sync Your Skills with Opportunities</p>
         </div>
       </div>
     </div>
