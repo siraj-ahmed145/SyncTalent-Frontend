@@ -1,4 +1,5 @@
 "use client";
+import { Suspense } from "react";
 import Sidebar from "../../components/Sidebar";
 import Topbar from "../../components/Topbar";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -72,8 +73,8 @@ const mapApiJobToCard = (job) => ({
   benefits:         ensureArray(job.benefits),
 });
 
-// ─── Component ────────────────────────────────────────────────────────────────
-export default function CandidateViewJobPostPage() {
+// ─── Inner component (uses useSearchParams) ───────────────────────────────────
+function CandidateViewJobPostContent() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const jobId      = parseInt(searchParams.get("jobId"));
@@ -93,12 +94,8 @@ export default function CandidateViewJobPostPage() {
   const [isSubmittingApplication,     setIsSubmittingApplication]     = useState(false);
   const [modalError,                  setModalError]                  = useState("");
 
-  // ── FIX: dynamic key forces the <input type="file"> to fully remount
-  // whenever the modal opens or the user goes back to the upload step,
-  // preventing the browser from serving a stale cached file reference.
   const [fileInputKey, setFileInputKey] = useState(0);
 
-  // Ref stores the File object — immune to stale-closure issues in async handlers
   const uploadedResumeRef = useRef(null);
 
   // ── Fetch job ──────────────────────────────────────────────────────────────
@@ -161,7 +158,6 @@ export default function CandidateViewJobPostPage() {
     setUseCustomResume(false);
     setUploadedResume(null);
     uploadedResumeRef.current = null;
-    // Bump key so the file input remounts fresh every time the modal opens
     setFileInputKey((k) => k + 1);
   };
 
@@ -178,7 +174,6 @@ export default function CandidateViewJobPostPage() {
     setUseCustomResume(useCustom);
     setModalError("");
     if (useCustom) {
-      // Clear any previously picked file and bump the input key so it remounts
       setUploadedResume(null);
       uploadedResumeRef.current = null;
       setFileInputKey((k) => k + 1);
@@ -207,7 +202,6 @@ export default function CandidateViewJobPostPage() {
     }
 
     setModalError("");
-    // Store in BOTH state and ref
     setUploadedResume(file);
     uploadedResumeRef.current = file;
 
@@ -220,7 +214,6 @@ export default function CandidateViewJobPostPage() {
   const handleSubmitApplication = async () => {
     setModalError("");
 
-    // Always read from ref — not from state — to avoid stale closures
     const fileToUpload = uploadedResumeRef.current;
 
     console.log("DEBUG handleSubmitApplication:", {
@@ -228,7 +221,6 @@ export default function CandidateViewJobPostPage() {
       fileToUpload: fileToUpload ? `${fileToUpload.name} (${fileToUpload.size} bytes)` : null,
     });
 
-    // Guard: custom chosen but no file present
     if (useCustomResume && !fileToUpload) {
       setModalError("Please select a resume file before submitting.");
       setApplicationStep("upload");
@@ -240,8 +232,6 @@ export default function CandidateViewJobPostPage() {
 
       const token = typeof window !== "undefined"
         ? localStorage.getItem("auth_token") : null;
-      // Do NOT set Content-Type manually — the browser sets it with the
-      // correct multipart boundary when you pass FormData as the body.
       const headers = {};
       if (token) headers["Authorization"] = `Bearer ${token}`;
 
@@ -251,10 +241,7 @@ export default function CandidateViewJobPostPage() {
         formData.append("resume", fileToUpload, fileToUpload.name);
         console.log("DEBUG: appended custom resume to FormData →", fileToUpload.name);
       }
-      // Default resume path: send empty FormData so FastAPI gets File(None)
-      // and falls back to the candidate's profile resume on the backend.
 
-      // Verify FormData contents before sending
       console.log("DEBUG FormData 'resume' entry:", formData.get("resume"));
 
       const res = await fetch(APPLY_JOB_API(job.id), {
@@ -562,13 +549,6 @@ export default function CandidateViewJobPostPage() {
                   </div>
 
                   <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-500 transition-colors">
-                    {/*
-                      FIX: fileInputKey is a number that increments every time
-                      the modal opens or the user re-enters the upload step.
-                      React sees a new key → unmounts the old input → mounts a
-                      brand-new one with no cached file, so onChange always fires
-                      even if the user picks the same filename again.
-                    */}
                     <input
                       key={fileInputKey}
                       type="file"
@@ -583,7 +563,6 @@ export default function CandidateViewJobPostPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                         </svg>
                       </div>
-                      {/* Show selected filename once a file is picked */}
                       {uploadedResume ? (
                         <p className="text-blue-700 font-semibold mb-1">{uploadedResume.name}</p>
                       ) : (
@@ -595,8 +574,6 @@ export default function CandidateViewJobPostPage() {
 
                   <button
                     onClick={() => {
-                      // Bump the key when going back so the input is fresh
-                      // if the user comes back and picks again
                       setFileInputKey((k) => k + 1);
                       setApplicationStep("choice");
                     }}
@@ -632,7 +609,6 @@ export default function CandidateViewJobPostPage() {
                     <button
                       onClick={() => {
                         if (useCustomResume) {
-                          // Bump the key so the input remounts when going back to upload
                           setFileInputKey((k) => k + 1);
                           setApplicationStep("upload");
                         } else {
@@ -663,9 +639,15 @@ export default function CandidateViewJobPostPage() {
   );
 }
 
-
-
-
-
-
-
+// ─── Page export — useSearchParams is inside the Suspense boundary ────────────
+export default function CandidateViewJobPostPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex bg-gray-50 dark:bg-[#0f1729] transition-colors items-center justify-center">
+        <Loader text="Loading..." />
+      </div>
+    }>
+      <CandidateViewJobPostContent />
+    </Suspense>
+  );
+}
